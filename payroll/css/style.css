@@ -1,0 +1,128 @@
+
+
+/* Add padding to containers */
+.container {
+  padding: 16px;
+ 
+}
+body  {
+  font-family: Arial, Helvetica, sans-serif;
+}
+/*body {
+   background-image: url('../image/bk2.jpg'); 
+  background-repeat: no-repeat;
+    background-size: 800px 600px;
+}*/
+
+/* Add padding to containers */
+.container {
+  padding: 16px;
+}
+
+/* Full-width input fields */
+input[type=text], input[type=password] {
+  width: 100%;
+  padding: 16px;
+  margin: 5px 0 22px 0;
+  display: inline-block;
+  border: none;
+  background: #f1f1f1;
+}
+
+input[type=text]:focus 
+{
+  background-color: #ddd;
+  outline: none;
+}
+input[type=email]:focus 
+{
+  background-color: #ddd;
+  outline: none;
+}
+input[type=password]:focus 
+{
+  background-color: #ddd;
+  outline: none;
+}
+input[type=radio]:focus{
+  background-color: #ddd;
+  outline: none;
+}
+input[type=date]:focus{
+  background-color: #ddd;
+  outline: none;
+}
+input[type=number]:focus{
+  background-color: #ddd;
+  outline: none;
+}
+/* Overwrite default styles of hr */
+hr {
+  border: 1px solid #e61010;
+  margin-bottom: 25px;
+}
+
+/* Set a style for the submit/register button */
+.registerbtn {
+  background-color: #3498DB;
+  color: white;
+  padding: 12px 16px;
+  margin: 8px 0;
+  border: none;
+  cursor: pointer;
+  width: 100%;
+  opacity: 0.9;
+}
+
+.registerbtn:hover {
+  opacity:1;
+}
+.containero {
+  background-color: #f1f1f1;
+  text-align: left;
+}
+/* Add a blue text color to links */
+a {
+  color: dodgerblue;
+}
+.signinbtn {
+  background-color:#3498DB;
+  color: white;
+  padding: 16px 20px;
+  margin: 8px 0;
+  border: none;
+  cursor: pointer;
+  width: 100%;
+  opacity: 0.9;
+}
+.signinbtn:hover {
+  opacity:1;
+}
+
+/* Set a grey background color and center the text of the "sign in" section */
+.signin {
+  background-color: #f1f1f1;
+  text-align: left;
+}
+form{
+  margin: auto !important ;
+  width: 50%;
+}
+.topnav {
+  overflow: hidden;
+  background-color: rgb(58, 178, 207);
+}
+.jumbotron {
+  background-color:rgb(159, 200, 228);
+  background-image: url('../image/py1.jpg'); 
+  background-repeat: no-repeat; 
+ 
+}
+.responsive {
+  width: 100%;
+  height: auto;
+}
+.ft {
+  background-color:rgb(195, 230, 213);
+  text-emphasis-color: #f1f1f1;
+}
