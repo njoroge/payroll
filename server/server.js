@@ -29,11 +29,18 @@ app.use('/api/income-grades', require('./routes/incomeGradeRoutes'));
 app.use('/api/payroll-ops', require('./routes/payrollOperationsRoutes'));
 app.use('/api/payrolls', require('./routes/payrollRoutes'));
 
+
 // Error Handling Middleware (basic example)
+// This should be defined AFTER all app.use() and routes
 app.use((err, req, res, next) => {
     console.error("Global Error Handler:", err.stack);
+    // Check if headers have already been sent
+    if (res.headersSent) {
+        return next(err);
+    }
     res.status(500).send('Something broke!');
 });
+
 
 const PORT = process.env.PORT || 5001;
 
