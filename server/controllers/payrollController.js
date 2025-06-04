@@ -244,5 +244,4 @@ module.exports = {
     updatePayslipStatus,
     updatePayrollSettings,
     // Expose for testing or direct use if needed
-    _internal: { calculateNSSF, calculateNHIF, calculatePAYE }
 };
