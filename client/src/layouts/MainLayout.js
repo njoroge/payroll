@@ -1,61 +1,48 @@
 import React from 'react';
-import { Link, Outlet, useNavigate } from 'react-router-dom';
-import { useAuth } from '../store/authContext';
+import { Outlet } from 'react-router-dom';
+import Sidebar from '../components/common/Sidebar'; // Adjusted path
+// import { useAuth } from '../store/authContext'; // Temporarily remove if not used directly in this simplified layout
 
 const MainLayout = () => {
-    const { userInfo, logout, isAuthenticated } = useAuth();
-    const navigate = useNavigate();
+    // const { userInfo, logout, isAuthenticated } = useAuth(); // Temporarily remove
+    // const navigate = useNavigate(); // Temporarily remove
 
-    const handleLogout = () => {
-        logout();
-        // navigate('/login'); // authContext logout already redirects
-    };
+    // const handleLogout = () => { // Temporarily remove
+    //     logout();
+    // };
 
     return (
-        <div>
-            <nav style={{ backgroundColor: '#f0f0f0', padding: '1rem', display: 'flex', justifyContent: 'space-between' }}>
-                <div>
-                    <Link to="/" style={{ marginRight: '1rem' }}>Home/Dashboard</Link>
-                    {isAuthenticated && userInfo?.role === 'company_admin' && (
-                        <>
-                            <Link to="/employees" style={{ marginRight: '1rem' }}>Employees</Link>
-                            <Link to="/departments" style={{ marginRight: '1rem' }}>Departments</Link>
-                            <Link to="/income-grades" style={{ marginRight: '1rem' }}>Income Grades</Link>
-                            <Link to="/payrolls" style={{ marginRight: '1rem' }}>Payrolls</Link>
-                            <Link to="/payroll-ops/advances" style={{ marginRight: '1rem' }}>Advances</Link>
-                             {/* Add more admin links */}
-                        </>
-                    )}
-                     {isAuthenticated && userInfo?.role === 'hr_manager' && (
-                        <>
-                            <Link to="/employees" style={{ marginRight: '1rem' }}>Employees</Link>
-                            <Link to="/payrolls" style={{ marginRight: '1rem' }}>Payrolls</Link>
-                             {/* Add more HR links */}
-                        </>
-                    )}
-                    {isAuthenticated && userInfo?.role === 'employee' && (
-                         <Link to={`/employees/\${userInfo.employee?._id}/payslips`} style={{ marginRight: '1rem' }}>My Payslips</Link>
-                    )}
-                </div>
-                <div>
-                    {isAuthenticated ? (
-                        <>
-                            <span style={{ marginRight: '1rem' }}>Welcome, {userInfo?.email} ({userInfo?.role})</span>
-                            <button onClick={handleLogout}>Logout</button>
-                        </>
-                    ) : (
-                        <>
-                            <Link to="/login" style={{ marginRight: '1rem' }}>Login</Link>
-                            <Link to="/register-company">Register Company</Link>
-                        </>
-                    )}
-                </div>
-            </nav>
-            <main style={{ padding: '1rem' }}>
-                <Outlet /> {/* Child routes will render here */}
+        <div className="flex min-h-screen bg-gray-100"> {/* Main container for flex layout, added bg-gray-100 for contrast */}
+            <Sidebar /> {/* Sidebar component */}
+
+            {/* Main content area */}
+            <main className="flex-1 p-4 md:ml-52 transition-all duration-300 ease-in-out">
+                {/*
+                    md:ml-52 assumes sidebar width is w-52 (208px).
+                    Sidebar.js uses w-52.
+                    On small screens, the sidebar is an overlay, so no margin needed.
+                    On md screens and up, the margin pushes content to the right of the static sidebar.
+                    Added transition for smoother margin change if sidebar width were dynamic (though it's fixed here).
+                */}
+                <Outlet /> {/* This renders the actual page content */}
             </main>
+
+            {/* Footer can remain, but will be pushed by flex content. Or be part of the main scrollable area.
+                For simplicity, let's include it inside the main content scrollable area.
+            */}
+            {/*
             <footer style={{ textAlign: 'center', padding: '1rem', marginTop: '2rem', borderTop: '1px solid #ccc' }}>
                 Payroll MERN App &copy; 2023
+            </footer>
+            */}
+            {/* Better placement for footer might be inside main or as a separate section if it needs to be sticky etc.
+                For this iteration, focusing on sidebar integration. The footer provided in the original MainLayout
+                was outside <main>. If it needs to be full-width below everything, it should be outside the flex div,
+                or the flex div should be column and this main section should grow.
+                Let's put a simplified footer inside the main content area for now.
+            */}
+            <footer className="text-center p-4 text-gray-600 text-sm">
+                Payroll MERN App &copy; 2024
             </footer>
         </div>
     );
