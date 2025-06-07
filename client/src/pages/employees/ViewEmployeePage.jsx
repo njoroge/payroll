@@ -15,7 +15,7 @@ const ViewEmployeePage = () => {
             try {
                 setLoading(true);
                 setError('');
-                const { data } = await api.get(\`/employees/\${employeeId}\`);
+                const { data } = await api.get(`/employees/\${employeeId}`);
                 setEmployee(data);
             } catch (err) {
                 setError(err.response?.data?.message || 'Failed to fetch employee details.');

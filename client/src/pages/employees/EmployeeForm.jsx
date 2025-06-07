@@ -66,7 +66,7 @@ const EmployeeForm = ({ isEditMode = false }) => {
             const fetchEmployee = async () => {
                 try {
                     setFormLoading(true);
-                    const { data } = await api.get(\`/employees/\${employeeId}\`);
+                    const { data } = await api.get(`/employees/\${employeeId}`);
                     // Format dates for input type="date"
                     if (data.dob) data.dob = new Date(data.dob).toISOString().split('T')[0];
                     if (data.employmentStartDate) data.employmentStartDate = new Date(data.employmentStartDate).toISOString().split('T')[0];
@@ -134,14 +134,14 @@ const EmployeeForm = ({ isEditMode = false }) => {
 
         try {
             if (isEditMode) {
-                await api.put(\`/employees/\${employeeId}\`, payload);
+                await api.put(`/employees/\${employeeId}`, payload);
                 // TODO: Handle user account update if email/role changed (might need specific endpoint)
             } else {
                 await api.post('/employees', payload);
             }
             navigate('/employees'); // Redirect to list page after success
         } catch (err) {
-            setError(err.response?.data?.message || \`Failed to \${isEditMode ? 'update' : 'create'} employee.\`);
+            setError(err.response?.data?.message || `Failed to \${isEditMode ? 'update' : 'create'} employee.`);
             console.error(err);
         } finally {
             setLoading(false);
