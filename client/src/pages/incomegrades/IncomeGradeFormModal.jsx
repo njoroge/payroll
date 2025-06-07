@@ -50,13 +50,13 @@ const IncomeGradeFormModal = ({ incomeGrade, onClose }) => {
         setError('');
         try {
             if (isEditMode) {
-                await api.put(\`/income-grades/\${incomeGrade._id}\`, formData);
+                await api.put(`/income-grades/\${incomeGrade._id}`, formData);
             } else {
                 await api.post('/income-grades', formData);
             }
             onClose();
         } catch (err) {
-            setError(err.response?.data?.message || \`Failed to \${isEditMode ? 'update' : 'create'} income grade.\`);
+            setError(err.response?.data?.message || `Failed to \${isEditMode ? 'update' : 'create'} income grade.`);
             console.error(err);
         } finally {
             setLoading(false);

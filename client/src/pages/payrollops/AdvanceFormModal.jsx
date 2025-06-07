@@ -76,14 +76,14 @@ const AdvanceFormModal = ({ item, onClose, operationType = "Advance" }) => {
             }
             onClose();
         } catch (err) {
-            setError(err.response?.data?.message || \`Failed to record \${operationType.toLowerCase()}.\`);
+            setError(err.response?.data?.message || `Failed to record \${operationType.toLowerCase()}.`);
             console.error(err);
         } finally {
             setLoading(false);
         }
     };
 
-    const title = isEditMode ? \`Edit \${operationType}\` : \`Record New \${operationType}\`;
+    const title = isEditMode ? `Edit \${operationType}` : `Record New \${operationType}`;
 
     return (
         <div style={modalStyle}>
@@ -108,7 +108,7 @@ const AdvanceFormModal = ({ item, onClose, operationType = "Advance" }) => {
                     <div><label>Reason: <textarea name="reason" value={formData.reason} onChange={handleChange} rows="2"></textarea></label></div>
                     <div style={{ marginTop: '15px' }}>
                         <button type="submit" disabled={loading || (isEditMode && !item)}>
-                            {loading ? 'Saving...' : (isEditMode ? 'Save Changes' : \`Record \${operationType}\`)}
+                            {loading ? 'Saving...' : (isEditMode ? 'Save Changes' : `Record \${operationType}`)}
                         </button>
                         <button type="button" onClick={onClose} style={{ marginLeft: '10px' }} disabled={loading}>
                             Cancel
