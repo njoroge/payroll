@@ -35,13 +35,13 @@ const DepartmentFormModal = ({ department, onClose }) => {
         setError('');
         try {
             if (isEditMode) {
-                await api.put(\`/departments/\${department._id}\`, { name, status });
+                await api.put(`/departments/${department._id}`, { name, status });
             } else {
                 await api.post('/departments', { name, status });
             }
             onClose();
         } catch (err) {
-            setError(err.response?.data?.message || \`Failed to \${isEditMode ? 'update' : 'create'} department.\`);
+            setError(err.response?.data?.message || `Failed to ${isEditMode ? 'update' : 'create'} department.`);
             console.error(err);
         } finally {
             setLoading(false);
