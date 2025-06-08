@@ -13,7 +13,11 @@ const ViewPayslipPage = () => {
         const fetchPayslip = async () => {
             try {
                 setLoading(true); setError('');
+<<<<<<< HEAD:client/src/pages/payrolls/ViewPayslipPage.js
                 const { data } = await api.get(`/payrolls/${payslipId}`);
+=======
+                const { data } = await api.get(`/payrolls/\${payslipId}`);
+>>>>>>> origin/master:client/src/pages/payrolls/ViewPayslipPage.jsx
                 setPayslip(data);
             } catch (err) {
                 setError(err.response?.data?.message || 'Failed to fetch payslip details.');

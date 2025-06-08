@@ -38,9 +38,15 @@ const AdvanceListPage = () => {
     };
 
     const handleStatusUpdate = async (id, newStatus) => {
+<<<<<<< HEAD:client/src/pages/payrollops/AdvanceListPage.js
         if (!window.confirm(`Are you sure you want to change status to ${newStatus}?`)) return;
         try {
             await api.put(`/payroll-ops/advances/${id}/status`, { status: newStatus });
+=======
+        if (!window.confirm(`Are you sure you want to change status to \${newStatus}?`)) return;
+        try {
+            await api.put(`/payroll-ops/advances/\${id}/status`, { status: newStatus });
+>>>>>>> origin/master:client/src/pages/payrollops/AdvanceListPage.jsx
             fetchItems();
         } catch (err) {
             setError(err.response?.data?.message || 'Failed to update status.');
