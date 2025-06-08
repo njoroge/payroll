@@ -18,7 +18,11 @@ api.interceptors.request.use(
     (config) => {
         const token = getAuthToken();
         if (token) {
+<<<<<<< HEAD:client/src/services/api.js
+            config.headers['Authorization'] = `Bearer ${token}`;
+=======
             config.headers['Authorization'] = `Bearer \${token}`;
+>>>>>>> origin/master:client/src/services/api.jsx
         }
         return config;
     },

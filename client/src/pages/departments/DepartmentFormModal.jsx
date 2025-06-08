@@ -35,13 +35,21 @@ const DepartmentFormModal = ({ department, onClose }) => {
         setError('');
         try {
             if (isEditMode) {
+<<<<<<< HEAD:client/src/pages/departments/DepartmentFormModal.js
+                await api.put(`/departments/${department._id}`, { name, status });
+=======
                 await api.put(`/departments/\${department._id}`, { name, status });
+>>>>>>> origin/master:client/src/pages/departments/DepartmentFormModal.jsx
             } else {
                 await api.post('/departments', { name, status });
             }
             onClose();
         } catch (err) {
+<<<<<<< HEAD:client/src/pages/departments/DepartmentFormModal.js
+            setError(err.response?.data?.message || `Failed to ${isEditMode ? 'update' : 'create'} department.`);
+=======
             setError(err.response?.data?.message || `Failed to \${isEditMode ? 'update' : 'create'} department.`);
+>>>>>>> origin/master:client/src/pages/departments/DepartmentFormModal.jsx
             console.error(err);
         } finally {
             setLoading(false);

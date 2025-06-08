@@ -41,7 +41,11 @@ const PayrollListPage = () => {
     const handleApprove = async (id) => {
         if (window.confirm("Are you sure you want to approve this payslip?")) {
             try {
+<<<<<<< HEAD:client/src/pages/payrolls/PayrollListPage.js
+                await api.put(`/payrolls/${id}/status`, { status: 'APPROVED' });
+=======
                 await api.put(`/payrolls/\${id}/status`, { status: 'APPROVED' });
+>>>>>>> origin/master:client/src/pages/payrolls/PayrollListPage.jsx
                 fetchPayrolls();
             } catch (err) {
                 setError(err.response?.data?.message || "Failed to approve payslip.");
@@ -52,7 +56,11 @@ const PayrollListPage = () => {
     const handleMarkPaid = async (id) => {
          if (window.confirm("Are you sure you want to mark this payslip as PAID?")) {
             try {
+<<<<<<< HEAD:client/src/pages/payrolls/PayrollListPage.js
+                await api.put(`/payrolls/${id}/status`, { status: 'PAID' });
+=======
                 await api.put(`/payrolls/\${id}/status`, { status: 'PAID' });
+>>>>>>> origin/master:client/src/pages/payrolls/PayrollListPage.jsx
                 fetchPayrolls();
             } catch (err) {
                 setError(err.response?.data?.message || "Failed to mark as paid.");

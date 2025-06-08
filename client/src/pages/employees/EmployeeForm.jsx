@@ -66,7 +66,11 @@ const EmployeeForm = ({ isEditMode = false }) => {
             const fetchEmployee = async () => {
                 try {
                     setFormLoading(true);
+<<<<<<< HEAD:client/src/pages/employees/EmployeeForm.js
+                    const { data } = await api.get(`/employees/${employeeId}`);
+=======
                     const { data } = await api.get(`/employees/\${employeeId}`);
+>>>>>>> origin/master:client/src/pages/employees/EmployeeForm.jsx
                     // Format dates for input type="date"
                     if (data.dob) data.dob = new Date(data.dob).toISOString().split('T')[0];
                     if (data.employmentStartDate) data.employmentStartDate = new Date(data.employmentStartDate).toISOString().split('T')[0];
@@ -134,14 +138,22 @@ const EmployeeForm = ({ isEditMode = false }) => {
 
         try {
             if (isEditMode) {
+<<<<<<< HEAD:client/src/pages/employees/EmployeeForm.js
+                await api.put(`/employees/${employeeId}`, payload);
+=======
                 await api.put(`/employees/\${employeeId}`, payload);
+>>>>>>> origin/master:client/src/pages/employees/EmployeeForm.jsx
                 // TODO: Handle user account update if email/role changed (might need specific endpoint)
             } else {
                 await api.post('/employees', payload);
             }
             navigate('/employees'); // Redirect to list page after success
         } catch (err) {
+<<<<<<< HEAD:client/src/pages/employees/EmployeeForm.js
+            setError(err.response?.data?.message || `Failed to ${isEditMode ? 'update' : 'create'} employee.`);
+=======
             setError(err.response?.data?.message || `Failed to \${isEditMode ? 'update' : 'create'} employee.`);
+>>>>>>> origin/master:client/src/pages/employees/EmployeeForm.jsx
             console.error(err);
         } finally {
             setLoading(false);

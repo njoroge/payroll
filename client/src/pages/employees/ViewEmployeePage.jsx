@@ -15,7 +15,11 @@ const ViewEmployeePage = () => {
             try {
                 setLoading(true);
                 setError('');
+<<<<<<< HEAD:client/src/pages/employees/ViewEmployeePage.js
+                const { data } = await api.get(`/employees/${employeeId}`);
+=======
                 const { data } = await api.get(`/employees/\${employeeId}`);
+>>>>>>> origin/master:client/src/pages/employees/ViewEmployeePage.jsx
                 setEmployee(data);
             } catch (err) {
                 setError(err.response?.data?.message || 'Failed to fetch employee details.');

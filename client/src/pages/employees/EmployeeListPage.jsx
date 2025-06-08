@@ -58,8 +58,8 @@ const EmployeeListPage = () => {
                                 <td>{emp.userId?.email || 'No Login'}</td>
                                 <td>{emp.workStatus}</td>
                                 <td>
-                                    <Link to={`/employees/\${emp._id}`}>View</Link> |{' '}
-                                    <Link to={`/employees/\${emp._id}/edit`}>Edit</Link>
+                                    <Link to={`/employees/${emp._id}`}>View</Link> |{' '}
+                                    <Link to={`/employees/${emp._id}/edit`}>Edit</Link>
                                     {/* Add Deactivate button here later */}
                                 </td>
                             </tr>
