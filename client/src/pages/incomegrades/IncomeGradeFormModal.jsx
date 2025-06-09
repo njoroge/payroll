@@ -69,13 +69,16 @@ const IncomeGradeFormModal = ({ incomeGrade, onClose }) => {
                 <h3>{isEditMode ? 'Edit Income Grade' : 'Add New Income Grade'}</h3>
                 <form onSubmit={handleSubmit}>
                     {error && <p style={{ color: 'red' }}>{error}</p>}
-                    <div><label>Grade Name: <input type="text" name="gradeName" value={formData.gradeName} onChange={handleChange} required /></label></div>
-                    <div><label>Basic Salary: <input type="number" name="basicSalary" value={formData.basicSalary} onChange={handleChange} required min="0" /></label></div>
-                    <div><label>House Allowance: <input type="number" name="houseAllowance" value={formData.houseAllowance} onChange={handleChange} min="0" /></label></div>
-                    <div><label>Transport Allowance: <input type="number" name="transportAllowance" value={formData.transportAllowance} onChange={handleChange} min="0" /></label></div>
-                    <div><label>Hardship Allowance: <input type="number" name="hardshipAllowance" value={formData.hardshipAllowance} onChange={handleChange} min="0" /></label></div>
-                    <div><label>Special Allowance: <input type="number" name="specialAllowance" value={formData.specialAllowance} onChange={handleChange} min="0" /></label></div>
-                    <div><label><input type="checkbox" name="isActive" checked={formData.isActive} onChange={handleChange} /> Active</label></div>
+                    <div className="mb-3"><label htmlFor="gradeName" className="form-label">Grade Name: </label><input type="text" name="gradeName" id="gradeName" className="form-control" value={formData.gradeName} onChange={handleChange} required /></div>
+                    <div className="mb-3"><label htmlFor="basicSalary" className="form-label">Basic Salary: </label><input type="number" name="basicSalary" id="basicSalary" className="form-control" value={formData.basicSalary} onChange={handleChange} required min="0" /></div>
+                    <div className="mb-3"><label htmlFor="houseAllowance" className="form-label">House Allowance: </label><input type="number" name="houseAllowance" id="houseAllowance" className="form-control" value={formData.houseAllowance} onChange={handleChange} min="0" /></div>
+                    <div className="mb-3"><label htmlFor="transportAllowance" className="form-label">Transport Allowance: </label><input type="number" name="transportAllowance" id="transportAllowance" className="form-control" value={formData.transportAllowance} onChange={handleChange} min="0" /></div>
+                    <div className="mb-3"><label htmlFor="hardshipAllowance" className="form-label">Hardship Allowance: </label><input type="number" name="hardshipAllowance" id="hardshipAllowance" className="form-control" value={formData.hardshipAllowance} onChange={handleChange} min="0" /></div>
+                    <div className="mb-3"><label htmlFor="specialAllowance" className="form-label">Special Allowance: </label><input type="number" name="specialAllowance" id="specialAllowance" className="form-control" value={formData.specialAllowance} onChange={handleChange} min="0" /></div>
+                    <div className="mb-3 form-check">
+                        <input type="checkbox" name="isActive" id="isActive" className="form-check-input" checked={formData.isActive} onChange={handleChange} />
+                        <label htmlFor="isActive" className="form-check-label"> Active</label>
+                    </div>
 
                     <div style={{ marginTop: '15px' }}>
                         <button type="submit" className="btn btn-success" disabled={loading}>

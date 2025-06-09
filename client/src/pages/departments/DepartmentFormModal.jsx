@@ -54,13 +54,13 @@ const DepartmentFormModal = ({ department, onClose }) => {
                 <h3>{isEditMode ? 'Edit Department' : 'Add New Department'}</h3>
                 <form onSubmit={handleSubmit}>
                     {error && <p style={{ color: 'red' }}>{error}</p>}
-                    <div>
-                        <label htmlFor="deptName">Name:</label>
-                        <input type="text" id="deptName" value={name} onChange={(e) => setName(e.target.value)} required />
+                    <div className="mb-3">
+                        <label htmlFor="deptName" className="form-label">Name:</label>
+                        <input type="text" id="deptName" className="form-control" value={name} onChange={(e) => setName(e.target.value)} required />
                     </div>
-                    <div>
-                        <label htmlFor="deptStatus">Status:</label>
-                        <select id="deptStatus" value={status} onChange={(e) => setStatus(e.target.value)}>
+                    <div className="mb-3">
+                        <label htmlFor="deptStatus" className="form-label">Status:</label>
+                        <select id="deptStatus" className="form-select" value={status} onChange={(e) => setStatus(e.target.value)}>
                             <option value="ACTIVE">Active</option>
                             <option value="INACTIVE">Inactive</option>
                         </select>

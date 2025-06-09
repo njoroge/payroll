@@ -157,72 +157,75 @@ const EmployeeForm = ({ isEditMode = false }) => {
                 {error && <p style={{ color: 'red' }}>{error}</p>}
 
                 <fieldset><legend>Personal Details</legend>
-                    <div><label>First Name: <input type="text" name="firstName" value={formData.firstName} onChange={handleChange} required /></label></div>
-                    <div><label>Last Name: <input type="text" name="lastName" value={formData.lastName} onChange={handleChange} required /></label></div>
-                    <div><label>Surname: <input type="text" name="surname" value={formData.surname} onChange={handleChange} /></label></div>
-                    <div><label>National ID: <input type="text" name="nationalId" value={formData.nationalId} onChange={handleChange} required disabled={isEditMode} /></label></div>
-                    <div><label>Phone Number: <input type="tel" name="phoneNo" value={formData.phoneNo} onChange={handleChange} /></label></div>
-                    <div><label>Personal Email: <input type="email" name="personalEmail" value={formData.personalEmail} onChange={handleChange} /></label></div>
-                    <div><label>Date of Birth: <input type="date" name="dob" value={formData.dob} onChange={handleChange} /></label></div>
-                    <div><label>Gender:
-                        <select name="gender" value={formData.gender} onChange={handleChange}>
+                    <div className="mb-3"><label htmlFor="firstName" className="form-label">First Name: </label><input type="text" name="firstName" id="firstName" className="form-control" value={formData.firstName} onChange={handleChange} required /></div>
+                    <div className="mb-3"><label htmlFor="lastName" className="form-label">Last Name: </label><input type="text" name="lastName" id="lastName" className="form-control" value={formData.lastName} onChange={handleChange} required /></div>
+                    <div className="mb-3"><label htmlFor="surname" className="form-label">Surname: </label><input type="text" name="surname" id="surname" className="form-control" value={formData.surname} onChange={handleChange} /></div>
+                    <div className="mb-3"><label htmlFor="nationalId" className="form-label">National ID: </label><input type="text" name="nationalId" id="nationalId" className="form-control" value={formData.nationalId} onChange={handleChange} required disabled={isEditMode} /></div>
+                    <div className="mb-3"><label htmlFor="phoneNo" className="form-label">Phone Number: </label><input type="tel" name="phoneNo" id="phoneNo" className="form-control" value={formData.phoneNo} onChange={handleChange} /></div>
+                    <div className="mb-3"><label htmlFor="personalEmail" className="form-label">Personal Email: </label><input type="email" name="personalEmail" id="personalEmail" className="form-control" value={formData.personalEmail} onChange={handleChange} /></div>
+                    <div className="mb-3"><label htmlFor="dob" className="form-label">Date of Birth: </label><input type="date" name="dob" id="dob" className="form-control" value={formData.dob} onChange={handleChange} /></div>
+                    <div className="mb-3"><label htmlFor="gender" className="form-label">Gender:</label>
+                        <select name="gender" id="gender" className="form-select" value={formData.gender} onChange={handleChange}>
                             <option value="male">Male</option><option value="female">Female</option><option value="other">Other</option>
-                        </select></label>
+                        </select>
                     </div>
-                    <div><label>Marital Status: <input type="text" name="maritalStatus" value={formData.maritalStatus} onChange={handleChange} /></label></div>
+                    <div className="mb-3"><label htmlFor="maritalStatus" className="form-label">Marital Status: </label><input type="text" name="maritalStatus" id="maritalStatus" className="form-control" value={formData.maritalStatus} onChange={handleChange} /></div>
                 </fieldset>
 
                 <fieldset><legend>Statutory & Bank Details</legend>
-                    <div><label>KRA PIN: <input type="text" name="kraPin" value={formData.kraPin} onChange={handleChange} /></label></div>
-                    <div><label>NHIF No.: <input type="text" name="nhifNo" value={formData.nhifNo} onChange={handleChange} /></label></div>
-                    <div><label>NSSF No.: <input type="text" name="nssfNo" value={formData.nssfNo} onChange={handleChange} /></label></div>
-                    <div><label>Bank Name: <input type="text" name="bankName" value={formData.bankName} onChange={handleChange} /></label></div> {/* TODO: Change to dropdown if Bank model is used */}
-                    <div><label>Account No.: <input type="text" name="accountNo" value={formData.accountNo} onChange={handleChange} /></label></div>
+                    <div className="mb-3"><label htmlFor="kraPin" className="form-label">KRA PIN: </label><input type="text" name="kraPin" id="kraPin" className="form-control" value={formData.kraPin} onChange={handleChange} /></div>
+                    <div className="mb-3"><label htmlFor="nhifNo" className="form-label">NHIF No.: </label><input type="text" name="nhifNo" id="nhifNo" className="form-control" value={formData.nhifNo} onChange={handleChange} /></div>
+                    <div className="mb-3"><label htmlFor="nssfNo" className="form-label">NSSF No.: </label><input type="text" name="nssfNo" id="nssfNo" className="form-control" value={formData.nssfNo} onChange={handleChange} /></div>
+                    <div className="mb-3"><label htmlFor="bankName" className="form-label">Bank Name: </label><input type="text" name="bankName" id="bankName" className="form-control" value={formData.bankName} onChange={handleChange} /></div> {/* TODO: Change to dropdown if Bank model is used */}
+                    <div className="mb-3"><label htmlFor="accountNo" className="form-label">Account No.: </label><input type="text" name="accountNo" id="accountNo" className="form-control" value={formData.accountNo} onChange={handleChange} /></div>
                 </fieldset>
 
                 <fieldset><legend>Employment Details</legend>
-                    <div><label>Department:
-                        <select name="departmentId" value={formData.departmentId} onChange={handleChange} required>
+                    <div className="mb-3"><label htmlFor="departmentId" className="form-label">Department:</label>
+                        <select name="departmentId" id="departmentId" className="form-select" value={formData.departmentId} onChange={handleChange} required>
                             <option value="">Select Department</option>
                             {departments.map(d => <option key={d._id} value={d._id}>{d.name}</option>)}
-                        </select></label>
+                        </select>
                     </div>
-                    <div><label>Income Grade:
-                        <select name="incomeGradeId" value={formData.incomeGradeId} onChange={handleChange} required>
+                    <div className="mb-3"><label htmlFor="incomeGradeId" className="form-label">Income Grade:</label>
+                        <select name="incomeGradeId" id="incomeGradeId" className="form-select" value={formData.incomeGradeId} onChange={handleChange} required>
                             <option value="">Select Income Grade</option>
                             {incomeGrades.map(g => <option key={g._id} value={g._id}>{g.gradeName} (Kes {g.basicSalary})</option>)}
-                        </select></label>
+                        </select>
                     </div>
-                    <div><label>Employment Start Date: <input type="date" name="employmentStartDate" value={formData.employmentStartDate} onChange={handleChange} required /></label></div>
-                    <div><label>Work Status:
-                        <select name="workStatus" value={formData.workStatus} onChange={handleChange}>
+                    <div className="mb-3"><label htmlFor="employmentStartDate" className="form-label">Employment Start Date: </label><input type="date" name="employmentStartDate" id="employmentStartDate" className="form-control" value={formData.employmentStartDate} onChange={handleChange} required /></div>
+                    <div className="mb-3"><label htmlFor="workStatus" className="form-label">Work Status:</label>
+                        <select name="workStatus" id="workStatus" className="form-select" value={formData.workStatus} onChange={handleChange}>
                             <option value="ACTIVE">Active</option><option value="INACTIVE">Inactive</option>
                             <option value="ON_LEAVE">On Leave</option><option value="TERMINATED">Terminated</option>
-                        </select></label>
+                        </select>
                     </div>
                 </fieldset>
 
                 <fieldset><legend>Next of Kin</legend>
-                    <div><label>First Name: <input type="text" name="nextOfKin.firstName" value={formData.nextOfKin.firstName} onChange={handleChange} /></label></div>
-                    <div><label>Last Name: <input type="text" name="nextOfKin.lastName" value={formData.nextOfKin.lastName} onChange={handleChange} /></label></div>
-                    <div><label>Relation: <input type="text" name="nextOfKin.relation" value={formData.nextOfKin.relation} onChange={handleChange} /></label></div>
-                    <div><label>Phone: <input type="tel" name="nextOfKin.phoneNo" value={formData.nextOfKin.phoneNo} onChange={handleChange} /></label></div>
-                    <div><label>Email: <input type="email" name="nextOfKin.email" value={formData.nextOfKin.email} onChange={handleChange} /></label></div>
+                    <div className="mb-3"><label htmlFor="nextOfKin.firstName" className="form-label">First Name: </label><input type="text" name="nextOfKin.firstName" id="nextOfKin.firstName" className="form-control" value={formData.nextOfKin.firstName} onChange={handleChange} /></div>
+                    <div className="mb-3"><label htmlFor="nextOfKin.lastName" className="form-label">Last Name: </label><input type="text" name="nextOfKin.lastName" id="nextOfKin.lastName" className="form-control" value={formData.nextOfKin.lastName} onChange={handleChange} /></div>
+                    <div className="mb-3"><label htmlFor="nextOfKin.relation" className="form-label">Relation: </label><input type="text" name="nextOfKin.relation" id="nextOfKin.relation" className="form-control" value={formData.nextOfKin.relation} onChange={handleChange} /></div>
+                    <div className="mb-3"><label htmlFor="nextOfKin.phoneNo" className="form-label">Phone: </label><input type="tel" name="nextOfKin.phoneNo" id="nextOfKin.phoneNo" className="form-control" value={formData.nextOfKin.phoneNo} onChange={handleChange} /></div>
+                    <div className="mb-3"><label htmlFor="nextOfKin.email" className="form-label">Email: </label><input type="email" name="nextOfKin.email" id="nextOfKin.email" className="form-control" value={formData.nextOfKin.email} onChange={handleChange} /></div>
                 </fieldset>
 
                 {!isEditMode && ( // Only show user account creation for new employees
                      <fieldset><legend>User Account (for Employee Portal Login)</legend>
-                        <div><label><input type="checkbox" name="createUserAccount" checked={formData.createUserAccount} onChange={handleChange} /> Create User Account?</label></div>
+                        <div className="mb-3 form-check">
+                            <input type="checkbox" name="createUserAccount" id="createUserAccount" className="form-check-input" checked={formData.createUserAccount} onChange={handleChange} />
+                            <label htmlFor="createUserAccount" className="form-check-label"> Create User Account?</label>
+                        </div>
                         {formData.createUserAccount && (
                             <>
-                                <div><label>Login Email: <input type="email" name="userEmail" value={formData.userEmail} onChange={handleChange} required={formData.createUserAccount} /></label></div>
-                                <div><label>Password: <input type="password" name="userPassword" value={formData.userPassword} onChange={handleChange} required={formData.createUserAccount} minLength="6" /></label></div>
-                                <div><label>Role:
-                                    <select name="userRole" value={formData.userRole} onChange={handleChange}>
+                                <div className="mb-3"><label htmlFor="userEmail" className="form-label">Login Email: </label><input type="email" name="userEmail" id="userEmail" className="form-control" value={formData.userEmail} onChange={handleChange} required={formData.createUserAccount} /></div>
+                                <div className="mb-3"><label htmlFor="userPassword" className="form-label">Password: </label><input type="password" name="userPassword" id="userPassword" className="form-control" value={formData.userPassword} onChange={handleChange} required={formData.createUserAccount} minLength="6" /></div>
+                                <div className="mb-3"><label htmlFor="userRole" className="form-label">Role:</label>
+                                    <select name="userRole" id="userRole" className="form-select" value={formData.userRole} onChange={handleChange}>
                                         <option value="employee">Employee</option>
                                         <option value="hr_manager">HR Manager</option> {/* Be cautious with assigning higher roles */}
                                         <option value="employee_admin">Employee Admin</option>
-                                    </select></label>
+                                    </select>
                                 </div>
                             </>
                         )}

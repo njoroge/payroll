@@ -56,16 +56,16 @@ const RegisterCompanyPage = () => {
             <h2>Register New Company</h2>
             <form onSubmit={handleSubmit}>
                 <h3>Company Details</h3>
-                <div><label>Company Name: <input type="text" name="companyName" value={formData.companyName} onChange={handleChange} required /></label></div>
-                <div><label>Company Tax PIN: <input type="text" name="companyTaxPin" value={formData.companyTaxPin} onChange={handleChange} required /></label></div>
-                <div><label>Company Email: <input type="email" name="companyEmail" value={formData.companyEmail} onChange={handleChange} required /></label></div>
-                <div><label>Company Location: <input type="text" name="companyLocation" value={formData.companyLocation} onChange={handleChange} /></label></div>
-                <div><label>Company Phone: <input type="tel" name="companyPhone" value={formData.companyPhone} onChange={handleChange} /></label></div>
+                <div className="mb-3"><label htmlFor="companyName" className="form-label">Company Name: </label><input type="text" name="companyName" id="companyName" className="form-control" value={formData.companyName} onChange={handleChange} required /></div>
+                <div className="mb-3"><label htmlFor="companyTaxPin" className="form-label">Company Tax PIN: </label><input type="text" name="companyTaxPin" id="companyTaxPin" className="form-control" value={formData.companyTaxPin} onChange={handleChange} required /></div>
+                <div className="mb-3"><label htmlFor="companyEmail" className="form-label">Company Email: </label><input type="email" name="companyEmail" id="companyEmail" className="form-control" value={formData.companyEmail} onChange={handleChange} required /></div>
+                <div className="mb-3"><label htmlFor="companyLocation" className="form-label">Company Location: </label><input type="text" name="companyLocation" id="companyLocation" className="form-control" value={formData.companyLocation} onChange={handleChange} /></div>
+                <div className="mb-3"><label htmlFor="companyPhone" className="form-label">Company Phone: </label><input type="tel" name="companyPhone" id="companyPhone" className="form-control" value={formData.companyPhone} onChange={handleChange} /></div>
 
                 <h3>Admin User Details</h3>
-                <div><label>Admin Email: <input type="email" name="adminEmail" value={formData.adminEmail} onChange={handleChange} required /></label></div>
-                <div><label>Admin Password: <input type="password" name="adminPassword" value={formData.adminPassword} onChange={handleChange} required minLength="6" /></label></div>
-                <div><label>Confirm Admin Password: <input type="password" name="adminConfirmPassword" value={formData.adminConfirmPassword} onChange={handleChange} required /></label></div>
+                <div className="mb-3"><label htmlFor="adminEmail" className="form-label">Admin Email: </label><input type="email" name="adminEmail" id="adminEmail" className="form-control" value={formData.adminEmail} onChange={handleChange} required /></div>
+                <div className="mb-3"><label htmlFor="adminPassword" className="form-label">Admin Password: </label><input type="password" name="adminPassword" id="adminPassword" className="form-control" value={formData.adminPassword} onChange={handleChange} required minLength="6" /></div>
+                <div className="mb-3"><label htmlFor="adminConfirmPassword" className="form-label">Confirm Admin Password: </label><input type="password" name="adminConfirmPassword" id="adminConfirmPassword" className="form-control" value={formData.adminConfirmPassword} onChange={handleChange} required /></div>
 
                 {error && <p style={{ color: 'red' }}>{error}</p>}
                 {success && <p style={{ color: 'green' }}>{success}</p>}

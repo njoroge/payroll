@@ -79,34 +79,36 @@ const RunPayrollPage = () => {
         <div>
             <h2>Run Payroll</h2>
             <form onSubmit={handleSubmit}>
-                <div>
-                    <label>Month:
-                        <select value={month} onChange={e => setMonth(e.target.value)}>
+                <div className="row mb-3">
+                    <div className="col-md-6">
+                        <label htmlFor="payrollMonth" className="form-label">Month:</label>
+                        <select id="payrollMonth" className="form-select" value={month} onChange={e => setMonth(e.target.value)}>
                             {months.map(m => <option key={m} value={m}>{m}</option>)}
                         </select>
-                    </label>
-                    <label style={{ marginLeft: '10px' }}>Year:
-                        <select value={year} onChange={e => setYear(parseInt(e.target.value))}>
+                    </div>
+                    <div className="col-md-6">
+                        <label htmlFor="payrollYear" className="form-label">Year:</label>
+                        <select id="payrollYear" className="form-select" value={year} onChange={e => setYear(parseInt(e.target.value))}>
                             {years.map(y => <option key={y} value={y}>{y}</option>)}
                         </select>
-                    </label>
+                    </div>
                 </div>
 
-                <div style={{ margin: '1rem 0' }}>
-                    <label>
-                        <input type="checkbox" checked={runForAll} onChange={(e) => setRunForAll(e.target.checked)} />
+                <div className="mb-3 form-check">
+                    <input type="checkbox" id="runForAll" className="form-check-input" checked={runForAll} onChange={(e) => setRunForAll(e.target.checked)} />
+                    <label htmlFor="runForAll" className="form-check-label">
                         Run for All Active Employees
                     </label>
                 </div>
 
                 {!runForAll && (
-                    <div>
+                    <div className="mb-3">
                         <h4>Select Employees:</h4>
                         {fetchLoading && <p>Loading employees...</p>}
                         {employees.map(emp => (
-                            <div key={emp._id}>
-                                <label>
-                                    <input type="checkbox" value={emp._id} checked={selectedEmployeeIds.includes(emp._id)} onChange={handleEmployeeSelection} />
+                            <div key={emp._id} className="form-check">
+                                <input type="checkbox" id={`emp-${emp._id}`} className="form-check-input" value={emp._id} checked={selectedEmployeeIds.includes(emp._id)} onChange={handleEmployeeSelection} />
+                                <label htmlFor={`emp-${emp._id}`} className="form-check-label">
                                     {emp.firstName} {emp.lastName} ({emp.nationalId})
                                 </label>
                             </div>
