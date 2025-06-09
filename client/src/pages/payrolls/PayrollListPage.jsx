@@ -64,26 +64,26 @@ const PayrollListPage = () => {
         <div>
             <h2>Payroll Records</h2>
             {(userInfo.role === 'company_admin' || userInfo.role === 'hr_manager' || userInfo.role === 'employee_admin') && (
-                <button onClick={handleRunPayroll} className="btn btn-success" style={{ marginBottom: '1rem' }}>
+                <button onClick={handleRunPayroll} className="btn btn-success mb-3">
                     Run New Payroll
                 </button>
             )}
-            <div style={{ marginBottom: '1rem' }}>
-                Filter by:
-                <select value={filterMonth} onChange={e => setFilterMonth(e.target.value)} style={{marginLeft: '5px'}}>
+            <div className="mb-3 d-flex align-items-center">
+                <span className="me-2">Filter by:</span>
+                <select value={filterMonth} onChange={e => setFilterMonth(e.target.value)} className="form-select form-select-sm d-inline-block w-auto ms-2">
                     {months.map(m => <option key={m} value={m}>{m}</option>)}
                 </select>
-                <select value={filterYear} onChange={e => setFilterYear(parseInt(e.target.value))} style={{marginLeft: '5px'}}>
+                <select value={filterYear} onChange={e => setFilterYear(parseInt(e.target.value))} className="form-select form-select-sm d-inline-block w-auto ms-2">
                      {years.map(y => <option key={y} value={y}>{y}</option>)}
                 </select>
             </div>
 
             {loading && <p>Loading payrolls...</p>}
-            {error && <p style={{ color: 'red' }}>Error: {error}</p>}
+            {error && <p className="text-danger">Error: {error}</p>}
             {!loading && !error && payrolls.length === 0 && <p>No payroll records found for {filterMonth}, {filterYear}.</p>}
 
             {!loading && !error && payrolls.length > 0 && (
-                <table border="1" style={{ width: '100%', borderCollapse: 'collapse' }}>
+                <table className="table table-bordered table-striped">
                     <thead>
                         <tr>
                             <th>Employee</th>
@@ -107,10 +107,10 @@ const PayrollListPage = () => {
                                 <td>
                                     <Link to={`/payrolls/${p._id}`} className="btn btn-sm btn-success">View Payslip</Link>
                                     {(userInfo.role === 'company_admin' || userInfo.role === 'hr_manager' || userInfo.role === 'employee_admin') && p.status === 'PENDING_APPROVAL' && (
-                                        <button onClick={() => handleApprove(p._id)} className="btn btn-sm btn-success" style={{marginLeft: '5px'}}>Approve</button>
+                                        <button onClick={() => handleApprove(p._id)} className="btn btn-sm btn-success ms-1">Approve</button>
                                     )}
                                      {(userInfo.role === 'company_admin' || userInfo.role === 'hr_manager' || userInfo.role === 'employee_admin') && p.status === 'APPROVED' && (
-                                        <button onClick={() => handleMarkPaid(p._id)} className="btn btn-sm btn-success" style={{marginLeft: '5px'}}>Mark Paid</button>
+                                        <button onClick={() => handleMarkPaid(p._id)} className="btn btn-sm btn-success ms-1">Mark Paid</button>
                                     )}
                                 </td>
                             </tr>

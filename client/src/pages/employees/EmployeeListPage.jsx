@@ -25,18 +25,18 @@ const EmployeeListPage = () => {
     }, []);
 
     if (loading) return <p>Loading employees...</p>;
-    if (error) return <p style={{ color: 'red' }}>Error: {error}</p>;
+    if (error) return <p className="text-danger">Error: {error}</p>;
 
     return (
         <div>
             <h2>Employee Management</h2>
-            <Link to="/employees/new" className="btn btn-success" style={{ marginBottom: '1rem', display: 'inline-block' }}>
+            <Link to="/employees/new" className="btn btn-success mb-3">
                 Add New Employee
             </Link>
             {employees.length === 0 ? (
                 <p>No employees found.</p>
             ) : (
-                <table border="1" style={{ width: '100%', borderCollapse: 'collapse' }}>
+                <table className="table table-bordered table-striped">
                     <thead>
                         <tr>
                             <th>Name</th>

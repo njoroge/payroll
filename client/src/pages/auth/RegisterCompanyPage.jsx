@@ -67,8 +67,8 @@ const RegisterCompanyPage = () => {
                 <div className="mb-3"><label htmlFor="adminPassword" className="form-label">Admin Password: </label><input type="password" name="adminPassword" id="adminPassword" className="form-control" value={formData.adminPassword} onChange={handleChange} required minLength="6" /></div>
                 <div className="mb-3"><label htmlFor="adminConfirmPassword" className="form-label">Confirm Admin Password: </label><input type="password" name="adminConfirmPassword" id="adminConfirmPassword" className="form-control" value={formData.adminConfirmPassword} onChange={handleChange} required /></div>
 
-                {error && <p style={{ color: 'red' }}>{error}</p>}
-                {success && <p style={{ color: 'green' }}>{success}</p>}
+                {error && <p className="text-danger">{error}</p>}
+                {success && <p className="text-success">{success}</p>}
                 <button type="submit" className="btn btn-success" disabled={loading}>{loading ? 'Registering...' : 'Register Company'}</button>
             </form>
         </div>

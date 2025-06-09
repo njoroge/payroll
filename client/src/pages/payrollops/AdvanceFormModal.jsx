@@ -90,7 +90,7 @@ const AdvanceFormModal = ({ item, onClose, operationType = "Advance" }) => {
             <div style={modalContentStyle}>
                 <h3>{title}</h3>
                 <form onSubmit={handleSubmit}>
-                    {error && <p style={{ color: 'red' }}>{error}</p>}
+                    {error && <p className="text-danger">{error}</p>}
                     <div className="mb-3">
                         <label htmlFor="employeeId" className="form-label">Employee:</label>
                         <select name="employeeId" id="employeeId" className="form-select" value={formData.employeeId} onChange={handleChange} required disabled={isEditMode}>
@@ -105,11 +105,11 @@ const AdvanceFormModal = ({ item, onClose, operationType = "Advance" }) => {
                     <div className="mb-3"><label htmlFor="amount" className="form-label">Amount: </label><input type="number" name="amount" id="amount" className="form-control" value={formData.amount} onChange={handleChange} required min="0.01" step="0.01" /></div>
                     <div className="mb-3"><label htmlFor="dateIssued" className="form-label">Date Issued: </label><input type="date" name="dateIssued" id="dateIssued" className="form-control" value={formData.dateIssued} onChange={handleChange} required /></div>
                     <div className="mb-3"><label htmlFor="reason" className="form-label">Reason: </label><textarea name="reason" id="reason" className="form-control" value={formData.reason} onChange={handleChange} rows="2"></textarea></div>
-                    <div style={{ marginTop: '15px' }}>
+                    <div className="mt-3">
                         <button type="submit" className="btn btn-success" disabled={loading || (isEditMode && !item)}>
                             {loading ? 'Saving...' : (isEditMode ? 'Save Changes' : `Record ${operationType}`)}
                         </button>
-                        <button type="button" className="btn btn-success" onClick={onClose} style={{ marginLeft: '10px' }} disabled={loading}>
+                        <button type="button" className="btn btn-success ms-2" onClick={onClose} disabled={loading}>
                             Cancel
                         </button>
                     </div>

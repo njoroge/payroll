@@ -15,11 +15,7 @@ const ViewEmployeePage = () => {
             try {
                 setLoading(true);
                 setError('');
-<<<<<<< HEAD:client/src/pages/employees/ViewEmployeePage.js
                 const { data } = await api.get(`/employees/${employeeId}`);
-=======
-                const { data } = await api.get(`/employees/\${employeeId}`);
->>>>>>> origin/master:client/src/pages/employees/ViewEmployeePage.jsx
                 setEmployee(data);
             } catch (err) {
                 setError(err.response?.data?.message || 'Failed to fetch employee details.');
@@ -32,7 +28,7 @@ const ViewEmployeePage = () => {
     }, [employeeId]);
 
     if (loading) return <p>Loading employee details...</p>;
-    if (error) return <p style={{ color: 'red' }}>Error: {error}</p>;
+    if (error) return <p className="text-danger">Error: {error}</p>;
     if (!employee) return <p>Employee not found.</p>;
 
     const canEdit = userInfo?.role === 'company_admin' || userInfo?.role === 'employee_admin' || userInfo?.role === 'hr_manager';
@@ -42,9 +38,9 @@ const ViewEmployeePage = () => {
     return (
         <div>
             <h2>Employee Details: {employee.firstName} {employee.lastName}</h2>
-            {canEdit && <Link to={`/employees/\${employee._id}/edit`} style={{marginRight: '10px'}}>Edit Employee</Link>}
+            {canEdit && <Link to={`/employees/${employee._id}/edit`} className="btn btn-sm btn-success me-2">Edit Employee</Link>}
             {/* Add other actions like Deactivate, View Payslips (if HR/Admin) */}
-            {isSelf && <Link to={`/employees/\${employee._id}/payslips`}>View My Payslips</Link>}
+            {isSelf && <Link to={`/employees/${employee._id}/payslips`} className="btn btn-sm btn-info">View My Payslips</Link>}
 
 
             <p><strong>National ID:</strong> {employee.nationalId}</p>
@@ -88,7 +84,7 @@ const ViewEmployeePage = () => {
                     <p><strong>Account Active:</strong> {employee.userId.isActive ? 'Yes' : 'No'}</p>
                 </>
             )}
-            <Link to="/employees" style={{marginTop: '1rem', display: 'block'}}>Back to Employee List</Link>
+            <Link to="/employees" className="btn btn-secondary mt-3 d-block">Back to Employee List</Link>
         </div>
     );
 };

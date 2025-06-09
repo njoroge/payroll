@@ -43,7 +43,7 @@ const LoginPage = () => {
                     <label htmlFor="password" className="form-label">Password:</label>
                     <input type="password" id="password" className="form-control" value={password} onChange={(e) => setPassword(e.target.value)} required />
                 </div>
-                {error && <p style={{ color: 'red' }}>{error}</p>}
+                {error && <p className="text-danger">{error}</p>}
                 <button type="submit" className="btn btn-success" disabled={loading}>{loading ? 'Logging in...' : 'Login'}</button>
             </form>
         </div>
