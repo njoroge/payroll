@@ -76,22 +76,14 @@ const AdvanceFormModal = ({ item, onClose, operationType = "Advance" }) => {
             }
             onClose();
         } catch (err) {
-<<<<<<< HEAD:client/src/pages/payrollops/AdvanceFormModal.js
             setError(err.response?.data?.message || `Failed to record ${operationType.toLowerCase()}.`);
-=======
-            setError(err.response?.data?.message || `Failed to record \${operationType.toLowerCase()}.`);
->>>>>>> origin/master:client/src/pages/payrollops/AdvanceFormModal.jsx
             console.error(err);
         } finally {
             setLoading(false);
         }
     };
 
-<<<<<<< HEAD:client/src/pages/payrollops/AdvanceFormModal.js
     const title = isEditMode ? `Edit ${operationType}` : `Record New ${operationType}`;
-=======
-    const title = isEditMode ? `Edit \${operationType}` : `Record New \${operationType}`;
->>>>>>> origin/master:client/src/pages/payrollops/AdvanceFormModal.jsx
 
     return (
         <div style={modalStyle}>
@@ -115,14 +107,10 @@ const AdvanceFormModal = ({ item, onClose, operationType = "Advance" }) => {
                     <div><label>Date Issued: <input type="date" name="dateIssued" value={formData.dateIssued} onChange={handleChange} required /></label></div>
                     <div><label>Reason: <textarea name="reason" value={formData.reason} onChange={handleChange} rows="2"></textarea></label></div>
                     <div style={{ marginTop: '15px' }}>
-                        <button type="submit" disabled={loading || (isEditMode && !item)}>
-<<<<<<< HEAD:client/src/pages/payrollops/AdvanceFormModal.js
+                        <button type="submit" className="btn btn-success" disabled={loading || (isEditMode && !item)}>
                             {loading ? 'Saving...' : (isEditMode ? 'Save Changes' : `Record ${operationType}`)}
-=======
-                            {loading ? 'Saving...' : (isEditMode ? 'Save Changes' : `Record \${operationType}`)}
->>>>>>> origin/master:client/src/pages/payrollops/AdvanceFormModal.jsx
                         </button>
-                        <button type="button" onClick={onClose} style={{ marginLeft: '10px' }} disabled={loading}>
+                        <button type="button" className="btn btn-success" onClick={onClose} style={{ marginLeft: '10px' }} disabled={loading}>
                             Cancel
                         </button>
                     </div>

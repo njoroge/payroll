@@ -30,7 +30,7 @@ const EmployeeListPage = () => {
     return (
         <div>
             <h2>Employee Management</h2>
-            <Link to="/employees/new" style={{ marginBottom: '1rem', display: 'inline-block' }}>
+            <Link to="/employees/new" className="btn btn-success" style={{ marginBottom: '1rem', display: 'inline-block' }}>
                 Add New Employee
             </Link>
             {employees.length === 0 ? (
@@ -58,8 +58,8 @@ const EmployeeListPage = () => {
                                 <td>{emp.userId?.email || 'No Login'}</td>
                                 <td>{emp.workStatus}</td>
                                 <td>
-                                    <Link to={`/employees/${emp._id}`}>View</Link> |{' '}
-                                    <Link to={`/employees/${emp._id}/edit`}>Edit</Link>
+                                    <Link to={`/employees/${emp._id}`} className="btn btn-sm btn-success">View</Link> |{' '}
+                                    <Link to={`/employees/${emp._id}/edit`} className="btn btn-sm btn-success">Edit</Link>
                                     {/* Add Deactivate button here later */}
                                 </td>
                             </tr>

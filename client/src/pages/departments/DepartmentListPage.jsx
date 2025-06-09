@@ -44,7 +44,7 @@ const DepartmentListPage = () => {
     return (
         <div>
             <h2>Department Management</h2>
-            <button onClick={() => handleOpenModal()} style={{ marginBottom: '1rem' }}>
+            <button onClick={() => handleOpenModal()} className="btn btn-success" style={{ marginBottom: '1rem' }}>
                 Add New Department
             </button>
             {departments.length === 0 ? (
@@ -64,7 +64,7 @@ const DepartmentListPage = () => {
                                 <td>{dept.name}</td>
                                 <td>{dept.status}</td>
                                 <td>
-                                    <button onClick={() => handleOpenModal(dept)}>Edit</button>
+                                    <button onClick={() => handleOpenModal(dept)} className="btn btn-sm btn-success">Edit</button>
                                 </td>
                             </tr>
                         ))}

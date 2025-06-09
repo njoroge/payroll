@@ -50,21 +50,13 @@ const IncomeGradeFormModal = ({ incomeGrade, onClose }) => {
         setError('');
         try {
             if (isEditMode) {
-<<<<<<< HEAD:client/src/pages/incomegrades/IncomeGradeFormModal.js
                 await api.put(`/income-grades/${incomeGrade._id}`, formData);
-=======
-                await api.put(`/income-grades/\${incomeGrade._id}`, formData);
->>>>>>> origin/master:client/src/pages/incomegrades/IncomeGradeFormModal.jsx
             } else {
                 await api.post('/income-grades', formData);
             }
             onClose();
         } catch (err) {
-<<<<<<< HEAD:client/src/pages/incomegrades/IncomeGradeFormModal.js
             setError(err.response?.data?.message || `Failed to ${isEditMode ? 'update' : 'create'} income grade.`);
-=======
-            setError(err.response?.data?.message || `Failed to \${isEditMode ? 'update' : 'create'} income grade.`);
->>>>>>> origin/master:client/src/pages/incomegrades/IncomeGradeFormModal.jsx
             console.error(err);
         } finally {
             setLoading(false);
@@ -86,10 +78,10 @@ const IncomeGradeFormModal = ({ incomeGrade, onClose }) => {
                     <div><label><input type="checkbox" name="isActive" checked={formData.isActive} onChange={handleChange} /> Active</label></div>
 
                     <div style={{ marginTop: '15px' }}>
-                        <button type="submit" disabled={loading}>
+                        <button type="submit" className="btn btn-success" disabled={loading}>
                             {loading ? (isEditMode ? 'Updating...' : 'Creating...') : (isEditMode ? 'Save Changes' : 'Create Grade')}
                         </button>
-                        <button type="button" onClick={onClose} style={{ marginLeft: '10px' }} disabled={loading}>
+                        <button type="button" className="btn btn-success" onClick={onClose} style={{ marginLeft: '10px' }} disabled={loading}>
                             Cancel
                         </button>
                     </div>

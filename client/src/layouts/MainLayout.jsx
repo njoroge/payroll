@@ -1,6 +1,5 @@
 import React from 'react';
 import { Outlet } from 'react-router-dom';
-import Sidebar from '../components/common/Sidebar'; // Adjust path if necessary
 
 // Basic Footer component (can be enhanced or moved later)
 const Footer = () => {
@@ -14,11 +13,10 @@ const Footer = () => {
 const MainLayout = () => {
   return (
     <div className="flex min-h-screen bg-gray-100"> {/* Main container for flex layout */}
-      <Sidebar /> {/* Sidebar component */}
 
       <div className="flex flex-col flex-1"> {/* Wrapper for main content and footer */}
         {/* Main content area */}
-        <main className="flex-1 p-4 md:ml-52 transition-all duration-300 ease-in-out">
+        <main className="flex-1 p-4 transition-all duration-300 ease-in-out">
           {/*
             md:ml-52 assumes sidebar width is w-52 (208px).
             This pushes content to the right of the static sidebar on md screens and up.
