@@ -66,11 +66,7 @@ const EmployeeForm = ({ isEditMode = false }) => {
             const fetchEmployee = async () => {
                 try {
                     setFormLoading(true);
-<<<<<<< HEAD:client/src/pages/employees/EmployeeForm.js
                     const { data } = await api.get(`/employees/${employeeId}`);
-=======
-                    const { data } = await api.get(`/employees/\${employeeId}`);
->>>>>>> origin/master:client/src/pages/employees/EmployeeForm.jsx
                     // Format dates for input type="date"
                     if (data.dob) data.dob = new Date(data.dob).toISOString().split('T')[0];
                     if (data.employmentStartDate) data.employmentStartDate = new Date(data.employmentStartDate).toISOString().split('T')[0];
@@ -138,22 +134,14 @@ const EmployeeForm = ({ isEditMode = false }) => {
 
         try {
             if (isEditMode) {
-<<<<<<< HEAD:client/src/pages/employees/EmployeeForm.js
                 await api.put(`/employees/${employeeId}`, payload);
-=======
-                await api.put(`/employees/\${employeeId}`, payload);
->>>>>>> origin/master:client/src/pages/employees/EmployeeForm.jsx
                 // TODO: Handle user account update if email/role changed (might need specific endpoint)
             } else {
                 await api.post('/employees', payload);
             }
             navigate('/employees'); // Redirect to list page after success
         } catch (err) {
-<<<<<<< HEAD:client/src/pages/employees/EmployeeForm.js
             setError(err.response?.data?.message || `Failed to ${isEditMode ? 'update' : 'create'} employee.`);
-=======
-            setError(err.response?.data?.message || `Failed to \${isEditMode ? 'update' : 'create'} employee.`);
->>>>>>> origin/master:client/src/pages/employees/EmployeeForm.jsx
             console.error(err);
         } finally {
             setLoading(false);
@@ -243,10 +231,10 @@ const EmployeeForm = ({ isEditMode = false }) => {
                 {/* In Edit mode, user account update is more complex, might be a separate section or done via User Management */}
 
 
-                <button type="submit" disabled={loading || formLoading}>
+                <button type="submit" className="btn btn-success" disabled={loading || formLoading}>
                     {loading ? (isEditMode ? 'Updating...' : 'Creating...') : (isEditMode ? 'Save Changes' : 'Create Employee')}
                 </button>
-                <button type="button" onClick={() => navigate('/employees')} style={{ marginLeft: '10px' }}>Cancel</button>
+                <button type="button" className="btn btn-success" onClick={() => navigate('/employees')} style={{ marginLeft: '10px' }}>Cancel</button>
             </form>
         </div>
     );

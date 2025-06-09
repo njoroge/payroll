@@ -69,7 +69,7 @@ const RegisterCompanyPage = () => {
 
                 {error && <p style={{ color: 'red' }}>{error}</p>}
                 {success && <p style={{ color: 'green' }}>{success}</p>}
-                <button type="submit" disabled={loading}>{loading ? 'Registering...' : 'Register Company'}</button>
+                <button type="submit" className="btn btn-success" disabled={loading}>{loading ? 'Registering...' : 'Register Company'}</button>
             </form>
         </div>
     );

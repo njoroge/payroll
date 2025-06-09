@@ -44,7 +44,7 @@ const IncomeGradeListPage = () => {
     return (
         <div>
             <h2>Income Grade Management</h2>
-            <button onClick={() => handleOpenModal()} style={{ marginBottom: '1rem' }}>
+            <button onClick={() => handleOpenModal()} className="btn btn-success" style={{ marginBottom: '1rem' }}>
                 Add New Income Grade
             </button>
             {incomeGrades.length === 0 ? (
@@ -70,7 +70,7 @@ const IncomeGradeListPage = () => {
                                 <td>{grade.transportAllowance}</td>
                                 <td>{grade.isActive ? 'Active' : 'Inactive'}</td>
                                 <td>
-                                    <button onClick={() => handleOpenModal(grade)}>Edit</button>
+                                    <button onClick={() => handleOpenModal(grade)} className="btn btn-sm btn-success">Edit</button>
                                 </td>
                             </tr>
                         ))}

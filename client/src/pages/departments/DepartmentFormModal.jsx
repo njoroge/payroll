@@ -35,21 +35,13 @@ const DepartmentFormModal = ({ department, onClose }) => {
         setError('');
         try {
             if (isEditMode) {
-<<<<<<< HEAD:client/src/pages/departments/DepartmentFormModal.js
                 await api.put(`/departments/${department._id}`, { name, status });
-=======
-                await api.put(`/departments/\${department._id}`, { name, status });
->>>>>>> origin/master:client/src/pages/departments/DepartmentFormModal.jsx
             } else {
                 await api.post('/departments', { name, status });
             }
             onClose();
         } catch (err) {
-<<<<<<< HEAD:client/src/pages/departments/DepartmentFormModal.js
             setError(err.response?.data?.message || `Failed to ${isEditMode ? 'update' : 'create'} department.`);
-=======
-            setError(err.response?.data?.message || `Failed to \${isEditMode ? 'update' : 'create'} department.`);
->>>>>>> origin/master:client/src/pages/departments/DepartmentFormModal.jsx
             console.error(err);
         } finally {
             setLoading(false);
@@ -74,10 +66,10 @@ const DepartmentFormModal = ({ department, onClose }) => {
                         </select>
                     </div>
                     <div style={{ marginTop: '15px' }}>
-                        <button type="submit" disabled={loading}>
+                        <button type="submit" className="btn btn-success" disabled={loading}>
                             {loading ? (isEditMode ? 'Updating...' : 'Creating...') : (isEditMode ? 'Save Changes' : 'Create Department')}
                         </button>
-                        <button type="button" onClick={onClose} style={{ marginLeft: '10px' }} disabled={loading}>
+                        <button type="button" className="btn btn-success" onClick={onClose} style={{ marginLeft: '10px' }} disabled={loading}>
                             Cancel
                         </button>
                     </div>

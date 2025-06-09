@@ -38,15 +38,9 @@ const AdvanceListPage = () => {
     };
 
     const handleStatusUpdate = async (id, newStatus) => {
-<<<<<<< HEAD:client/src/pages/payrollops/AdvanceListPage.js
         if (!window.confirm(`Are you sure you want to change status to ${newStatus}?`)) return;
         try {
             await api.put(`/payroll-ops/advances/${id}/status`, { status: newStatus });
-=======
-        if (!window.confirm(`Are you sure you want to change status to \${newStatus}?`)) return;
-        try {
-            await api.put(`/payroll-ops/advances/\${id}/status`, { status: newStatus });
->>>>>>> origin/master:client/src/pages/payrollops/AdvanceListPage.jsx
             fetchItems();
         } catch (err) {
             setError(err.response?.data?.message || 'Failed to update status.');
@@ -61,7 +55,7 @@ const AdvanceListPage = () => {
         <div>
             <h2>Advance Management</h2>
             {(userInfo.role === 'company_admin' || userInfo.role === 'hr_manager' || userInfo.role === 'employee_admin') && (
-                <button onClick={() => handleOpenModal()} style={{ marginBottom: '1rem' }}>
+                <button onClick={() => handleOpenModal()} className="btn btn-success" style={{ marginBottom: '1rem' }}>
                     Record New Advance
                 </button>
             )}
@@ -90,8 +84,8 @@ const AdvanceListPage = () => {
                                 <td>
                                     {(userInfo.role === 'company_admin' || userInfo.role === 'hr_manager' || userInfo.role === 'employee_admin') && item.status === 'PENDING' && (
                                         <>
-                                            <button onClick={() => handleStatusUpdate(item._id, 'APPROVED')}>Approve</button>
-                                            <button onClick={() => handleStatusUpdate(item._id, 'REJECTED')} style={{marginLeft: '5px'}}>Reject</button>
+                                            <button onClick={() => handleStatusUpdate(item._id, 'APPROVED')} className="btn btn-sm btn-success">Approve</button>
+                                            <button onClick={() => handleStatusUpdate(item._id, 'REJECTED')} className="btn btn-sm btn-success" style={{marginLeft: '5px'}}>Reject</button>
                                         </>
                                     )}
                                 </td>

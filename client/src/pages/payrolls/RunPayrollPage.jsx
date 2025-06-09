@@ -125,10 +125,10 @@ const RunPayrollPage = () => {
                     </div>
                 )}
 
-                <button type="submit" disabled={loading || fetchLoading}>
+                <button type="submit" className="btn btn-success" disabled={loading || fetchLoading}>
                     {loading ? 'Processing...' : 'Run Payroll'}
                 </button>
-                <button type="button" onClick={() => navigate('/payrolls')} style={{ marginLeft: '10px' }} disabled={loading}>Cancel</button>
+                <button type="button" className="btn btn-success" onClick={() => navigate('/payrolls')} style={{ marginLeft: '10px' }} disabled={loading}>Cancel</button>
             </form>
         </div>
     );

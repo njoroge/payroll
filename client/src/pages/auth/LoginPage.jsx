@@ -44,7 +44,7 @@ const LoginPage = () => {
                     <input type="password" id="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
                 </div>
                 {error && <p style={{ color: 'red' }}>{error}</p>}
-                <button type="submit" disabled={loading}>{loading ? 'Logging in...' : 'Login'}</button>
+                <button type="submit" className="btn btn-success" disabled={loading}>{loading ? 'Logging in...' : 'Login'}</button>
             </form>
         </div>
     );

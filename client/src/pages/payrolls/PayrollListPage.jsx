@@ -41,11 +41,7 @@ const PayrollListPage = () => {
     const handleApprove = async (id) => {
         if (window.confirm("Are you sure you want to approve this payslip?")) {
             try {
-<<<<<<< HEAD:client/src/pages/payrolls/PayrollListPage.js
                 await api.put(`/payrolls/${id}/status`, { status: 'APPROVED' });
-=======
-                await api.put(`/payrolls/\${id}/status`, { status: 'APPROVED' });
->>>>>>> origin/master:client/src/pages/payrolls/PayrollListPage.jsx
                 fetchPayrolls();
             } catch (err) {
                 setError(err.response?.data?.message || "Failed to approve payslip.");
@@ -56,11 +52,7 @@ const PayrollListPage = () => {
     const handleMarkPaid = async (id) => {
          if (window.confirm("Are you sure you want to mark this payslip as PAID?")) {
             try {
-<<<<<<< HEAD:client/src/pages/payrolls/PayrollListPage.js
                 await api.put(`/payrolls/${id}/status`, { status: 'PAID' });
-=======
-                await api.put(`/payrolls/\${id}/status`, { status: 'PAID' });
->>>>>>> origin/master:client/src/pages/payrolls/PayrollListPage.jsx
                 fetchPayrolls();
             } catch (err) {
                 setError(err.response?.data?.message || "Failed to mark as paid.");
@@ -72,7 +64,7 @@ const PayrollListPage = () => {
         <div>
             <h2>Payroll Records</h2>
             {(userInfo.role === 'company_admin' || userInfo.role === 'hr_manager' || userInfo.role === 'employee_admin') && (
-                <button onClick={handleRunPayroll} style={{ marginBottom: '1rem' }}>
+                <button onClick={handleRunPayroll} className="btn btn-success" style={{ marginBottom: '1rem' }}>
                     Run New Payroll
                 </button>
             )}
@@ -113,12 +105,12 @@ const PayrollListPage = () => {
                                 <td>{p.totalDeductions?.toFixed(2)}</td>
                                 <td>{p.status}</td>
                                 <td>
-                                    <Link to={`/payrolls/\${p._id}`}>View Payslip</Link>
+                                    <Link to={`/payrolls/${p._id}`} className="btn btn-sm btn-success">View Payslip</Link>
                                     {(userInfo.role === 'company_admin' || userInfo.role === 'hr_manager' || userInfo.role === 'employee_admin') && p.status === 'PENDING_APPROVAL' && (
-                                        <button onClick={() => handleApprove(p._id)} style={{marginLeft: '5px'}}>Approve</button>
+                                        <button onClick={() => handleApprove(p._id)} className="btn btn-sm btn-success" style={{marginLeft: '5px'}}>Approve</button>
                                     )}
                                      {(userInfo.role === 'company_admin' || userInfo.role === 'hr_manager' || userInfo.role === 'employee_admin') && p.status === 'APPROVED' && (
-                                        <button onClick={() => handleMarkPaid(p._id)} style={{marginLeft: '5px'}}>Mark Paid</button>
+                                        <button onClick={() => handleMarkPaid(p._id)} className="btn btn-sm btn-success" style={{marginLeft: '5px'}}>Mark Paid</button>
                                     )}
                                 </td>
                             </tr>

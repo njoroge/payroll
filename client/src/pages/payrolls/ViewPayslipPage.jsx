@@ -13,11 +13,7 @@ const ViewPayslipPage = () => {
         const fetchPayslip = async () => {
             try {
                 setLoading(true); setError('');
-<<<<<<< HEAD:client/src/pages/payrolls/ViewPayslipPage.js
                 const { data } = await api.get(`/payrolls/${payslipId}`);
-=======
-                const { data } = await api.get(`/payrolls/\${payslipId}`);
->>>>>>> origin/master:client/src/pages/payrolls/ViewPayslipPage.jsx
                 setPayslip(data);
             } catch (err) {
                 setError(err.response?.data?.message || 'Failed to fetch payslip details.');
@@ -35,7 +31,7 @@ const ViewPayslipPage = () => {
         document.body.innerHTML = printContents;
         window.print();
         document.body.innerHTML = originalContents;
-        window.location.reload();
+        window.location.reload(); // To restore event listeners and React state
     };
 
     if (loading) return <p>Loading payslip...</p>;
@@ -46,7 +42,7 @@ const ViewPayslipPage = () => {
 
     return (
         <div>
-            <button onClick={handlePrint} style={{ float: 'right', marginBottom: '1rem' }}>Print Payslip</button>
+            <button onClick={handlePrint} className="btn btn-success" style={{ float: 'right', marginBottom: '1rem' }}>Print Payslip</button>
             <h2>Payslip for {emp?.firstName} {emp?.lastName}</h2>
             <div ref={payslipRef} style={{padding: '20px', border: '1px solid #ccc'}}>
                 <h3 style={{textAlign: 'center'}}>{comp?.name || 'Company Name'}</h3>
@@ -93,7 +89,7 @@ const ViewPayslipPage = () => {
                 <p><strong>Status:</strong> {payslip.status}</p>
                 {payslip.notes && <p><strong>Notes:</strong> {payslip.notes}</p>}
             </div>
-            <Link to="/payrolls" style={{marginTop: '1rem', display: 'block'}}>Back to Payroll List</Link>
+            <Link to="/payrolls" className="btn btn-success" style={{marginTop: '1rem', display: 'block'}}>Back to Payroll List</Link>
         </div>
     );
 };
