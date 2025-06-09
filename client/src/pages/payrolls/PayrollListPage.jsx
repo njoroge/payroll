@@ -64,26 +64,26 @@ const PayrollListPage = () => {
         <div>
             <h2>Payroll Records</h2>
             {(userInfo.role === 'company_admin' || userInfo.role === 'hr_manager' || userInfo.role === 'employee_admin') && (
-                <button onClick={handleRunPayroll} className="btn btn-success" style={{ marginBottom: '1rem' }}>
+                <button onClick={handleRunPayroll} className="btn btn-success mb-3">
                     Run New Payroll
                 </button>
             )}
-            <div style={{ marginBottom: '1rem' }}>
-                Filter by:
-                <select value={filterMonth} onChange={e => setFilterMonth(e.target.value)} style={{marginLeft: '5px'}}>
+            <div className="mb-3 d-flex align-items-center"> {/* Added d-flex for better alignment */}
+                <span className="me-2">Filter by:</span> {/* Added span and margin for label */}
+                <select value={filterMonth} onChange={e => setFilterMonth(e.target.value)} className="form-select form-select-sm me-2" style={{width: 'auto'}}> {/* Added form-select, width auto */}
                     {months.map(m => <option key={m} value={m}>{m}</option>)}
                 </select>
-                <select value={filterYear} onChange={e => setFilterYear(parseInt(e.target.value))} style={{marginLeft: '5px'}}>
+                <select value={filterYear} onChange={e => setFilterYear(parseInt(e.target.value))} className="form-select form-select-sm" style={{width: 'auto'}}> {/* Added form-select, width auto */}
                      {years.map(y => <option key={y} value={y}>{y}</option>)}
                 </select>
             </div>
 
             {loading && <p>Loading payrolls...</p>}
-            {error && <p style={{ color: 'red' }}>Error: {error}</p>}
+            {error && <p className="text-danger">Error: {error}</p>}
             {!loading && !error && payrolls.length === 0 && <p>No payroll records found for {filterMonth}, {filterYear}.</p>}
 
             {!loading && !error && payrolls.length > 0 && (
-                <table border="1" style={{ width: '100%', borderCollapse: 'collapse' }}>
+                <table className="table table-striped table-hover">
                     <thead>
                         <tr>
                             <th>Employee</th>
@@ -103,14 +103,19 @@ const PayrollListPage = () => {
                                 <td>{p.netPay?.toFixed(2)}</td>
                                 <td>{p.grossEarnings?.toFixed(2)}</td>
                                 <td>{p.totalDeductions?.toFixed(2)}</td>
-                                <td>{p.status}</td>
                                 <td>
-                                    <Link to={`/payrolls/${p._id}`} className="btn btn-sm btn-success">View Payslip</Link>
+                                    {p.status === 'PENDING_APPROVAL' && <span className="badge bg-warning text-dark">Pending Approval</span>}
+                                    {p.status === 'APPROVED' && <span className="badge bg-info">Approved</span>}
+                                    {p.status === 'PAID' && <span className="badge bg-success">Paid</span>}
+                                    {!['PENDING_APPROVAL', 'APPROVED', 'PAID'].includes(p.status) && <span className="badge bg-secondary">{p.status}</span>}
+                                </td>
+                                <td>
+                                    <Link to={`/payrolls/${p._id}`} className="btn btn-sm btn-info">View Payslip</Link>
                                     {(userInfo.role === 'company_admin' || userInfo.role === 'hr_manager' || userInfo.role === 'employee_admin') && p.status === 'PENDING_APPROVAL' && (
-                                        <button onClick={() => handleApprove(p._id)} className="btn btn-sm btn-success" style={{marginLeft: '5px'}}>Approve</button>
+                                        <button onClick={() => handleApprove(p._id)} className="btn btn-sm btn-success ms-1">Approve</button>
                                     )}
                                      {(userInfo.role === 'company_admin' || userInfo.role === 'hr_manager' || userInfo.role === 'employee_admin') && p.status === 'APPROVED' && (
-                                        <button onClick={() => handleMarkPaid(p._id)} className="btn btn-sm btn-success" style={{marginLeft: '5px'}}>Mark Paid</button>
+                                        <button onClick={() => handleMarkPaid(p._id)} className="btn btn-sm btn-success ms-1">Mark Paid</button>
                                     )}
                                 </td>
                             </tr>

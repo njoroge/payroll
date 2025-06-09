@@ -1,15 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import api from '../../services/api';
 
-const modalStyle = {
-    position: 'fixed', top: '0', left: '0', width: '100%', height: '100%',
-    backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex',
-    justifyContent: 'center', alignItems: 'center'
-};
-const modalContentStyle = {
-    backgroundColor: 'white', padding: '20px', borderRadius: '5px',
-    minWidth: '300px', boxShadow: '0 4px 8px rgba(0,0,0,0.2)'
-};
+// Removed modalStyle and modalContentStyle
 
 const DepartmentFormModal = ({ department, onClose }) => {
     const [name, setName] = useState('');
@@ -39,7 +31,7 @@ const DepartmentFormModal = ({ department, onClose }) => {
             } else {
                 await api.post('/departments', { name, status });
             }
-            onClose();
+            onClose(); // Close modal on success
         } catch (err) {
             setError(err.response?.data?.message || `Failed to ${isEditMode ? 'update' : 'create'} department.`);
             console.error(err);
@@ -48,32 +40,40 @@ const DepartmentFormModal = ({ department, onClose }) => {
         }
     };
 
+    // Bootstrap modal structure
     return (
-        <div style={modalStyle}>
-            <div style={modalContentStyle}>
-                <h3>{isEditMode ? 'Edit Department' : 'Add New Department'}</h3>
-                <form onSubmit={handleSubmit}>
-                    {error && <p style={{ color: 'red' }}>{error}</p>}
-                    <div className="mb-3">
-                        <label htmlFor="deptName" className="form-label">Name:</label>
-                        <input type="text" id="deptName" className="form-control" value={name} onChange={(e) => setName(e.target.value)} required />
-                    </div>
-                    <div className="mb-3">
-                        <label htmlFor="deptStatus" className="form-label">Status:</label>
-                        <select id="deptStatus" className="form-select" value={status} onChange={(e) => setStatus(e.target.value)}>
-                            <option value="ACTIVE">Active</option>
-                            <option value="INACTIVE">Inactive</option>
-                        </select>
-                    </div>
-                    <div style={{ marginTop: '15px' }}>
-                        <button type="submit" className="btn btn-success" disabled={loading}>
-                            {loading ? (isEditMode ? 'Updating...' : 'Creating...') : (isEditMode ? 'Save Changes' : 'Create Department')}
-                        </button>
-                        <button type="button" className="btn btn-success" onClick={onClose} style={{ marginLeft: '10px' }} disabled={loading}>
-                            Cancel
-                        </button>
-                    </div>
-                </form>
+        <div className="modal fade show" tabIndex="-1" style={{ display: 'block', backgroundColor: 'rgba(0,0,0,0.5)' }} role="dialog">
+            <div className="modal-dialog modal-dialog-centered" role="document">
+                <div className="modal-content">
+                    <form onSubmit={handleSubmit}> {/* Form wraps modal-content or just modal-body/footer */}
+                        <div className="modal-header">
+                            <h5 className="modal-title">{isEditMode ? 'Edit Department' : 'Add New Department'}</h5>
+                            <button type="button" className="btn-close" onClick={onClose} aria-label="Close" disabled={loading}></button>
+                        </div>
+                        <div className="modal-body">
+                            {error && <p className="text-danger">{error}</p>}
+                            <div className="mb-3">
+                                <label htmlFor="deptName" className="form-label">Name:</label>
+                                <input type="text" id="deptName" className="form-control" value={name} onChange={(e) => setName(e.target.value)} required />
+                            </div>
+                            <div className="mb-3">
+                                <label htmlFor="deptStatus" className="form-label">Status:</label>
+                                <select id="deptStatus" className="form-select" value={status} onChange={(e) => setStatus(e.target.value)}>
+                                    <option value="ACTIVE">Active</option>
+                                    <option value="INACTIVE">Inactive</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div className="modal-footer">
+                            <button type="button" className="btn btn-secondary" onClick={onClose} disabled={loading}>
+                                Cancel
+                            </button>
+                            <button type="submit" className="btn btn-primary" disabled={loading}>
+                                {loading ? (isEditMode ? 'Updating...' : 'Creating...') : (isEditMode ? 'Save Changes' : 'Create Department')}
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
     );

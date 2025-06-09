@@ -39,18 +39,18 @@ const IncomeGradeListPage = () => {
     };
 
     if (loading) return <p>Loading income grades...</p>;
-    if (error) return <p style={{ color: 'red' }}>Error: {error}</p>;
+    if (error) return <p className="text-danger">Error: {error}</p>;
 
     return (
         <div>
             <h2>Income Grade Management</h2>
-            <button onClick={() => handleOpenModal()} className="btn btn-success" style={{ marginBottom: '1rem' }}>
+            <button onClick={() => handleOpenModal()} className="btn btn-success mb-3">
                 Add New Income Grade
             </button>
             {incomeGrades.length === 0 ? (
                 <p>No income grades found.</p>
             ) : (
-                <table border="1" style={{ width: '100%', borderCollapse: 'collapse' }}>
+                <table className="table table-striped table-hover">
                     <thead>
                         <tr>
                             <th>Grade Name</th>
@@ -70,7 +70,7 @@ const IncomeGradeListPage = () => {
                                 <td>{grade.transportAllowance}</td>
                                 <td>{grade.isActive ? 'Active' : 'Inactive'}</td>
                                 <td>
-                                    <button onClick={() => handleOpenModal(grade)} className="btn btn-sm btn-success">Edit</button>
+                                    <button onClick={() => handleOpenModal(grade)} className="btn btn-sm btn-primary">Edit</button>
                                 </td>
                             </tr>
                         ))}
