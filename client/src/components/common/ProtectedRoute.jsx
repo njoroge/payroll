@@ -7,7 +7,17 @@ const ProtectedRoute = ({ children, roles }) => {
     const location = useLocation();
 
     if (loading) {
-        return <div>Loading authentication status...</div>; // Or a spinner
+        // Basic Bootstrap styled loading message
+        return (
+            <div className="d-flex justify-content-center align-items-center" style={{ minHeight: '80vh' }}>
+                <div>
+                    <div className="spinner-border text-primary" role="status">
+                        <span className="visually-hidden">Loading...</span>
+                    </div>
+                    <p className="mt-2 text-muted">Loading authentication status...</p>
+                </div>
+            </div>
+        );
     }
 
     if (!isAuthenticated) {

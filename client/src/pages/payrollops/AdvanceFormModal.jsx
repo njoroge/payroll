@@ -80,7 +80,6 @@ const AdvanceFormModal = ({ item, onClose, operationType = "Advance" }) => {
 
     // Bootstrap modal structure
     return (
-
         <div className="modal fade show" tabIndex="-1" style={{ display: 'block', backgroundColor: 'rgba(0,0,0,0.5)' }} role="dialog">
             <div className="modal-dialog modal-dialog-centered modal-lg" role="document">
                 <div className="modal-content">
@@ -127,36 +126,6 @@ const AdvanceFormModal = ({ item, onClose, operationType = "Advance" }) => {
                         </div>
                     </form>
                 </div>
-
-        <div style={modalStyle}>
-            <div style={modalContentStyle}>
-                <h3>{title}</h3>
-                <form onSubmit={handleSubmit}>
-                    {error && <p className="text-danger">{error}</p>}
-                    <div className="mb-3">
-                        <label htmlFor="employeeId" className="form-label">Employee:</label>
-                        <select name="employeeId" id="employeeId" className="form-select" value={formData.employeeId} onChange={handleChange} required disabled={isEditMode}>
-                            <option value="">Select Employee</option>
-                            {employees.map(emp => (
-                                <option key={emp._id} value={emp._id}>
-                                    {emp.firstName} {emp.lastName} ({emp.nationalId})
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-                    <div className="mb-3"><label htmlFor="amount" className="form-label">Amount: </label><input type="number" name="amount" id="amount" className="form-control" value={formData.amount} onChange={handleChange} required min="0.01" step="0.01" /></div>
-                    <div className="mb-3"><label htmlFor="dateIssued" className="form-label">Date Issued: </label><input type="date" name="dateIssued" id="dateIssued" className="form-control" value={formData.dateIssued} onChange={handleChange} required /></div>
-                    <div className="mb-3"><label htmlFor="reason" className="form-label">Reason: </label><textarea name="reason" id="reason" className="form-control" value={formData.reason} onChange={handleChange} rows="2"></textarea></div>
-                    <div className="mt-3">
-                        <button type="submit" className="btn btn-success" disabled={loading || (isEditMode && !item)}>
-                            {loading ? 'Saving...' : (isEditMode ? 'Save Changes' : `Record ${operationType}`)}
-                        </button>
-                        <button type="button" className="btn btn-success ms-2" onClick={onClose} disabled={loading}>
-                            Cancel
-                        </button>
-                    </div>
-                </form>
-
             </div>
         </div>
     );
