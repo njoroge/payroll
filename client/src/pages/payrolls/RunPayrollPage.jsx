@@ -116,13 +116,13 @@ const RunPayrollPage = () => {
                     </div>
                 )}
 
-                {error && <p style={{ color: 'red' }}>{error}</p>}
+                {error && <p className="text-danger">{error}</p>}
                 {result && (
-                    <div style={{margin: '1rem 0', padding: '1rem', border: result.errors ? '1px solid red' : '1px solid green' }}>
+                    <div className={`alert ${result.errors ? 'alert-danger' : 'alert-success'} my-3 p-3`}>
                         <p>{result.message}</p>
                         {result.processedCount && <p>Successfully processed: {result.processedCount}</p>}
                         {result.errorCount && <p>Errors: {result.errorCount}</p>}
-                        {result.errors?.map(err => <p key={err.employeeId} style={{color: 'orange'}}>Emp ID {err.employeeId}: {err.message}</p>)}
+                        {result.errors?.map(err => <p key={err.employeeId} className="text-warning">Emp ID {err.employeeId}: {err.message}</p>)}
                         {result.results?.length > 0 && !result.errors && <p>All selected employees processed.</p>}
                     </div>
                 )}
@@ -130,7 +130,7 @@ const RunPayrollPage = () => {
                 <button type="submit" className="btn btn-success" disabled={loading || fetchLoading}>
                     {loading ? 'Processing...' : 'Run Payroll'}
                 </button>
-                <button type="button" className="btn btn-success" onClick={() => navigate('/payrolls')} style={{ marginLeft: '10px' }} disabled={loading}>Cancel</button>
+                <button type="button" className="btn btn-success ms-2" onClick={() => navigate('/payrolls')} disabled={loading}>Cancel</button>
             </form>
         </div>
     );

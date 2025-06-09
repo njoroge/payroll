@@ -6,7 +6,7 @@ const UnauthorizedPage = () => {
         <div>
             <h2>Access Denied</h2>
             <p>You do not have the necessary permissions to view this page.</p>
-            <Link to="/">Go to Homepage</Link>
+            <Link to="/" className="btn btn-primary">Go to Homepage</Link>
         </div>
     );
 };

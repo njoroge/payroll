@@ -41,7 +41,7 @@ const DepartmentFormModal = ({ department, onClose }) => {
     };
 
     // Bootstrap modal structure
-    return (
+    
         <div className="modal fade show" tabIndex="-1" style={{ display: 'block', backgroundColor: 'rgba(0,0,0,0.5)' }} role="dialog">
             <div className="modal-dialog modal-dialog-centered" role="document">
                 <div className="modal-content">
@@ -74,6 +74,35 @@ const DepartmentFormModal = ({ department, onClose }) => {
                         </div>
                     </form>
                 </div>
+
+
+        <div style={modalStyle}>
+            <div style={modalContentStyle}>
+                <h3>{isEditMode ? 'Edit Department' : 'Add New Department'}</h3>
+                <form onSubmit={handleSubmit}>
+                    {error && <p className="text-danger">{error}</p>}
+                    <div className="mb-3">
+                        <label htmlFor="deptName" className="form-label">Name:</label>
+                        <input type="text" id="deptName" className="form-control" value={name} onChange={(e) => setName(e.target.value)} required />
+                    </div>
+                    <div className="mb-3">
+                        <label htmlFor="deptStatus" className="form-label">Status:</label>
+                        <select id="deptStatus" className="form-select" value={status} onChange={(e) => setStatus(e.target.value)}>
+                            <option value="ACTIVE">Active</option>
+                            <option value="INACTIVE">Inactive</option>
+                        </select>
+                    </div>
+                    <div className="mt-3">
+                        <button type="submit" className="btn btn-success" disabled={loading}>
+                            {loading ? (isEditMode ? 'Updating...' : 'Creating...') : (isEditMode ? 'Save Changes' : 'Create Department')}
+                        </button>
+                        <button type="button" className="btn btn-success ms-2" onClick={onClose} disabled={loading}>
+                            Cancel
+                        </button>
+                    </div>
+                </form>
+
+
             </div>
         </div>
     );
