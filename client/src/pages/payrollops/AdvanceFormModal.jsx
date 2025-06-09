@@ -91,21 +91,20 @@ const AdvanceFormModal = ({ item, onClose, operationType = "Advance" }) => {
                 <h3>{title}</h3>
                 <form onSubmit={handleSubmit}>
                     {error && <p style={{ color: 'red' }}>{error}</p>}
-                    <div>
-                        <label>Employee:
-                            <select name="employeeId" value={formData.employeeId} onChange={handleChange} required disabled={isEditMode}>
-                                <option value="">Select Employee</option>
-                                {employees.map(emp => (
-                                    <option key={emp._id} value={emp._id}>
-                                        {emp.firstName} {emp.lastName} ({emp.nationalId})
-                                    </option>
-                                ))}
-                            </select>
-                        </label>
+                    <div className="mb-3">
+                        <label htmlFor="employeeId" className="form-label">Employee:</label>
+                        <select name="employeeId" id="employeeId" className="form-select" value={formData.employeeId} onChange={handleChange} required disabled={isEditMode}>
+                            <option value="">Select Employee</option>
+                            {employees.map(emp => (
+                                <option key={emp._id} value={emp._id}>
+                                    {emp.firstName} {emp.lastName} ({emp.nationalId})
+                                </option>
+                            ))}
+                        </select>
                     </div>
-                    <div><label>Amount: <input type="number" name="amount" value={formData.amount} onChange={handleChange} required min="0.01" step="0.01" /></label></div>
-                    <div><label>Date Issued: <input type="date" name="dateIssued" value={formData.dateIssued} onChange={handleChange} required /></label></div>
-                    <div><label>Reason: <textarea name="reason" value={formData.reason} onChange={handleChange} rows="2"></textarea></label></div>
+                    <div className="mb-3"><label htmlFor="amount" className="form-label">Amount: </label><input type="number" name="amount" id="amount" className="form-control" value={formData.amount} onChange={handleChange} required min="0.01" step="0.01" /></div>
+                    <div className="mb-3"><label htmlFor="dateIssued" className="form-label">Date Issued: </label><input type="date" name="dateIssued" id="dateIssued" className="form-control" value={formData.dateIssued} onChange={handleChange} required /></div>
+                    <div className="mb-3"><label htmlFor="reason" className="form-label">Reason: </label><textarea name="reason" id="reason" className="form-control" value={formData.reason} onChange={handleChange} rows="2"></textarea></div>
                     <div style={{ marginTop: '15px' }}>
                         <button type="submit" className="btn btn-success" disabled={loading || (isEditMode && !item)}>
                             {loading ? 'Saving...' : (isEditMode ? 'Save Changes' : `Record ${operationType}`)}
