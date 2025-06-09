@@ -8,8 +8,8 @@ export default defineConfig({
     proxy: {
       '/api': { // Match paths starting with /api
         target: 'http://localhost:5001', // Proxy to this backend
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, '') // Remove /api prefix when forwarding
+        changeOrigin: true
+        // rewrite: (path) => path.replace(/^\/api/, '') // Remove /api prefix when forwarding
       }
     }
   }

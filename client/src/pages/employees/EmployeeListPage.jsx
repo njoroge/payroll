@@ -25,18 +25,18 @@ const EmployeeListPage = () => {
     }, []);
 
     if (loading) return <p>Loading employees...</p>;
-    if (error) return <p style={{ color: 'red' }}>Error: {error}</p>;
+    if (error) return <p className="text-danger">Error: {error}</p>;
 
     return (
         <div>
             <h2>Employee Management</h2>
-            <Link to="/employees/new" className="btn btn-success" style={{ marginBottom: '1rem', display: 'inline-block' }}>
+            <Link to="/employees/new" className="btn btn-success mb-3 d-inline-block">
                 Add New Employee
             </Link>
             {employees.length === 0 ? (
                 <p>No employees found.</p>
             ) : (
-                <table border="1" style={{ width: '100%', borderCollapse: 'collapse' }}>
+                <table className="table table-striped table-hover">
                     <thead>
                         <tr>
                             <th>Name</th>
@@ -58,8 +58,8 @@ const EmployeeListPage = () => {
                                 <td>{emp.userId?.email || 'No Login'}</td>
                                 <td>{emp.workStatus}</td>
                                 <td>
-                                    <Link to={`/employees/${emp._id}`} className="btn btn-sm btn-success">View</Link> |{' '}
-                                    <Link to={`/employees/${emp._id}/edit`} className="btn btn-sm btn-success">Edit</Link>
+                                    <Link to={`/employees/${emp._id}`} className="btn btn-sm btn-info">View</Link> |{' '}
+                                    <Link to={`/employees/${emp._id}/edit`} className="btn btn-sm btn-primary">Edit</Link>
                                     {/* Add Deactivate button here later */}
                                 </td>
                             </tr>
