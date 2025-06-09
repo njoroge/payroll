@@ -62,7 +62,9 @@ const AdvanceListPage = () => {
             {advances.length === 0 ? (
                 <p>No advances found.</p>
             ) : (
+
                 <table className="table table-striped table-hover">
+                <table className="table table-bordered table-striped">
                     <thead>
                         <tr>
                             <th>Employee</th>
@@ -91,8 +93,10 @@ const AdvanceListPage = () => {
                                 <td>
                                     {(userInfo.role === 'company_admin' || userInfo.role === 'hr_manager' || userInfo.role === 'employee_admin') && item.status === 'PENDING' && (
                                         <>
-                                            <button onClick={() => handleStatusUpdate(item._id, 'APPROVED')} className="btn btn-sm btn-success">Approve</button>
+                                            <button onClick={() => handleStatusUpdate(item._id, 'APPROVED')} className="btn btn-sm btn-success">Approve</butt
                                             <button onClick={() => handleStatusUpdate(item._id, 'REJECTED')} className="btn btn-sm btn-warning ms-1">Reject</button>
+
+                                            <button onClick={() => handleStatusUpdate(item._id, 'REJECTED')} className="btn btn-sm btn-success ms-1">Reject</button>
                                         </>
                                     )}
                                 </td>
