@@ -53,7 +53,7 @@ const DepartmentFormModal = ({ department, onClose }) => {
             <div style={modalContentStyle}>
                 <h3>{isEditMode ? 'Edit Department' : 'Add New Department'}</h3>
                 <form onSubmit={handleSubmit}>
-                    {error && <p style={{ color: 'red' }}>{error}</p>}
+                    {error && <p className="text-danger">{error}</p>}
                     <div className="mb-3">
                         <label htmlFor="deptName" className="form-label">Name:</label>
                         <input type="text" id="deptName" className="form-control" value={name} onChange={(e) => setName(e.target.value)} required />
@@ -65,11 +65,11 @@ const DepartmentFormModal = ({ department, onClose }) => {
                             <option value="INACTIVE">Inactive</option>
                         </select>
                     </div>
-                    <div style={{ marginTop: '15px' }}>
+                    <div className="mt-3">
                         <button type="submit" className="btn btn-success" disabled={loading}>
                             {loading ? (isEditMode ? 'Updating...' : 'Creating...') : (isEditMode ? 'Save Changes' : 'Create Department')}
                         </button>
-                        <button type="button" className="btn btn-success" onClick={onClose} style={{ marginLeft: '10px' }} disabled={loading}>
+                        <button type="button" className="btn btn-success ms-2" onClick={onClose} disabled={loading}>
                             Cancel
                         </button>
                     </div>

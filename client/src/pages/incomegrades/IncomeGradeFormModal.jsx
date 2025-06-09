@@ -68,7 +68,7 @@ const IncomeGradeFormModal = ({ incomeGrade, onClose }) => {
             <div style={modalContentStyle}>
                 <h3>{isEditMode ? 'Edit Income Grade' : 'Add New Income Grade'}</h3>
                 <form onSubmit={handleSubmit}>
-                    {error && <p style={{ color: 'red' }}>{error}</p>}
+                    {error && <p className="text-danger">{error}</p>}
                     <div className="mb-3"><label htmlFor="gradeName" className="form-label">Grade Name: </label><input type="text" name="gradeName" id="gradeName" className="form-control" value={formData.gradeName} onChange={handleChange} required /></div>
                     <div className="mb-3"><label htmlFor="basicSalary" className="form-label">Basic Salary: </label><input type="number" name="basicSalary" id="basicSalary" className="form-control" value={formData.basicSalary} onChange={handleChange} required min="0" /></div>
                     <div className="mb-3"><label htmlFor="houseAllowance" className="form-label">House Allowance: </label><input type="number" name="houseAllowance" id="houseAllowance" className="form-control" value={formData.houseAllowance} onChange={handleChange} min="0" /></div>
@@ -80,11 +80,11 @@ const IncomeGradeFormModal = ({ incomeGrade, onClose }) => {
                         <label htmlFor="isActive" className="form-check-label"> Active</label>
                     </div>
 
-                    <div style={{ marginTop: '15px' }}>
+                    <div className="mt-3">
                         <button type="submit" className="btn btn-success" disabled={loading}>
                             {loading ? (isEditMode ? 'Updating...' : 'Creating...') : (isEditMode ? 'Save Changes' : 'Create Grade')}
                         </button>
-                        <button type="button" className="btn btn-success" onClick={onClose} style={{ marginLeft: '10px' }} disabled={loading}>
+                        <button type="button" className="btn btn-success ms-2" onClick={onClose} disabled={loading}>
                             Cancel
                         </button>
                     </div>

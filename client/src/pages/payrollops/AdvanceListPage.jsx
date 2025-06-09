@@ -49,20 +49,20 @@ const AdvanceListPage = () => {
     };
 
     if (loading) return <p>Loading advances...</p>;
-    if (error) return <p style={{ color: 'red' }}>Error: {error}</p>;
+    if (error) return <p className="text-danger">Error: {error}</p>;
 
     return (
         <div>
             <h2>Advance Management</h2>
             {(userInfo.role === 'company_admin' || userInfo.role === 'hr_manager' || userInfo.role === 'employee_admin') && (
-                <button onClick={() => handleOpenModal()} className="btn btn-success" style={{ marginBottom: '1rem' }}>
+                <button onClick={() => handleOpenModal()} className="btn btn-success mb-3">
                     Record New Advance
                 </button>
             )}
             {advances.length === 0 ? (
                 <p>No advances found.</p>
             ) : (
-                <table border="1" style={{ width: '100%', borderCollapse: 'collapse' }}>
+                <table className="table table-bordered table-striped">
                     <thead>
                         <tr>
                             <th>Employee</th>
@@ -85,7 +85,7 @@ const AdvanceListPage = () => {
                                     {(userInfo.role === 'company_admin' || userInfo.role === 'hr_manager' || userInfo.role === 'employee_admin') && item.status === 'PENDING' && (
                                         <>
                                             <button onClick={() => handleStatusUpdate(item._id, 'APPROVED')} className="btn btn-sm btn-success">Approve</button>
-                                            <button onClick={() => handleStatusUpdate(item._id, 'REJECTED')} className="btn btn-sm btn-success" style={{marginLeft: '5px'}}>Reject</button>
+                                            <button onClick={() => handleStatusUpdate(item._id, 'REJECTED')} className="btn btn-sm btn-success ms-1">Reject</button>
                                         </>
                                     )}
                                 </td>

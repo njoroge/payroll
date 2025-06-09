@@ -154,7 +154,7 @@ const EmployeeForm = ({ isEditMode = false }) => {
         <div>
             <h2>{isEditMode ? 'Edit Employee' : 'Add New Employee'}</h2>
             <form onSubmit={handleSubmit}>
-                {error && <p style={{ color: 'red' }}>{error}</p>}
+                {error && <p className="text-danger">{error}</p>}
 
                 <fieldset><legend>Personal Details</legend>
                     <div className="mb-3"><label htmlFor="firstName" className="form-label">First Name: </label><input type="text" name="firstName" id="firstName" className="form-control" value={formData.firstName} onChange={handleChange} required /></div>
@@ -237,7 +237,7 @@ const EmployeeForm = ({ isEditMode = false }) => {
                 <button type="submit" className="btn btn-success" disabled={loading || formLoading}>
                     {loading ? (isEditMode ? 'Updating...' : 'Creating...') : (isEditMode ? 'Save Changes' : 'Create Employee')}
                 </button>
-                <button type="button" className="btn btn-success" onClick={() => navigate('/employees')} style={{ marginLeft: '10px' }}>Cancel</button>
+                <button type="button" className="btn btn-success ms-2" onClick={() => navigate('/employees')}>Cancel</button>
             </form>
         </div>
     );
