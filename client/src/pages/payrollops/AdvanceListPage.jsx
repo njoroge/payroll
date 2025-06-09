@@ -62,6 +62,8 @@ const AdvanceListPage = () => {
             {advances.length === 0 ? (
                 <p>No advances found.</p>
             ) : (
+
+                <table className="table table-striped table-hover">
                 <table className="table table-bordered table-striped">
                     <thead>
                         <tr>
@@ -80,11 +82,20 @@ const AdvanceListPage = () => {
                                 <td>{item.amount}</td>
                                 <td>{new Date(item.dateIssued).toLocaleDateString()}</td>
                                 <td>{item.reason || 'N/A'}</td>
-                                <td>{item.status}</td>
+                                <td>
+                                    {item.status === 'PENDING' && <span className="badge bg-warning">Pending</span>}
+                                    {item.status === 'APPROVED' && <span className="badge bg-success">Approved</span>}
+                                    {item.status === 'REJECTED' && <span className="badge bg-danger">Rejected</span>}
+                                    {item.status === 'PAID' && <span className="badge bg-info">Paid</span>}
+                                    {/* Assuming PAID is a possible status, added as an example */}
+                                    {!['PENDING', 'APPROVED', 'REJECTED', 'PAID'].includes(item.status) && <span className="badge bg-secondary">{item.status}</span>}
+                                </td>
                                 <td>
                                     {(userInfo.role === 'company_admin' || userInfo.role === 'hr_manager' || userInfo.role === 'employee_admin') && item.status === 'PENDING' && (
                                         <>
-                                            <button onClick={() => handleStatusUpdate(item._id, 'APPROVED')} className="btn btn-sm btn-success">Approve</button>
+                                            <button onClick={() => handleStatusUpdate(item._id, 'APPROVED')} className="btn btn-sm btn-success">Approve</butt
+                                            <button onClick={() => handleStatusUpdate(item._id, 'REJECTED')} className="btn btn-sm btn-warning ms-1">Reject</button>
+
                                             <button onClick={() => handleStatusUpdate(item._id, 'REJECTED')} className="btn btn-sm btn-success ms-1">Reject</button>
                                         </>
                                     )}

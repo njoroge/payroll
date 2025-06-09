@@ -50,6 +50,9 @@ const DepartmentListPage = () => {
             {departments.length === 0 ? (
                 <p>No departments found.</p>
             ) : (
+
+                <table className="table table-striped table-hover">
+
                 <table className="table table-bordered table-striped">
                     <thead>
                         <tr>
@@ -64,7 +67,7 @@ const DepartmentListPage = () => {
                                 <td>{dept.name}</td>
                                 <td>{dept.status}</td>
                                 <td>
-                                    <button onClick={() => handleOpenModal(dept)} className="btn btn-sm btn-success">Edit</button>
+                                    <button onClick={() => handleOpenModal(dept)} className="btn btn-sm btn-primary">Edit</button>
                                 </td>
                             </tr>
                         ))}

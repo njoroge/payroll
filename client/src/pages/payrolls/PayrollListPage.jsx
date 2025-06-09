@@ -68,12 +68,20 @@ const PayrollListPage = () => {
                     Run New Payroll
                 </button>
             )}
+
+            <div className="mb-3 d-flex align-items-center"> {/* Added d-flex for better alignment */}
+                <span className="me-2">Filter by:</span> {/* Added span and margin for label */}
+                <select value={filterMonth} onChange={e => setFilterMonth(e.target.value)} className="form-select form-select-sm me-2" style={{width: 'auto'}}> {/* Added form-select, width auto */}
+                    {months.map(m => <option key={m} value={m}>{m}</option>)}
+                </select>
+                <select value={filterYear} onChange={e => setFilterYear(parseInt(e.target.value))} className="form-select form-select-sm" style={{width: 'auto'}}> {/* Added form-select, width auto */}
             <div className="mb-3 d-flex align-items-center">
                 <span className="me-2">Filter by:</span>
                 <select value={filterMonth} onChange={e => setFilterMonth(e.target.value)} className="form-select form-select-sm d-inline-block w-auto ms-2">
                     {months.map(m => <option key={m} value={m}>{m}</option>)}
                 </select>
                 <select value={filterYear} onChange={e => setFilterYear(parseInt(e.target.value))} className="form-select form-select-sm d-inline-block w-auto ms-2">
+
                      {years.map(y => <option key={y} value={y}>{y}</option>)}
                 </select>
             </div>
@@ -83,7 +91,11 @@ const PayrollListPage = () => {
             {!loading && !error && payrolls.length === 0 && <p>No payroll records found for {filterMonth}, {filterYear}.</p>}
 
             {!loading && !error && payrolls.length > 0 && (
+ fix/bootstrap
+                <table className="table table-striped table-hover">
+
                 <table className="table table-bordered table-striped">
+
                     <thead>
                         <tr>
                             <th>Employee</th>
@@ -103,9 +115,14 @@ const PayrollListPage = () => {
                                 <td>{p.netPay?.toFixed(2)}</td>
                                 <td>{p.grossEarnings?.toFixed(2)}</td>
                                 <td>{p.totalDeductions?.toFixed(2)}</td>
-                                <td>{p.status}</td>
                                 <td>
-                                    <Link to={`/payrolls/${p._id}`} className="btn btn-sm btn-success">View Payslip</Link>
+                                    {p.status === 'PENDING_APPROVAL' && <span className="badge bg-warning text-dark">Pending Approval</span>}
+                                    {p.status === 'APPROVED' && <span className="badge bg-info">Approved</span>}
+                                    {p.status === 'PAID' && <span className="badge bg-success">Paid</span>}
+                                    {!['PENDING_APPROVAL', 'APPROVED', 'PAID'].includes(p.status) && <span className="badge bg-secondary">{p.status}</span>}
+                                </td>
+                                <td>
+                                    <Link to={`/payrolls/${p._id}`} className="btn btn-sm btn-info">View Payslip</Link>
                                     {(userInfo.role === 'company_admin' || userInfo.role === 'hr_manager' || userInfo.role === 'employee_admin') && p.status === 'PENDING_APPROVAL' && (
                                         <button onClick={() => handleApprove(p._id)} className="btn btn-sm btn-success ms-1">Approve</button>
                                     )}
