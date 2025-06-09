@@ -128,6 +128,7 @@ const AdvanceFormModal = ({ item, onClose, operationType = "Advance" }) => {
                     </form>
                 </div>
 
+
         <div style={modalStyle}>
             <div style={modalContentStyle}>
                 <h3>{title}</h3>

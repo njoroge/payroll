@@ -33,7 +33,11 @@ const EmployeeListPage = () => {
 
             <Link to="/employees/new" className="btn btn-success mb-3 d-inline-block">
 
+
+            <Link to="/employees/new" className="btn btn-success mb-3 d-inline-block">
+
             <Link to="/employees/new" className="btn btn-success mb-3">
+
 
                 Add New Employee
             </Link>
@@ -42,7 +46,11 @@ const EmployeeListPage = () => {
             ) : (
 
                 <table className="table table-striped table-hover">
+
+
+                <table className="table table-striped table-hover">
                 <table className="table table-bordered table-striped">
+
 
                     <thead>
                         <tr>

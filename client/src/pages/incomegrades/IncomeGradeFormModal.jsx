@@ -120,6 +120,7 @@ const IncomeGradeFormModal = ({ incomeGrade, onClose }) => {
                     </div>
                 </form>
 
+
             </div>
         </div>
     );

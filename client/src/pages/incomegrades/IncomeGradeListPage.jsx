@@ -53,7 +53,11 @@ const IncomeGradeListPage = () => {
 
                 <table className="table table-striped table-hover">
 
+
+                <table className="table table-striped table-hover">
+
                 <table className="table table-bordered table-striped">
+
 
                     <thead>
                         <tr>
