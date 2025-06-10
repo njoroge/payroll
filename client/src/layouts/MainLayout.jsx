@@ -12,7 +12,7 @@ const Footer = () => {
 };
 
 const MainLayout = () => {
-  const { user, logout } = useAuth();
+  const { isAuthenticated, userInfo, logout } = useAuth();
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -31,7 +31,7 @@ const MainLayout = () => {
           </button>
           <div className="collapse navbar-collapse" id="navbarNav">
             <ul className="navbar-nav me-auto mb-2 mb-lg-0">
-              {user && ( // Show links if user is logged in
+              {isAuthenticated && userInfo && ( // Show links if user is logged in and userInfo is available
                 <>
                   <li className="nav-item">
                     <Link className="nav-link" to="/">Home</Link>
@@ -46,6 +46,7 @@ const MainLayout = () => {
                     <Link className="nav-link" to="/payrolls">Payrolls</Link>
                   </li>
                   {/* Add other links based on roles if needed, e.g., Income Grades, Payroll Ops */}
+                  {/* Ensure userInfo is checked before accessing its properties */}
                   {(userInfo.role === 'company_admin' || userInfo.role === 'hr_manager' || userInfo.role === 'employee_admin') && (
                      <li className="nav-item dropdown">
                         <a className="nav-link dropdown-toggle" href="#" id="navbarDropdownOps" role="button" data-bs-toggle="dropdown" aria-expanded="false">
@@ -61,7 +62,7 @@ const MainLayout = () => {
                 </>
               )}
             </ul>
-            {user ? (
+            {isAuthenticated ? (
               <button className="btn btn-outline-danger" onClick={handleLogout}>Logout</button>
             ) : (
               <>
