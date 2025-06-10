@@ -31,12 +31,29 @@ const EmployeeListPage = () => {
         <div>
             <h2>Employee Management</h2>
             <Link to="/employees/new" className="btn btn-success mb-3 d-inline-block">
+
+
+
+            <Link to="/employees/new" className="btn btn-success mb-3 d-inline-block">
+
+            <Link to="/employees/new" className="btn btn-success mb-3">
+
+
+
                 Add New Employee
             </Link>
             {employees.length === 0 ? (
                 <p>No employees found.</p>
             ) : (
                 <table className="table table-striped table-hover">
+
+
+
+                <table className="table table-striped table-hover">
+                <table className="table table-bordered table-striped">
+
+
+
                     <thead>
                         <tr>
                             <th>Name</th>

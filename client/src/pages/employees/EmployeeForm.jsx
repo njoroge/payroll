@@ -230,6 +230,7 @@ const EmployeeForm = ({ isEditMode = false }) => {
                                     <div className="mb-3"><label htmlFor="nextOfKin.email" className="form-label">Email:</label><input type="email" name="nextOfKin.email" id="nextOfKin.email" className="form-control" value={formData.nextOfKin.email} onChange={handleChange} /></div>
                                 </fieldset>
 
+
                                 {!isEditMode && (
                                      <fieldset className="mb-4">
                                         <legend className="fs-5 fw-semibold mb-3 border-bottom pb-2">User Account (for Employee Portal Login)</legend>
@@ -261,6 +262,15 @@ const EmployeeForm = ({ isEditMode = false }) => {
                     </div>
                 </div>
             </div>
+
+                <button type="button" className="btn btn-secondary ms-2" onClick={() => navigate('/employees')}>Cancel</button>
+
+
+                <button type="button" className="btn btn-secondary ms-2" onClick={() => navigate('/employees')}>Cancel</button>
+                <button type="button" className="btn btn-success ms-2" onClick={() => navigate('/employees')}>Cancel</button>
+
+            </form>
+
         </div>
     );
 };

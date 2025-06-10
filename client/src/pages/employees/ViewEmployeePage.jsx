@@ -16,6 +16,13 @@ const ViewEmployeePage = () => {
                 setLoading(true);
                 setError('');
                 // Resolved conflict and ensured correct template literal
+
+
+
+                // Resolved conflict and ensured correct template literal
+
+
+
                 const { data } = await api.get(`/employees/${employeeId}`);
                 setEmployee(data);
             } catch (err) {
@@ -30,6 +37,11 @@ const ViewEmployeePage = () => {
 
     if (loading) return <p>Loading employee details...</p>;
     // Changed error to use className
+
+
+    // Changed error to use className
+
+
     if (error) return <p className="text-danger">Error: {error}</p>;
     if (!employee) return <p>Employee not found.</p>;
 
@@ -44,6 +56,14 @@ const ViewEmployeePage = () => {
             {canEdit && <Link to={`/employees/${employee._id}/edit`} className="btn btn-primary btn-sm me-2">Edit Employee</Link>}
             {/* Styled View Payslips button, corrected URL */}
             {isSelf && <Link to={`/employees/${employee._id}/payslips`} className="btn btn-info btn-sm">View My Payslips</Link>}
+
+
+
+            {canEdit && <Link to={`/employees/${employee._id}/edit`} className="btn btn-sm btn-success me-2">Edit Employee</Link>}
+            {/* Add other actions like Deactivate, View Payslips (if HR/Admin) */}
+            {isSelf && <Link to={`/employees/${employee._id}/payslips`} className="btn btn-sm btn-info">View My Payslips</Link>}
+
+
 
 
             <p><strong>National ID:</strong> {employee.nationalId}</p>
