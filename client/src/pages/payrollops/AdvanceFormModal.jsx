@@ -80,7 +80,6 @@ const AdvanceFormModal = ({ item, onClose, operationType = "Advance" }) => {
 
     // Bootstrap modal structure
     return (
-
         <div className="modal fade show" tabIndex="-1" style={{ display: 'block', backgroundColor: 'rgba(0,0,0,0.5)' }} role="dialog">
             <div className="modal-dialog modal-dialog-centered modal-lg" role="document">
                 <div className="modal-content">
@@ -129,6 +128,7 @@ const AdvanceFormModal = ({ item, onClose, operationType = "Advance" }) => {
                 </div>
 
 
+
         <div style={modalStyle}>
             <div style={modalContentStyle}>
                 <h3>{title}</h3>
@@ -157,6 +157,7 @@ const AdvanceFormModal = ({ item, onClose, operationType = "Advance" }) => {
                         </button>
                     </div>
                 </form>
+
 
             </div>
         </div>

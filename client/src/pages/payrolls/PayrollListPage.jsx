@@ -68,13 +68,13 @@ const PayrollListPage = () => {
                     Run New Payroll
                 </button>
             )}
-
             <div className="mb-3 d-flex align-items-center"> {/* Added d-flex for better alignment */}
                 <span className="me-2">Filter by:</span> {/* Added span and margin for label */}
                 <select value={filterMonth} onChange={e => setFilterMonth(e.target.value)} className="form-select form-select-sm me-2" style={{width: 'auto'}}> {/* Added form-select, width auto */}
                     {months.map(m => <option key={m} value={m}>{m}</option>)}
                 </select>
                 <select value={filterYear} onChange={e => setFilterYear(parseInt(e.target.value))} className="form-select form-select-sm" style={{width: 'auto'}}> {/* Added form-select, width auto */}
+
 
 
             <div className="mb-3 d-flex align-items-center"> {/* Added d-flex for better alignment */}
@@ -103,10 +103,14 @@ const PayrollListPage = () => {
 
                 <table className="table table-striped table-hover">
 
+
+                <table className="table table-striped table-hover">
+
  fix/bootstrap
                 <table className="table table-striped table-hover">
 
                 <table className="table table-bordered table-striped">
+
 
 
                     <thead>

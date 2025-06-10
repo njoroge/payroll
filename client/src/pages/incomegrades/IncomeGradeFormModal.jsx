@@ -57,7 +57,6 @@ const IncomeGradeFormModal = ({ incomeGrade, onClose }) => {
 
     // Bootstrap modal structure
     return (
-
         <div className="modal fade show" tabIndex="-1" style={{ display: 'block', backgroundColor: 'rgba(0,0,0,0.5)' }} role="dialog">
             <div className="modal-dialog modal-dialog-centered modal-lg" role="document"> {/* Added modal-lg for wider content */}
                 <div className="modal-content">
@@ -94,6 +93,7 @@ const IncomeGradeFormModal = ({ incomeGrade, onClose }) => {
                     </form>
                 </div>
 
+
         <div style={modalStyle}>
             <div style={modalContentStyle}>
                 <h3>{isEditMode ? 'Edit Income Grade' : 'Add New Income Grade'}</h3>
@@ -119,6 +119,7 @@ const IncomeGradeFormModal = ({ incomeGrade, onClose }) => {
                         </button>
                     </div>
                 </form>
+
 
 
             </div>

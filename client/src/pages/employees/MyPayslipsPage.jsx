@@ -37,7 +37,7 @@ const MyPayslipsPage = () => {
     }, [employeeId, userInfo]);
 
     if (loading) return <p>Loading your payslips...</p>;
-    if (error) return <p className="text-danger">Error: {error}</p>;
+    if (error) return <p style={{ color: 'red' }}>Error: {error}</p>;
 
     return (
         <div>
@@ -45,7 +45,7 @@ const MyPayslipsPage = () => {
             {payslips.length === 0 ? (
                 <p>You have no payslips available.</p>
             ) : (
-                <table className="table table-bordered table-striped">
+                <table border="1" style={{ width: '100%', borderCollapse: 'collapse' }}>
                     <thead>
                         <tr>
                             <th>Month/Year</th>
@@ -61,7 +61,7 @@ const MyPayslipsPage = () => {
                                 <td>{p.netPay?.toFixed(2)}</td>
                                 <td>{p.status}</td>
                                 <td>
-                                    <Link to={`/payrolls/${p._id}`} className="btn btn-sm btn-success">View Details</Link>
+                                    <Link to={`/payrolls/\${p._id}`}>View Details</Link>
                                 </td>
                             </tr>
                         ))}

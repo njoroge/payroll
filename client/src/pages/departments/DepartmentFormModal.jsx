@@ -41,7 +41,9 @@ const DepartmentFormModal = ({ department, onClose }) => {
     };
 
     // Bootstrap modal structure
-    
+
+    return (
+
         <div className="modal fade show" tabIndex="-1" style={{ display: 'block', backgroundColor: 'rgba(0,0,0,0.5)' }} role="dialog">
             <div className="modal-dialog modal-dialog-centered" role="document">
                 <div className="modal-content">
@@ -76,6 +78,7 @@ const DepartmentFormModal = ({ department, onClose }) => {
                 </div>
 
 
+
         <div style={modalStyle}>
             <div style={modalContentStyle}>
                 <h3>{isEditMode ? 'Edit Department' : 'Add New Department'}</h3>
@@ -101,6 +104,7 @@ const DepartmentFormModal = ({ department, onClose }) => {
                         </button>
                     </div>
                 </form>
+
 
 
             </div>

@@ -50,7 +50,6 @@ const DepartmentListPage = () => {
             {departments.length === 0 ? (
                 <p>No departments found.</p>
             ) : (
-
                 <table className="table table-striped table-hover">
 
 

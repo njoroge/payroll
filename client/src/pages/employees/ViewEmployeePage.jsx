@@ -15,11 +15,12 @@ const ViewEmployeePage = () => {
             try {
                 setLoading(true);
                 setError('');
-
                 // Resolved conflict and ensured correct template literal
 
 
+
                 // Resolved conflict and ensured correct template literal
+
 
 
                 const { data } = await api.get(`/employees/${employeeId}`);
@@ -35,11 +36,11 @@ const ViewEmployeePage = () => {
     }, [employeeId]);
 
     if (loading) return <p>Loading employee details...</p>;
-
     // Changed error to use className
 
 
     // Changed error to use className
+
 
     if (error) return <p className="text-danger">Error: {error}</p>;
     if (!employee) return <p>Employee not found.</p>;
@@ -51,11 +52,11 @@ const ViewEmployeePage = () => {
     return (
         <div>
             <h2>Employee Details: {employee.firstName} {employee.lastName}</h2>
-
             {/* Styled Edit button, corrected URL */}
             {canEdit && <Link to={`/employees/${employee._id}/edit`} className="btn btn-primary btn-sm me-2">Edit Employee</Link>}
             {/* Styled View Payslips button, corrected URL */}
             {isSelf && <Link to={`/employees/${employee._id}/payslips`} className="btn btn-info btn-sm">View My Payslips</Link>}
+
 
 
             {canEdit && <Link to={`/employees/${employee._id}/edit`} className="btn btn-sm btn-success me-2">Edit Employee</Link>}
@@ -106,7 +107,6 @@ const ViewEmployeePage = () => {
                     <p><strong>Account Active:</strong> {employee.userId.isActive ? 'Yes' : 'No'}</p>
                 </>
             )}
-
             {/* Styled Back to list button */}
             <Link to="/employees" className="btn btn-secondary mt-3 d-block">Back to Employee List</Link>
         </div>
