@@ -3,7 +3,7 @@ import { useAuth } from '../store/authContext';
 import { Link } from 'react-router-dom'; // Added for potential buttons
 
 const HomePage = () => {
-    const { userInfo, user } = useAuth(); // Assuming 'user' is available for general logged-in check, 'userInfo' for details
+    const { userInfo, isAuthenticated } = useAuth(); // Assuming 'user' is available for general logged-in check, 'userInfo' for details
 
     return (
         <div className="container mt-5">
@@ -13,13 +13,13 @@ const HomePage = () => {
                     <p className="col-md-10 fs-4">
                         Manage your employees, departments, income grades, and payroll operations efficiently.
                     </p>
-                    {!user && (
+                    {!isAuthenticated && (
                         <Link className="btn btn-success btn-lg mt-3" to="/login" role="button">Login to Get Started</Link>
                     )}
                 </div>
             </div>
 
-            {user && userInfo ? ( // Check for both user (for auth status) and userInfo (for details)
+            {isAuthenticated && userInfo ? ( // Check for both user (for auth status) and userInfo (for details)
                 <div className="card">
                     <div className="card-header">
                         <h4 className="my-0 fw-normal">User Information</h4>
@@ -43,9 +43,14 @@ const HomePage = () => {
                     </div>
                 </div>
             ) : (
-                // This part is now covered by the "Login to Get Started" button if !user
-                // If user exists but userInfo is somehow missing, this could be a fallback.
-                !user && (
+                // This part is now covered by the "Login to Get Started" button if !isAuthenticated
+                // If isAuthenticated exists but userInfo is somehow missing, this could be a fallback.
+                // However, the primary condition for this block is already handled by !isAuthenticated check for the login button.
+                // So, we can simplify this or remove it if the login button is the only intended UI for non-authenticated users.
+                // For now, let's ensure it doesn't conflict. The outer condition is `isAuthenticated && userInfo`, so this `else` implies `!(isAuthenticated && userInfo)`.
+                // If `!isAuthenticated`, the login button is shown. If `isAuthenticated` but `!userInfo`, this block might be relevant.
+                // Let's keep the original logic structure but use isAuthenticated.
+                !isAuthenticated && ( // This condition is redundant if the login button is already shown when !isAuthenticated
                     <div className="alert alert-info" role="alert">
                         Please log in or register a company to continue.
                     </div>

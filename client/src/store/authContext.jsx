@@ -7,11 +7,46 @@ export const AuthProvider = ({ children }) => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const storedUserInfo = localStorage.getItem('userInfo');
-        if (storedUserInfo) {
-            setUserInfo(JSON.parse(storedUserInfo));
-        }
-        setLoading(false);
+        const verifyAuthToken = async () => {
+            const storedUserInfoString = localStorage.getItem('userInfo');
+            if (storedUserInfoString) {
+                try {
+                    const storedUserInfo = JSON.parse(storedUserInfoString);
+                    const token = storedUserInfo?.token;
+
+                    if (token) {
+                        const response = await fetch('/api/auth/me', {
+                            headers: {
+                                'Authorization': `Bearer ${token}`,
+                            },
+                        });
+
+                        if (response.ok) {
+                            const freshUserData = await response.json();
+                            setUserInfo(freshUserData);
+                            // Update localStorage with fresh data, potentially including a renewed token or updated details
+                            localStorage.setItem('userInfo', JSON.stringify(freshUserData));
+                        } else {
+                            // Token is invalid or expired
+                            localStorage.removeItem('userInfo');
+                            setUserInfo(null);
+                        }
+                    } else {
+                        // No token found in stored user info
+                        localStorage.removeItem('userInfo');
+                        setUserInfo(null);
+                    }
+                } catch (error) {
+                    // Error parsing JSON or other unexpected issue
+                    console.error("Auth verification error:", error);
+                    localStorage.removeItem('userInfo');
+                    setUserInfo(null);
+                }
+            }
+            setLoading(false);
+        };
+
+        verifyAuthToken();
     }, []);
 
     const login = (userData) => {
