@@ -12,7 +12,8 @@ import ProtectedRoute from './components/common/ProtectedRoute';
 import EmployeeListPage from './pages/employees/EmployeeListPage';
 import EmployeeForm from './pages/employees/EmployeeForm';
 import ViewEmployeePage from './pages/employees/ViewEmployeePage';
-import MyPayslipsPage from './pages/employees/MyPayslipsPage';
+import MyPayslipsPage from './pages/employees/MyPayslipsPage'; // Existing, may be different from new PaystubsPage
+import PaystubsPage from './pages/PaystubsPage'; // New page for /my-paystubs
 
 
 // Department Pages
@@ -28,6 +29,15 @@ import AdvanceListPage from './pages/payrollops/AdvanceListPage';
 import PayrollListPage from './pages/payrolls/PayrollListPage';
 import RunPayrollPage from './pages/payrolls/RunPayrollPage';
 import ViewPayslipPage from './pages/payrolls/ViewPayslipPage';
+
+// Help Page
+import HelpPage from './pages/HelpPage';
+
+// Benefits Page
+import BenefitsPage from './pages/BenefitsPage';
+
+// Settings Page
+import SettingsPage from './pages/SettingsPage';
 
 
 function AppContent() {
@@ -110,6 +120,31 @@ function AppContent() {
             <ViewPayslipPage />
           </ProtectedRoute>
         } />
+
+        {/* Routes for an employee to view their own paystubs */}
+        <Route path="/my-paystubs" element={
+          <ProtectedRoute roles={['employee']}> {/* Primarily for employees */}
+            <PaystubsPage />
+          </ProtectedRoute>
+        } />
+        <Route path="/my-paystubs/:payslipId" element={
+          <ProtectedRoute roles={['employee']}> {/* Primarily for employees */}
+            <PaystubsPage /> {/* Assuming PaystubsPage handles both list and detail view */}
+          </ProtectedRoute>
+        } />
+
+        {/* Benefits Page Route - Primarily for employees */}
+        <Route path="/my-benefits" element={
+          <ProtectedRoute roles={['employee']}>
+            <BenefitsPage />
+          </ProtectedRoute>
+        } />
+
+        {/* Help Page Route - Accessible to all authenticated users */}
+        <Route path="/help" element={<HelpPage />} />
+
+        {/* Settings Page Route - Accessible to all authenticated users */}
+        <Route path="/settings" element={<SettingsPage />} />
 
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>

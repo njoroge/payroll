@@ -36,15 +36,33 @@ const MainLayout = () => {
                   <li className="nav-item">
                     <Link className="nav-link" to="/">Home</Link>
                   </li>
-                  <li className="nav-item">
-                    <Link className="nav-link" to="/employees">Employees</Link>
-                  </li>
-                  <li className="nav-item">
-                    <Link className="nav-link" to="/departments">Departments</Link>
-                  </li>
-                  <li className="nav-item">
-                    <Link className="nav-link" to="/payrolls">Payrolls</Link>
-                  </li>
+                  {/* Employee specific links */}
+                  {userInfo.role === 'employee' && (
+                    <>
+                      <li className="nav-item">
+                        <Link className="nav-link" to="/my-paystubs">My Paystubs</Link>
+                      </li>
+                      <li className="nav-item">
+                        <Link className="nav-link" to="/my-benefits">My Benefits</Link>
+                      </li>
+                      <li className="nav-item">
+                        <Link className="nav-link" to="/help">Help</Link>
+                      </li>
+                    </>
+                  )}
+                  { userInfo.role !== 'employee' && (
+                    <>
+                      <li className="nav-item">
+                        <Link className="nav-link" to="/employees">Employees</Link>
+                      </li>
+                      <li className="nav-item">
+                        <Link className="nav-link" to="/departments">Departments</Link>
+                      </li>
+                      <li className="nav-item">
+                        <Link className="nav-link" to="/payrolls">Payrolls</Link>
+                      </li>
+                    </>
+                  )}
                   {/* Add other links based on roles if needed, e.g., Income Grades, Payroll Ops */}
                   {/* Ensure userInfo is checked before accessing its properties */}
                   {(userInfo.role === 'company_admin' || userInfo.role === 'hr_manager' || userInfo.role === 'employee_admin') && (
@@ -59,6 +77,10 @@ const MainLayout = () => {
                         </ul>
                     </li>
                   )}
+                  {/* Settings link for all authenticated users */}
+                  <li className="nav-item">
+                    <Link className="nav-link" to="/settings">Settings</Link>
+                  </li>
                 </>
               )}
             </ul>

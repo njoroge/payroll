@@ -87,16 +87,27 @@ const runPayroll = async (req, res) => {
 // @access  Private (CompanyAdmin, EmployeeAdmin, HrManager)
 const getPayrolls = async (req, res) => {
     const companyId = req.user.companyId;
-    const { employeeId, month, year, status } = req.query;
+    const { employeeId: queryEmployeeId, month, year, status, limit: queryLimit } = req.query; // Renamed employeeId to queryEmployeeId
     const filter = { companyId };
 
-    if (employeeId) filter.employeeId = employeeId;
+    if (req.user.role === 'employee') {
+        if (!req.user.employeeId) {
+            return res.status(403).json({ message: "Forbidden: Employee ID not linked to your user." });
+        }
+        filter.employeeId = req.user.employeeId; // Override employeeId for employees
+    } else {
+        // For admin roles, use employeeId from query if provided
+        if (queryEmployeeId) {
+            filter.employeeId = queryEmployeeId;
+        }
+    }
+
     if (month) filter.month = month;
-    if (year) filter.year = parseInt(year);
+    if (year) filter.year = parseInt(year); // Ensure year is an integer for matching
     if (status) filter.status = status;
 
     try {
-        const payrolls = await Payroll.find(filter)
+        let query = Payroll.find(filter)
             .populate('employeeId', 'firstName lastName nationalId departmentId')
             .populate({
                 path: 'employeeId',
@@ -104,8 +115,22 @@ const getPayrolls = async (req, res) => {
             })
             .populate('processedBy', 'email')
             .populate('approvedBy', 'email')
-            .sort({ year: -1, month: -1, createdAt: -1 });
-        res.json(payrolls);
+            .sort({ year: -1, month: -1, createdAt: -1 }); // Default sort
+
+        if (queryLimit) {
+            const limitNum = parseInt(queryLimit);
+            if (!isNaN(limitNum) && limitNum > 0) {
+                query = query.limit(limitNum);
+            }
+        }
+
+        const payrolls = await query;
+
+        // Standard practice: return an object with a key, e.g., { payrolls: payrolls }
+        // This allows for adding more data later, like pagination info.
+        // The frontend was expecting response.data.payrolls or response.data
+        res.json({ payrolls: payrolls });
+
     } catch (error) {
         console.error('Get payrolls error:', error);
         res.status(500).json({ message: 'Server error fetching payroll records.', error: error.message });
@@ -243,5 +268,45 @@ module.exports = {
     getPayslipById,
     updatePayslipStatus,
     updatePayrollSettings,
+    getUpcomingPaymentDates // Added export
     // Expose for testing or direct use if needed
+};
+
+// @desc    Get upcoming payment dates (placeholder logic)
+// @route   GET /api/payrolls/upcoming-payment-dates
+// @access  Private (Authenticated users)
+const getUpcomingPaymentDates = async (req, res) => {
+    try {
+        const today = new Date();
+        const currentDay = today.getDate();
+        const currentMonth = today.getMonth(); // 0-indexed
+        const currentYear = today.getFullYear();
+
+        let upcomingDates = [];
+        const paymentDay = 28; // Assuming payment day is the 28th
+
+        // Helper to format date as YYYY-MM-DD
+        const formatDate = (date) => {
+            const y = date.getFullYear();
+            const m = String(date.getMonth() + 1).padStart(2, '0'); // Month is 0-indexed
+            const d = String(date.getDate()).padStart(2, '0');
+            return `${y}-${m}-${d}`;
+        };
+
+        // First upcoming date
+        if (currentDay < paymentDay) {
+            upcomingDates.push(formatDate(new Date(currentYear, currentMonth, paymentDay)));
+            upcomingDates.push(formatDate(new Date(currentYear, currentMonth + 1, paymentDay)));
+        } else {
+            // If today is on or after the 28th, first payment is next month
+            upcomingDates.push(formatDate(new Date(currentYear, currentMonth + 1, paymentDay)));
+            upcomingDates.push(formatDate(new Date(currentYear, currentMonth + 2, paymentDay)));
+        }
+
+        res.json({ upcomingDates });
+
+    } catch (error) {
+        console.error('Get upcoming payment dates error:', error);
+        res.status(500).json({ message: 'Server error fetching upcoming payment dates.', error: error.message });
+    }
 };
