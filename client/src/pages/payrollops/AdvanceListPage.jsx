@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import api from '../../services/api';
 import AdvanceFormModal from './AdvanceFormModal';
 import { useAuth } from '../../store/authContext';
+import { formatCurrency } from '../../../utils/formatting';
 
 const AdvanceListPage = () => {
     const [advances, setAdvances] = useState([]);
@@ -84,7 +85,7 @@ const AdvanceListPage = () => {
                         {advances.map((item) => (
                             <tr key={item._id}>
                                 <td>{item.employeeId?.firstName} {item.employeeId?.lastName} ({item.employeeId?.nationalId})</td>
-                                <td>{item.amount}</td>
+                                <td>{formatCurrency(item.amount)}</td>
                                 <td>{new Date(item.dateIssued).toLocaleDateString()}</td>
                                 <td>{item.reason || 'N/A'}</td>
                                 <td>

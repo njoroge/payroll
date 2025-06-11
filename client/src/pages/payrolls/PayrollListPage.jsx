@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import api from '../../services/api';
 import { useAuth } from '../../store/authContext';
+import { formatCurrency } from '../../../utils/formatting';
 
 const PayrollListPage = () => {
     const [payrolls, setPayrolls] = useState([]);
@@ -129,9 +130,9 @@ const PayrollListPage = () => {
                             <tr key={p._id}>
                                 <td>{p.employeeId?.firstName} {p.employeeId?.lastName}</td>
                                 <td>{p.month} {p.year}</td>
-                                <td>{p.netPay?.toFixed(2)}</td>
-                                <td>{p.grossEarnings?.toFixed(2)}</td>
-                                <td>{p.totalDeductions?.toFixed(2)}</td>
+                                <td>{formatCurrency(p.netPay)}</td>
+                                <td>{formatCurrency(p.grossEarnings)}</td>
+                                <td>{formatCurrency(p.totalDeductions)}</td>
                                 <td>
                                     {p.status === 'PENDING_APPROVAL' && <span className="badge bg-warning text-dark">Pending Approval</span>}
                                     {p.status === 'APPROVED' && <span className="badge bg-info">Approved</span>}

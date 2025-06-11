@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import api from '../../services/api';
 import { useAuth } from '../../store/authContext';
+import { formatCurrency } from '../../../utils/formatting';
 
 const ViewEmployeePage = () => {
     const { id: employeeId } = useParams();
@@ -69,7 +70,7 @@ const ViewEmployeePage = () => {
             <p><strong>National ID:</strong> {employee.nationalId}</p>
             <p><strong>Full Name:</strong> {employee.firstName} {employee.lastName} {employee.surname || ''}</p>
             <p><strong>Department:</strong> {employee.departmentId?.name || 'N/A'}</p>
-            <p><strong>Income Grade:</strong> {employee.incomeGradeId?.gradeName || 'N/A'} (Basic: {employee.incomeGradeId?.basicSalary})</p>
+            <p><strong>Income Grade:</strong> {employee.incomeGradeId?.gradeName || 'N/A'} (Basic: {formatCurrency(employee.incomeGradeId?.basicSalary)})</p>
             <p><strong>Work Status:</strong> {employee.workStatus}</p>
             <p><strong>Employment Start Date:</strong> {employee.employmentStartDate ? new Date(employee.employmentStartDate).toLocaleDateString() : 'N/A'}</p>
 

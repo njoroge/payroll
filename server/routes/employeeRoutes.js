@@ -5,12 +5,22 @@ const {
     getEmployees,
     getEmployeeById,
     updateEmployee,
-    deactivateEmployee
+    deactivateEmployee,
+    getMyEmployeeDetails,
+    getMyAnnualEarnings,
+    getMyFinancialSummary,
+    getMyAdvances // Added
 } = require('../controllers/employeeController');
 const { protect, isHrManager, isEmployeeAdmin, isCompanyAdmin, hasRole } = require('../middleware/authMiddleware');
 
 // Apply protect middleware to all employee routes
 router.use(protect);
+
+// Route for employee to get their own details
+router.get('/me', getMyEmployeeDetails);
+router.get('/me/annual-earnings', getMyAnnualEarnings);
+router.get('/me/financial-summary', getMyFinancialSummary);
+router.get('/me/advances', getMyAdvances); // New route for employee advances
 
 // Only HR, EmployeeAdmin, or CompanyAdmin can create, update, deactivate, or list all employees
 router.route('/')

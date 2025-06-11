@@ -147,5 +147,45 @@ const getMe = async (req, res) => {
 module.exports = {
     registerCompanyAdmin,
     loginUser,
-    getMe
+    getMe,
+    changePassword // Added changePassword to exports
+};
+
+// @desc    Change user password
+// @route   POST /api/auth/change-password
+// @access  Private
+const changePassword = async (req, res) => {
+    const { currentPassword, newPassword } = req.body;
+
+    if (!currentPassword || !newPassword) {
+        return res.status(400).json({ message: 'Please provide current and new passwords.' });
+    }
+
+    if (newPassword.length < 6) {
+        return res.status(400).json({ message: 'New password must be at least 6 characters long.' });
+    }
+
+    try {
+        const user = await User.findById(req.user.id);
+
+        if (!user) {
+            // This should not happen if protect middleware is effective
+            return res.status(404).json({ message: 'User not found.' });
+        }
+
+        const isMatch = await user.comparePassword(currentPassword);
+
+        if (!isMatch) {
+            return res.status(401).json({ message: 'Incorrect current password.' });
+        }
+
+        user.password = newPassword; // The pre-save hook in User model will hash this
+        await user.save();
+
+        res.json({ message: 'Password updated successfully.' });
+
+    } catch (error) {
+        console.error('Change password error:', error);
+        res.status(500).json({ message: 'Server error during password change.', error: error.message });
+    }
 };

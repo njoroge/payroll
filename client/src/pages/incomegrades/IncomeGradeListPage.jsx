@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import api from '../../services/api';
 import IncomeGradeFormModal from './IncomeGradeFormModal';
+import { formatCurrency } from '../../utils/formatting';
 
 const IncomeGradeListPage = () => {
     const [incomeGrades, setIncomeGrades] = useState([]);
@@ -74,9 +75,9 @@ const IncomeGradeListPage = () => {
                         {incomeGrades.map((grade) => (
                             <tr key={grade._id}>
                                 <td>{grade.gradeName}</td>
-                                <td>{grade.basicSalary}</td>
-                                <td>{grade.houseAllowance}</td>
-                                <td>{grade.transportAllowance}</td>
+                                <td>{formatCurrency(grade.basicSalary)}</td>
+                                <td>{formatCurrency(grade.houseAllowance)}</td>
+                                <td>{formatCurrency(grade.transportAllowance)}</td>
                                 <td>{grade.isActive ? 'Active' : 'Inactive'}</td>
                                 <td>
                                     <button onClick={() => handleOpenModal(grade)} className="btn btn-sm btn-primary">Edit</button>
