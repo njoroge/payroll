@@ -65,8 +65,21 @@ io.use(async (socket, next) => {
     console.log(`Socket Auth: User ${user.email} authenticated for socket ${socket.id}`);
     next();
   } catch (error) {
-    console.error('Socket authentication error:', error.message);
-    return next(new Error('Authentication error: Invalid token'));
+    console.error('Socket authentication error:', error.message, error.name); // Log name too for clarity
+
+    let clientErrorMessage = 'Authentication error: Invalid token or session.'; // Default client message
+
+    if (error.name === 'TokenExpiredError') {
+        clientErrorMessage = 'Authentication error: Your session has expired. Please log in again.';
+    } else if (error.name === 'JsonWebTokenError') {
+        // JsonWebTokenError can be for various issues like 'invalid signature', 'jwt malformed'.
+        // We keep a somewhat generic message for the client here for security.
+        clientErrorMessage = 'Authentication error: Your session token is invalid. Please log in again.';
+    }
+    // Other unexpected errors will also use the default clientErrorMessage.
+    // The server log (error.message, error.name) remains key for specific diagnosis.
+
+    return next(new Error(clientErrorMessage));
   }
 });
 
