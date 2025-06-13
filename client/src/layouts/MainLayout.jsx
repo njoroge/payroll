@@ -36,6 +36,10 @@ const MainLayout = () => {
                   <li className="nav-item">
                     <Link className="nav-link" to="/">Home</Link>
                   </li>
+                  {/* Messages link for all authenticated users */}
+                  <li className="nav-item">
+                    <Link className="nav-link" to="/messages">Messages</Link>
+                  </li>
                   {/* Employee specific links */}
                   {userInfo.role === 'employee' && (
                     <>
@@ -85,7 +89,7 @@ const MainLayout = () => {
               )}
             </ul>
             {isAuthenticated ? (
-              <button className="btn btn-outline-danger" onClick={handleLogout}>Logout</button>
+              null // Logout button removed, alternative is on Settings page
             ) : (
               <>
                 <Link className="btn btn-outline-primary me-2" to="/login">Login</Link>

@@ -39,6 +39,9 @@ import BenefitsPage from './pages/BenefitsPage';
 // Settings Page
 import SettingsPage from './pages/SettingsPage';
 
+// Chat Page
+import ChatPage from './pages/ChatPage';
+
 
 function AppContent() {
   return (
@@ -145,6 +148,9 @@ function AppContent() {
 
         {/* Settings Page Route - Accessible to all authenticated users */}
         <Route path="/settings" element={<SettingsPage />} />
+
+        {/* Chat/Messages Page Route - Accessible to all authenticated users (further role restrictions can be added if needed) */}
+        <Route path="/messages" element={<ChatPage />} />
 
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>
