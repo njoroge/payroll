@@ -22,9 +22,25 @@ const messageSchema = new mongoose.Schema({
         required: true,
         trim: true,
     },
-    contentType: { // E.g., 'text', 'image', 'file'
+    contentType: { // E.g., 'text', 'image', 'file', 'pdf'
         type: String,
         default: 'text',
+    },
+    // Fields for file attachments
+    fileName: {
+        type: String,
+        trim: true,
+    },
+    fileUrl: {
+        type: String,
+        trim: true,
+    },
+    fileType: { // E.g., 'image/jpeg', 'application/pdf', 'text/plain'
+        type: String,
+        trim: true,
+    },
+    fileSize: { // Size in bytes
+        type: Number,
     },
     readBy: [{ // Array of user IDs who have read the message
         readerId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
