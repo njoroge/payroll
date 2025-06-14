@@ -44,6 +44,8 @@ const io = new Server(httpServer, {
   }
 });
 
+app.set('socketio', io); // Make io accessible in controllers
+
 io.use(async (socket, next) => {
   const token = socket.handshake.auth.token || socket.handshake.query.token;
   if (!token) {

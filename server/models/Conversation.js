@@ -10,6 +10,16 @@ const conversationSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Message',
     },
+    type: {
+        type: String,
+        enum: ['direct', 'group'],
+        default: 'direct',
+        required: true,
+    },
+    name: {
+        type: String,
+        trim: true,
+    },
     // Consider adding companyId if conversations are company-specific
     companyId: {
         type: mongoose.Schema.Types.ObjectId,
