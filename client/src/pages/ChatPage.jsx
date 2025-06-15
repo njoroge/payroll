@@ -1,29 +1,49 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useAuth } from '../store/authContext'; // For user info and token
-import api from '../services/api'; // For REST API calls (fetching initial data)
-import io from 'socket.io-client'; // For WebSocket connection
+import { useAuth } from '../store/authContext';
+import api from '../services/api';
+import io from 'socket.io-client';
 import ErrorBoundary from '../components/common/ErrorBoundary';
+
+// Define useDebounce hook (can be moved to a separate utility file later)
+const useDebounce = (value, delay) => {
+    const [debouncedValue, setDebouncedValue] = useState(value);
+    useEffect(() => {
+        const handler = setTimeout(() => {
+            setDebouncedValue(value);
+        }, delay);
+        return () => {
+            clearTimeout(handler);
+        };
+    }, [value, delay]);
+    return debouncedValue;
+};
 
 const ChatPage = () => {
     const auth = useAuth();
     const userInfo = auth?.userInfo;
     const loadingAuth = auth?.loading;
 
-    const [socket, setSocket] = useState(null);
+    if (loadingAuth) {
+        return <p>Loading user information...</p>;
+    }
 
+    if (!userInfo) {
+        return <p>User information not available. You might need to log in.</p>;
+    }
+
+    const currentChatUserId = userInfo.employee?._id || userInfo._id;
+
+    const [socket, setSocket] = useState(null);
     const [conversations, setConversations] = useState([]);
     const [selectedConversationId, setSelectedConversationId] = useState(null);
     const [messages, setMessages] = useState([]);
     const [newMessage, setNewMessage] = useState('');
-
     const [loadingConversations, setLoadingConversations] = useState(false);
     const [errorConversations, setErrorConversations] = useState(null);
     const [loadingMessages, setLoadingMessages] = useState(false);
     const [errorMessages, setErrorMessages] = useState(null);
-
     const [fileUploading, setFileUploading] = useState(false);
     const [fileUploadError, setFileUploadError] = useState(null);
-
     const [isUserSearchModalOpen, setIsUserSearchModalOpen] = useState(false);
     const [pendingRecipient, setPendingRecipient] = useState(null);
 
@@ -50,7 +70,6 @@ const ChatPage = () => {
         const today = new Date();
         const yesterday = new Date(today);
         yesterday.setDate(yesterday.getDate() - 1);
-
         if (date.toDateString() === today.toDateString()) {
             return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
         } else if (date.toDateString() === yesterday.toDateString()) {
@@ -85,7 +104,7 @@ const ChatPage = () => {
                     const newConversations = prevConversations.filter(conv => conv._id !== updatedConversation._id);
                     return [updatedConversation, ...newConversations];
                 });
-                if (userInfo && message.senderId?._id === userInfo.employee?._id) {
+                if (message.senderId?._id === currentChatUserId) {
                     setNewMessage('');
                 }
             });
@@ -102,7 +121,7 @@ const ChatPage = () => {
                 setSocket(null);
             };
         }
-    }, [userInfo]);
+    }, [userInfo, currentChatUserId]); // Added currentChatUserId as it's used in newMessage handler logic
 
     useEffect(() => {
         if (!userInfo || !socket) return;
@@ -155,7 +174,7 @@ const ChatPage = () => {
     useEffect(() => {
         if (socket) {
             const newConversationHandler = (newlyCreatedConv) => {
-                const isInitiator = newlyCreatedConv.participants.some(p => p._id === userInfo?.employee?._id);
+                const isInitiator = newlyCreatedConv.participants.some(p => p._id === currentChatUserId);
                 const hasPendingRecipient = pendingRecipient && newlyCreatedConv.participants.some(p => p._id === pendingRecipient._id);
                 if (isInitiator && hasPendingRecipient) {
                     setSelectedConversationId(newlyCreatedConv._id);
@@ -165,13 +184,13 @@ const ChatPage = () => {
             socket.on('newConversation', newConversationHandler);
             return () => socket.off('newConversation', newConversationHandler);
         }
-    }, [socket, pendingRecipient, userInfo?.employee?._id]);
+    }, [socket, pendingRecipient, currentChatUserId]);
 
     const getParticipantNames = (conversation) => {
         if (!conversation) return 'N/A';
         if (conversation.type === 'group') return conversation.name || 'Group Chat';
         if (!userInfo || !conversation.participants) return 'N/A';
-        const otherParticipants = conversation.participants.filter(p => p._id !== userInfo?.employee?._id);
+        const otherParticipants = conversation.participants.filter(p => p._id !== currentChatUserId);
         if (otherParticipants.length === 0 && conversation.participants.length > 0) {
             return conversation.participants[0]?.firstName || conversation.participants[0]?.email || 'Self';
         }
@@ -185,12 +204,12 @@ const ChatPage = () => {
 
     const FILE_BASE_URL = api.defaults.baseURL.replace('/api', '');
 
-    // Define these handlers inside ChatPage component
     const handleFileSelect = (e) => {
         console.log("File selected:", e.target.files[0]);
-        // Placeholder for actual file upload logic
+        // Placeholder for actual file upload logic: api.post('/messages/upload', formData) etc.
+        // For now, just clear the input to allow selecting the same file again if needed
         if (fileInputRef.current) {
-           fileInputRef.current.value = "";
+            fileInputRef.current.value = "";
         }
     };
 
@@ -202,14 +221,12 @@ const ChatPage = () => {
                 conv.type === 'direct' &&
                 conv.participants.length === 2 &&
                 conv.participants.some(p => p._id === user._id) &&
-                conv.participants.some(p => p._id === userInfo?.employee?._id)
+                conv.participants.some(p => p._id === currentChatUserId)
             );
             if (existingConv) {
                 setSelectedConversationId(existingConv._id);
                 setPendingRecipient(null);
             } else {
-                // This case (isExistingConversation true but not found) should ideally not happen if data is consistent
-                // Defaulting to treating as a new chat with the selected user
                 setPendingRecipient(user);
                 setSelectedConversationId(null);
             }
@@ -219,14 +236,11 @@ const ChatPage = () => {
         }
     };
 
-    if (loadingAuth) return <p>Loading user information...</p>;
-    if (!userInfo) return <p>User information not available. You might need to log in.</p>;
-
-    // ***** START OF DIAGNOSTIC LOGS *****
+    // Diagnostic logs (placed after all hooks and handlers, before return)
     console.log('[ChatPage] Debug: Right before UserSearchModal. userInfo:', userInfo);
     if (userInfo) console.log('[ChatPage] Debug: userInfo.employee:', userInfo.employee);
-    console.log('[ChatPage] Debug: Condition for UserSearchModal:', (userInfo && userInfo.employee));
-    // ***** END OF DIAGNOSTIC LOGS *****
+    console.log('[ChatPage] Debug: currentChatUserId:', currentChatUserId);
+    console.log('[ChatPage] Debug: Condition for UserSearchModal:', (userInfo && true)); // Changed from userInfo.employee to just userInfo for modal rendering
 
     return (
         <ErrorBoundary>
@@ -248,7 +262,7 @@ const ChatPage = () => {
                                         </span>
                                         <small className="text-muted" style={{fontSize: '0.75em'}}>{conv.lastMessage ? formatTimestamp(conv.lastMessage.createdAt) : formatTimestamp(conv.updatedAt)}</small>
                                     </div>
-                                    <small className="d-block text-muted text-truncate" style={{fontSize: '0.85em'}}>{conv.lastMessage ? `${conv.lastMessage.senderId?._id === userInfo?.employee?._id ? 'You: ' : (conv.lastMessage.senderId?.firstName ? conv.lastMessage.senderId?.firstName + ': ' : '')}${conv.lastMessage.contentType === 'text' ? conv.lastMessage.content : (conv.lastMessage.fileName || conv.lastMessage.contentType)}` : 'No messages yet'}</small>
+                                    <small className="d-block text-muted text-truncate" style={{fontSize: '0.85em'}}>{conv.lastMessage ? `${conv.lastMessage.senderId?._id === currentChatUserId ? 'You: ' : (conv.lastMessage.senderId?.firstName ? conv.lastMessage.senderId?.firstName + ': ' : '')}${conv.lastMessage.contentType === 'text' ? conv.lastMessage.content : (conv.lastMessage.fileName || conv.lastMessage.contentType)}` : 'No messages yet'}</small>
                                 </div>
                             ))}
                         </div>
@@ -262,15 +276,15 @@ const ChatPage = () => {
                                     {selectedConversationId && loadingMessages && <p>Loading messages...</p>}
                                     {errorMessages && <p className="text-danger">{errorMessages}</p>}
                                     {messages.map((msg) => (
-                                        <div key={msg._id} style={{ marginBottom: '10px', textAlign: msg.senderId?._id === userInfo?.employee?._id ? 'right' : 'left' }}>
-                                            <div style={{ display: 'inline-block', padding: '8px 12px', borderRadius: '15px', backgroundColor: msg.senderId?._id === userInfo?.employee?._id ? '#007bff' : '#e9ecef', color: msg.senderId?._id === userInfo?.employee?._id ? 'white' : 'black', maxWidth: '70%', wordWrap: 'break-word' }}>
-                                                <strong style={{display: 'block', marginBottom: '5px'}}>{msg.senderId?._id === userInfo?.employee?._id ? 'You' : (msg.senderId?.firstName || 'Sender')}</strong>
+                                        <div key={msg._id} style={{ marginBottom: '10px', textAlign: msg.senderId?._id === currentChatUserId ? 'right' : 'left' }}>
+                                            <div style={{ display: 'inline-block', padding: '8px 12px', borderRadius: '15px', backgroundColor: msg.senderId?._id === currentChatUserId ? '#007bff' : '#e9ecef', color: msg.senderId?._id === currentChatUserId ? 'white' : 'black', maxWidth: '70%', wordWrap: 'break-word' }}>
+                                                <strong style={{display: 'block', marginBottom: '5px'}}>{msg.senderId?._id === currentChatUserId ? 'You' : (msg.senderId?.firstName || 'Sender')}</strong>
                                                 {msg.contentType === 'text' && <p className="mb-0" style={{whiteSpace: 'pre-wrap'}}>{msg.content}</p>}
                                                 {msg.contentType === 'image' && msg.fileUrl && (<img src={`${FILE_BASE_URL}${msg.fileUrl}`} alt={msg.fileName || 'Uploaded image'} style={{ maxWidth: '100%', height: 'auto', borderRadius: '8px', maxHeight: '300px' }} />)}
-                                                {msg.contentType === 'pdf' && msg.fileUrl && (<a href={`${FILE_BASE_URL}${msg.fileUrl}`} target="_blank" rel="noopener noreferrer" className="text-decoration-none" style={{color: msg.senderId?._id === userInfo?.employee?._id ? '#fff' : '#000'}}><i className="bi bi-file-earmark-pdf-fill me-1"></i>{msg.fileName || 'View PDF'}</a>)}
-                                                {(msg.contentType === 'file' || (msg.contentType !== 'text' && msg.contentType !== 'image' && msg.contentType !== 'pdf')) && msg.fileUrl && (<a href={`${FILE_BASE_URL}${msg.fileUrl}`} target="_blank" rel="noopener noreferrer" className="text-decoration-none" style={{color: msg.senderId?._id === userInfo?.employee?._id ? '#fff' : '#000'}}><i className="bi bi-file-earmark-arrow-down-fill me-1"></i>{msg.fileName || 'Download File'}</a>)}
+                                                {msg.contentType === 'pdf' && msg.fileUrl && (<a href={`${FILE_BASE_URL}${msg.fileUrl}`} target="_blank" rel="noopener noreferrer" className="text-decoration-none" style={{color: msg.senderId?._id === currentChatUserId ? '#fff' : '#000'}}><i className="bi bi-file-earmark-pdf-fill me-1"></i>{msg.fileName || 'View PDF'}</a>)}
+                                                {(msg.contentType === 'file' || (msg.contentType !== 'text' && msg.contentType !== 'image' && msg.contentType !== 'pdf')) && msg.fileUrl && (<a href={`${FILE_BASE_URL}${msg.fileUrl}`} target="_blank" rel="noopener noreferrer" className="text-decoration-none" style={{color: msg.senderId?._id === currentChatUserId ? '#fff' : '#000'}}><i className="bi bi-file-earmark-arrow-down-fill me-1"></i>{msg.fileName || 'Download File'}</a>)}
                                                 {msg.contentType !== 'text' && !msg.content && msg.fileName && (<p className="mb-0 text-muted" style={{fontSize: '0.8em', marginTop: '4px'}}>{msg.fileName}</p>)}
-                                                <small className="text-muted" style={{fontSize: '0.75rem', display: 'block', marginTop: '4px', color: msg.senderId?._id === userInfo?.employee?._id ? '#f0f0f0' : '#6c757d !important'}}>{formatTimestamp(msg.createdAt)}</small>
+                                                <small className="text-muted" style={{fontSize: '0.75rem', display: 'block', marginTop: '4px', color: msg.senderId?._id === currentChatUserId ? '#f0f0f0' : '#6c757d !important'}}>{formatTimestamp(msg.createdAt)}</small>
                                             </div>
                                         </div>
                                     ))}
@@ -290,8 +304,8 @@ const ChatPage = () => {
                         ) : ( <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%', color: '#aaa' }}><p>Select or start a conversation to begin messaging.</p></div> )}
                     </div>
                 </div>
-                {userInfo && userInfo.employee && (
-                    <UserSearchModal isOpen={isUserSearchModalOpen} onClose={() => setIsUserSearchModalOpen(false)} onSelectUser={handleUserSelectForNewChat} loggedInUserInfo={userInfo} currentUserId={userInfo.employee._id} conversations={conversations} />
+                {userInfo && (
+                    <UserSearchModal isOpen={isUserSearchModalOpen} onClose={() => setIsUserSearchModalOpen(false)} onSelectUser={handleUserSelectForNewChat} loggedInUserInfo={userInfo} currentUserId={currentChatUserId} conversations={conversations} />
                 )}
             </div>
         </ErrorBoundary>
@@ -304,14 +318,6 @@ const UserSearchModal = ({ isOpen, onClose, onSelectUser, loggedInUserInfo, curr
     const [loadingSearch, setLoadingSearch] = useState(false);
     const [searchError, setSearchError] = useState('');
 
-    const useDebounce = (value, delay) => {
-        const [debouncedValue, setDebouncedValue] = useState(value);
-        useEffect(() => {
-            const handler = setTimeout(() => setDebouncedValue(value), delay);
-            return () => clearTimeout(handler);
-        }, [value, delay]);
-        return debouncedValue;
-    };
     const debouncedSearchTerm = useDebounce(searchTerm, 300);
 
     useEffect(() => {
@@ -319,7 +325,7 @@ const UserSearchModal = ({ isOpen, onClose, onSelectUser, loggedInUserInfo, curr
             setLoadingSearch(true);
             setSearchError('');
             const companyId = loggedInUserInfo?.company?._id;
-            console.log('UserSearchModal: companyId for search:', companyId);
+            console.log('UserSearchModal: companyId for search:', companyId); // Debug log for companyId
             if (companyId) {
                 console.log("Mock API: Searching users for:", debouncedSearchTerm, "in company:", companyId);
                 setTimeout(() => {
@@ -328,7 +334,6 @@ const UserSearchModal = ({ isOpen, onClose, onSelectUser, loggedInUserInfo, curr
                         { _id: 'mockUserId456', firstName: 'Another', lastName: 'Person', email: 'another@example.com'},
                         { _id: 'knownUserId789', firstName: 'Known', lastName: 'Contact', email: 'known@example.com'}
                     ];
-                    // Filtering logic
                     setSearchResults(mockUsers.filter(u => (u.firstName.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) || u.lastName.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) || u.email.toLowerCase().includes(debouncedSearchTerm.toLowerCase())) && u._id !== currentUserId ));
                     setLoadingSearch(false);
                 }, 500);
@@ -347,6 +352,7 @@ const UserSearchModal = ({ isOpen, onClose, onSelectUser, loggedInUserInfo, curr
     };
 
     useEffect(() => { if (isOpen) { setSearchTerm(''); setSearchResults([]); setSearchError(''); } }, [isOpen]);
+
     if (!isOpen) return null;
 
     return (
@@ -368,3 +374,4 @@ const UserSearchModal = ({ isOpen, onClose, onSelectUser, loggedInUserInfo, curr
 };
 
 export default ChatPage;
+```
