@@ -38,184 +38,176 @@ app.use('/api/messages', require('./routes/messageRoutes'));
 
 const httpServer = http.createServer(app);
 const io = new Server(httpServer, {
-  cors: {
-    origin: "http://localhost:3000",
-    methods: ["GET", "POST"]
-  }
+    cors: {
+        origin: ["http://localhost:5173"],
+        methods: ["GET", "POST"]
+    }
 });
 
 app.set('socketio', io); // Make io accessible in controllers
 
 io.use(async (socket, next) => {
-  const token = socket.handshake.auth.token || socket.handshake.query.token;
-  if (!token) {
-    console.log('Socket Auth: Token not provided');
-    return next(new Error('Authentication error: Token not provided'));
-  }
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const user = await User.findById(decoded.id).select('-password');
-    if (!user) {
-      console.log('Socket Auth: User not found for token ID:', decoded.id);
-      return next(new Error('Authentication error: User not found'));
+    const token = socket.handshake.auth.token || socket.handshake.query.token;
+    if (!token) {
+        console.log('Socket Auth: Token not provided');
+        return next(new Error('Authentication error: Token not provided'));
     }
-    if (!user.isActive) {
-      console.log('Socket Auth: User account is deactivated:', user.email);
-      return next(new Error('Authentication error: User account is deactivated'));
+    try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const user = await User.findById(decoded.id).select('-password');
+        if (!user) {
+            console.log('Socket Auth: User not found for token ID:', decoded.id);
+            return next(new Error('Authentication error: User not found'));
+        }
+        if (!user.isActive) {
+            console.log('Socket Auth: User account is deactivated:', user.email);
+            return next(new Error('Authentication error: User account is deactivated'));
+        }
+        socket.user = user;
+        console.log(`Socket Auth: User ${user.email} authenticated for socket ${socket.id}`);
+        next();
+    } catch (error) {
+        console.error('Socket authentication error:', error.message, error.name); // Log name too for clarity
+
+        let clientErrorMessage = 'Authentication error: Invalid token or session.'; // Default client message
+
+        if (error.name === 'TokenExpiredError') {
+            clientErrorMessage = 'Authentication error: Your session has expired. Please log in again.';
+        } else if (error.name === 'JsonWebTokenError') {
+            clientErrorMessage = 'Authentication error: Your session token is invalid. Please log in again.';
+        }
+        return next(new Error(clientErrorMessage));
     }
-    socket.user = user;
-    console.log(`Socket Auth: User ${user.email} authenticated for socket ${socket.id}`);
-    next();
-  } catch (error) {
-    console.error('Socket authentication error:', error.message, error.name); // Log name too for clarity
-
-    let clientErrorMessage = 'Authentication error: Invalid token or session.'; // Default client message
-
-    if (error.name === 'TokenExpiredError') {
-        clientErrorMessage = 'Authentication error: Your session has expired. Please log in again.';
-    } else if (error.name === 'JsonWebTokenError') {
-        // JsonWebTokenError can be for various issues like 'invalid signature', 'jwt malformed'.
-        // We keep a somewhat generic message for the client here for security.
-        clientErrorMessage = 'Authentication error: Your session token is invalid. Please log in again.';
-    }
-    // Other unexpected errors will also use the default clientErrorMessage.
-    // The server log (error.message, error.name) remains key for specific diagnosis.
-
-    return next(new Error(clientErrorMessage));
-  }
 });
 
 io.on('connection', (socket) => {
-  console.log(`User connected via Socket.IO: ${socket.id}, Name: ${socket.user.email}, Role: ${socket.user.role}`);
+    console.log(`User connected via Socket.IO: ${socket.id}, Name: ${socket.user.email}, Role: ${socket.user.role}`);
 
-  socket.join(socket.user._id.toString());
-  console.log(`User ${socket.user.email} joined personal room: ${socket.user._id.toString()}`);
+    socket.join(socket.user._id.toString());
+    console.log(`User ${socket.user.email} joined personal room: ${socket.user._id.toString()}`);
 
-  if (socket.user.companyId) {
-    socket.join(socket.user.companyId.toString());
-    console.log(`User ${socket.user.email} joined company room: ${socket.user.companyId.toString()}`);
-  }
-
-  socket.on('joinConversationRoom', (conversationId) => {
-    if (conversationId) {
-        // TODO: Future enhancement: Verify user is part of this conversation before joining
-        socket.join(conversationId.toString());
-        console.log(`User ${socket.user.email} (${socket.id}) joined conversation room ${conversationId}`);
+    if (socket.user.companyId) {
+        socket.join(socket.user.companyId.toString());
+        console.log(`User ${socket.user.email} joined company room: ${socket.user.companyId.toString()}`);
     }
-  });
 
-  socket.on('leaveConversationRoom', (conversationId) => {
-    if (conversationId) {
-        socket.leave(conversationId.toString());
-        console.log(`User ${socket.user.email} (${socket.id}) left conversation room ${conversationId}`);
-    }
-  });
-
-  socket.on('sendMessage', async (data) => {
-    try {
-        const { conversationId, content, recipientId } = data;
-        const senderId = socket.user._id;
-
-        if (!content || !content.trim()) {
-            socket.emit('sendMessageError', { message: 'Message content cannot be empty.' });
-            return;
+    socket.on('joinConversationRoom', (conversationId) => {
+        if (conversationId) {
+            // TODO: Future enhancement: Verify user is part of this conversation before joining
+            socket.join(conversationId.toString());
+            console.log(`User ${socket.user.email} (${socket.id}) joined conversation room ${conversationId}`);
         }
+    });
 
-        let currentConversationId = conversationId;
-        let conversation;
+    socket.on('leaveConversationRoom', (conversationId) => {
+        if (conversationId) {
+            socket.leave(conversationId.toString());
+            console.log(`User ${socket.user.email} (${socket.id}) left conversation room ${conversationId}`);
+        }
+    });
 
-        if (!currentConversationId && recipientId) {
-            if (senderId.toString() === recipientId.toString()) {
-                socket.emit('sendMessageError', { message: 'Cannot start a conversation with yourself.' });
+    socket.on('sendMessage', async (data) => {
+        try {
+            const { conversationId, content, recipientId } = data;
+            const senderId = socket.user._id;
+
+            if (!content || !content.trim()) {
+                socket.emit('sendMessageError', { message: 'Message content cannot be empty.' });
                 return;
             }
-            const participants = [senderId, recipientId].sort();
-            conversation = await Conversation.findOneAndUpdate(
-                {
-                    companyId: socket.user.companyId,
-                    participants: { $all: participants, $size: participants.length }
-                },
-                {
-                    $setOnInsert: {
+
+            let currentConversationId = conversationId;
+            let conversation;
+
+            if (!currentConversationId && recipientId) {
+                if (senderId.toString() === recipientId.toString()) {
+                    socket.emit('sendMessageError', { message: 'Cannot start a conversation with yourself.' });
+                    return;
+                }
+                const participants = [senderId, recipientId].sort();
+                conversation = await Conversation.findOneAndUpdate(
+                    {
                         companyId: socket.user.companyId,
-                        participants: participants
-                    }
-                },
-                { upsert: true, new: true, setDefaultsOnInsert: true }
-            );
-            currentConversationId = conversation._id;
-            // When a new conversation is created/found, make sure both participants join its room
-            // The sender (socket.user) is already in their own room.
-            // The recipient needs to be notified or join if they are online.
-            // The sender's socket should join this new conversation room.
-            socket.join(currentConversationId.toString());
-            console.log(`User ${socket.user.email} joined newly created/found conversation room ${currentConversationId}`);
+                        participants: { $all: participants, $size: participants.length }
+                    },
+                    {
+                        $setOnInsert: {
+                            companyId: socket.user.companyId,
+                            participants: participants
+                        }
+                    },
+                    { upsert: true, new: true, setDefaultsOnInsert: true }
+                );
+                currentConversationId = conversation._id;
+                socket.join(currentConversationId.toString());
+                console.log(`User ${socket.user.email} joined newly created/found conversation room ${currentConversationId}`);
 
-            // Emit to recipient's personal room that a new conversation has been started/found for them
-            // so their client can update its conversation list and join the room
-            io.to(recipientId.toString()).emit('newConversation', conversation);
+                // Notify the recipient that a new conversation has been created/found for them
+                io.to(recipientId.toString()).emit('newConversation', conversation);
 
-
-        } else if (currentConversationId) {
-            conversation = await Conversation.findOne({
-                _id: currentConversationId,
-                participants: senderId,
-                companyId: socket.user.companyId
-            });
-            if (!conversation) {
-                socket.emit('sendMessageError', { conversationId: currentConversationId, message: 'Conversation not found or you are not a participant.' });
+            } else if (currentConversationId) {
+                conversation = await Conversation.findOne({
+                    _id: currentConversationId,
+                    participants: senderId, // Ensure sender is part of the conversation
+                    companyId: socket.user.companyId // Ensure conversation belongs to the same company
+                });
+                if (!conversation) {
+                    socket.emit('sendMessageError', { conversationId: currentConversationId, message: 'Conversation not found or you are not a participant.' });
+                    return;
+                }
+            } else {
+                socket.emit('sendMessageError', { message: 'Conversation ID or Recipient ID must be provided.' });
                 return;
             }
-        } else {
-             socket.emit('sendMessageError', { message: 'Conversation ID or Recipient ID must be provided.' });
-             return;
-        }
 
-        const message = new Message({
-            conversationId: currentConversationId,
-            senderId,
-            content: content.trim(),
-        });
-        await message.save();
+            const message = new Message({
+                conversationId: currentConversationId,
+                senderId,
+                content: content.trim(),
+            });
+            await message.save();
 
-        conversation.lastMessage = message._id;
-        // conversation.updatedAt = Date.now(); // Mongoose timestamps option handles this on save
-        await conversation.save();
+            // Update conversation's last message
+            conversation.lastMessage = message._id;
+            await conversation.save();
 
-        const populatedMessage = await Message.findById(message._id)
-            .populate('senderId', 'firstName lastName email role _id');
+            // Populate message sender details
+            const populatedMessage = await Message.findById(message._id)
+                .populate('senderId', 'firstName lastName email role _id');
 
-        const populatedConversationForEmit = await Conversation.findById(currentConversationId)
-            .populate('participants', 'firstName lastName email role _id')
-            .populate({
-                path: 'lastMessage',
-                populate: { path: 'senderId', select: 'firstName lastName email _id' }
+            // Populate conversation details for emitting (participants and last message)
+            const populatedConversationForEmit = await Conversation.findById(currentConversationId)
+                .populate('participants', 'firstName lastName email role _id')
+                .populate({
+                    path: 'lastMessage',
+                    populate: { path: 'senderId', select: 'firstName lastName email _id' }
+                });
+
+            // Emit the new message to all clients in the conversation room
+            io.to(currentConversationId.toString()).emit('newMessage', {
+                message: populatedMessage,
+                conversation: populatedConversationForEmit // Send the updated conversation object
             });
 
-        // Emit to the conversation room. All participants (including sender) who have joined this room will receive it.
-        io.to(currentConversationId.toString()).emit('newMessage', {
-            message: populatedMessage,
-            conversation: populatedConversationForEmit
-        });
+        } catch (error) {
+            console.error('Error in sendMessage handler:', error);
+            socket.emit('sendMessageError', {
+                conversationId: data.conversationId, // Include conversationId if available
+                message: 'Server error processing your message. ' + error.message
+            });
+        }
+    });
 
-    } catch (error) {
-        console.error('Error in sendMessage handler:', error);
-        socket.emit('sendMessageError', {
-            conversationId: data.conversationId,
-            message: 'Server error processing your message. ' + error.message
-        });
-    }
-  });
-
-  socket.on('disconnect', () => {
-    console.log(`User disconnected via Socket.IO: ${socket.id}`);
-  });
+    socket.on('disconnect', () => {
+        console.log(`User disconnected via Socket.IO: ${socket.id}`);
+    });
 });
 
+// Global error handler (Express middleware)
 app.use((err, req, res, next) => {
     console.error("Global Error Handler:", err.stack);
     if (res.headersSent) {
-        return next(err);
+        return next(err); // Delegate to default Express error handler if headers already sent
     }
     res.status(err.status || 500).json({ message: err.message || 'Something broke!' });
 });
