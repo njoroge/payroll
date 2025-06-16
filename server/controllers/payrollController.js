@@ -261,17 +261,6 @@ const updatePayrollSettings = async (req, res) => {
     }
 };
 
-
-module.exports = {
-    runPayroll,
-    getPayrolls,
-    getPayslipById,
-    updatePayslipStatus,
-    updatePayrollSettings,
-    getUpcomingPaymentDates // Added export
-    // Expose for testing or direct use if needed
-};
-
 // @desc    Get upcoming payment dates (placeholder logic)
 // @route   GET /api/payrolls/upcoming-payment-dates
 // @access  Private (Authenticated users)
@@ -309,4 +298,14 @@ const getUpcomingPaymentDates = async (req, res) => {
         console.error('Get upcoming payment dates error:', error);
         res.status(500).json({ message: 'Server error fetching upcoming payment dates.', error: error.message });
     }
+};
+
+module.exports = {
+    runPayroll,
+    getPayrolls,
+    getPayslipById,
+    updatePayslipStatus,
+    updatePayrollSettings,
+    getUpcomingPaymentDates // Added export
+    // Expose for testing or direct use if needed
 };
