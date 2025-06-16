@@ -51,16 +51,7 @@ const IncomeGradeListPage = () => {
             {incomeGrades.length === 0 ? (
                 <p>No income grades found.</p>
             ) : (
-                <table className="table table-striped table-hover">
-
-
-
-                <table className="table table-striped table-hover">
-
                 <table className="table table-bordered table-striped">
-
-
-
                     <thead>
                         <tr>
                             <th>Grade Name</th>
