@@ -1,6 +1,6 @@
 import React from 'react';
 import { Outlet, Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../../store/authContext'; // Adjust path if necessary
+import { useAuth } from '../store/authContext'; // Adjust path if necessary
 
 // Basic Footer component (can be enhanced or moved later)
 const Footer = () => {

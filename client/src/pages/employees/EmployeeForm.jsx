@@ -258,20 +258,11 @@ const EmployeeForm = ({ isEditMode = false }) => {
                                     </button>
                                 </div>
                             </form>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-                <button type="button" className="btn btn-secondary ms-2" onClick={() => navigate('/employees')}>Cancel</button>
-
-
-                <button type="button" className="btn btn-secondary ms-2" onClick={() => navigate('/employees')}>Cancel</button>
-                <button type="button" className="btn btn-success ms-2" onClick={() => navigate('/employees')}>Cancel</button>
-
-            </form>
-
-        </div>
+                        </div> {/* Closing card-body */}
+                    </div> {/* Closing card */}
+                </div> {/* Closing col-lg-10 */}
+            </div> {/* Closing row */}
+        </div> // Closing container mt-4 mb-5
     );
 };
 
