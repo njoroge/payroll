@@ -143,14 +143,6 @@ const getMe = async (req, res) => {
     });
 };
 
-
-module.exports = {
-    registerCompanyAdmin,
-    loginUser,
-    getMe,
-    changePassword // Added changePassword to exports
-};
-
 // @desc    Change user password
 // @route   POST /api/auth/change-password
 // @access  Private
@@ -188,4 +180,11 @@ const changePassword = async (req, res) => {
         console.error('Change password error:', error);
         res.status(500).json({ message: 'Server error during password change.', error: error.message });
     }
+};
+
+module.exports = {
+    registerCompanyAdmin,
+    loginUser,
+    getMe,
+    changePassword // Added changePassword to exports
 };
