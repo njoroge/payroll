@@ -360,7 +360,7 @@ const searchEmployees = async (req, res) => {
             $or: [
                 { firstName: searchRegex },
                 { lastName: searchRegex },
-                { email: searchRegex } // If your Employee model has an email field directly
+                { personalEmail: searchRegex } // If your Employee model has an email field directly
             ]
         };
 
@@ -371,7 +371,7 @@ const searchEmployees = async (req, res) => {
         // For this example, I'll assume Employee schema might have email or you're searching by name.
 
         const employees = await Employee.find(query)
-            .select('_id firstName lastName email') // Select fields you want to return
+            .select('_id firstName lastName personalEmail') // Select fields you want to return
             .limit(10); // Limit results for performance
 
         res.json(employees);

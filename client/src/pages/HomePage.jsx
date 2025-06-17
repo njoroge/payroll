@@ -87,7 +87,7 @@ const HomePage = () => {
                         <h4 className="my-0 fw-normal">User Information</h4>
                     </div>
                     <div className="card-body">
-                        <p className="card-text fs-5">You are logged in as: <strong>{userInfo.email}</strong></p>
+                        <p className="card-text fs-5">You are logged in as: <strong>{userInfo.employee?.firstName || userInfo.email}</strong></p>
                         <p className="card-text fs-5">Role: <span className="badge bg-info text-dark">{userInfo.role}</span></p>
                         {userInfo.company && (
                             <div className="mt-3">
@@ -122,9 +122,9 @@ const HomePage = () => {
                                 {employeeDetails && !loadingDetails && !errorDetails && (
                                     <>
                                         <p><strong>Full Name:</strong> {employeeDetails.firstName} {employeeDetails.lastName}</p>
-                                        <p><strong>Email:</strong> {employeeDetails.email}</p>
-                                        <p><strong>Phone:</strong> {employeeDetails.phone || 'N/A'}</p>
-                                        <p><strong>Department:</strong> {employeeDetails.department?.name || 'N/A'}</p>
+                                        <p><strong>Email:</strong> {employeeDetails.personalEmail || 'N/A'}</p>
+                                        <p><strong>Phone:</strong> {employeeDetails.phoneNo || 'N/A'}</p>
+                                        <p><strong>Department:</strong> {employeeDetails.departmentId?.name || 'N/A'}</p>
                                         {/* Add more fields as necessary, e.g., Job Title, Hire Date */}
                                     </>
                                 )}
