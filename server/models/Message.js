@@ -45,6 +45,18 @@ const messageSchema = new mongoose.Schema({
     readBy: [{ // Array of user IDs who have read the message
         readerId: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
         readAt: { type: Date, default: Date.now }
+    }],
+    isDeletedForAll: {
+        type: Boolean,
+        default: false
+    },
+    deletedForAllAt: {
+        type: Date,
+        default: null
+    },
+    deletedForUsers: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
     }]
     // companyId could also be on messages for direct querying, though derivable from conversation
     // companyId: {

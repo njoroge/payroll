@@ -4,7 +4,9 @@ const {
     getConversations,
     getMessagesForConversation,
     uploadFileForConversation, // Import the new controller
-    upload // Import the multer instance
+    upload, // Import the multer instance
+    deleteMessageForEveryone, // Import the new controller function
+    deleteMessageForMyself // Import the new controller function
 } = require('../controllers/messageController');
 const { protect } = require('../middleware/authMiddleware');
 
@@ -24,5 +26,11 @@ router.post('/upload/:conversationId', upload.single('chatFile'), uploadFileForC
 // This might be more naturally handled via Socket.IO when a user sends the first message
 // to someone new, but a REST endpoint could also be useful.
 // router.post('/conversations', createConversation);
+
+// Delete a message for everyone (sender action)
+router.put('/:messageId/delete-for-everyone', deleteMessageForEveryone);
+
+// Delete a message for oneself (hide from user's view)
+router.post('/:messageId/delete-for-myself', deleteMessageForMyself);
 
 module.exports = router;

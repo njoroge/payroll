@@ -122,10 +122,27 @@ io.on('connection', (socket) => {
 
             if (!currentConversationId && recipientId) {
                 if (senderId.toString() === recipientId.toString()) {
+                    // This initial check is using Employee._id for recipientId.
+                    // It's a basic check, but the more robust check against actual User IDs is below.
                     socket.emit('sendMessageError', { message: 'Cannot start a conversation with yourself.' });
                     return;
                 }
-                const participants = [senderId, recipientId].sort();
+
+                // The recipientId from client is an Employee._id. We need the User._id.
+                const recipientEmployeeDoc = await Employee.findById(recipientId).select('userId');
+                if (!recipientEmployeeDoc || !recipientEmployeeDoc.userId) {
+                    socket.emit('sendMessageError', { message: 'Recipient employee or linked user account not found.' });
+                    return;
+                }
+                const actualRecipientUserId = recipientEmployeeDoc.userId;
+
+                // Ensure sender is not trying to message themselves using the actual User ID
+                if (senderId.toString() === actualRecipientUserId.toString()) {
+                    socket.emit('sendMessageError', { message: 'Cannot start a conversation with yourself.' });
+                    return;
+                }
+
+                const participants = [senderId, actualRecipientUserId].sort();
 
                 // 1. Attempt to find an existing conversation
                 let isNewConversation = false; // Flag to track if we created it
@@ -150,10 +167,9 @@ io.on('connection', (socket) => {
 
                 // If it's a newly created conversation, notify the recipient so they can update their UI.
                 if (isNewConversation) {
-                    // recipientId is an Employee._id, passed from client search selection
-                    const recipientEmployee = await Employee.findById(recipientId).select('userId');
-                    if (recipientEmployee && recipientEmployee.userId) {
-                        const recipientUserIdStr = recipientEmployee.userId.toString();
+                    // We already fetched recipientEmployeeDoc and have actualRecipientUserId
+                    if (recipientEmployeeDoc && actualRecipientUserId) { // recipientEmployeeDoc is the same as recipientEmployee before
+                        const recipientUserIdStr = actualRecipientUserId.toString();
 
                         // Populate conversation details for the specific recipient
                         // This ensures the recipient gets fully populated participant info for the new conversation item
@@ -165,9 +181,11 @@ io.on('connection', (socket) => {
                             });
 
                         io.to(recipientUserIdStr).emit('newConversation', populatedNewConversation);
+                        // Log still uses recipientId (Employee._id) for context from client, and recipientUserIdStr (User._id) for actual target room
                         console.log(`Emitted 'newConversation' to user room ${recipientUserIdStr} (for employee ${recipientId}) for conv ${currentConversationId}`);
                     } else {
-                        console.error(`Could not find/get user ID for employee ${recipientId} to send 'newConversation' event for conversation ${currentConversationId}.`);
+                        // This else case should ideally not be reached if we validated recipientEmployeeDoc earlier
+                        console.error(`Could not find/get user ID for employee ${recipientId} (using recipientEmployeeDoc) to send 'newConversation' event for conversation ${currentConversationId}.`);
                     }
                 }
 
@@ -214,6 +232,29 @@ io.on('connection', (socket) => {
                 message: populatedMessage,
                 conversation: populatedConversationForEmit // Send the updated conversation object
             });
+
+            // Additionally, if it's a direct message, emit to the recipient's personal room
+            if (conversation.type === 'direct') {
+                // The 'conversation' object here should already be populated with participant User objects
+                // from earlier in the handler (e.g., when it was fetched or created).
+                // If conversation.participants are just IDs, it would need repopulating or a specific query.
+                // Assuming conversation.participants contains at least _id for each participant.
+                const recipientParticipant = conversation.participants.find(
+                    p => p._id.toString() !== senderId.toString()
+                );
+
+                if (recipientParticipant) {
+                    const recipientUserIdStr = recipientParticipant._id.toString();
+
+                    console.log(`Direct message: Emitting 'newMessage' also to recipient user room ${recipientUserIdStr} for conversation ${currentConversationId}`);
+                    io.to(recipientUserIdStr).emit('newMessage', {
+                        message: populatedMessage,
+                        conversation: populatedConversationForEmit
+                    });
+                } else {
+                    console.warn(`Direct message in conversation ${currentConversationId}, but could not identify recipient among participants:`, conversation.participants);
+                }
+            }
 
         } catch (error) {
             console.error('Error in sendMessage handler:', error);

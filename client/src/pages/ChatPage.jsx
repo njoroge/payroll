@@ -46,6 +46,7 @@ const ChatPage = () => {
     const [fileUploadError, setFileUploadError] = useState(null);
     const [isUserSearchModalOpen, setIsUserSearchModalOpen] = useState(false);
     const [pendingRecipient, setPendingRecipient] = useState(null);
+    const [activeMessageMenu, setActiveMessageMenu] = useState(null); // To store msg._id of open menu
 
     const previousConversationIdRef = useRef(null);
     const messagesEndRef = useRef(null);
@@ -279,6 +280,44 @@ const ChatPage = () => {
         }
     };
 
+    const handleDeleteForEveryone = async (messageId) => {
+        if (!window.confirm('Are you sure you want to delete this message for everyone? This action cannot be undone.')) {
+            return;
+        }
+        try {
+            // Optimistic UI update can be tricky if the message content changes structure
+            // Relying on socket event 'messageUpdated' is generally safer for "delete for everyone"
+            // to ensure all clients see the same final state.
+
+            // We could temporarily mark it as "deleting..." locally if needed.
+            // For now, just call the API. The socket event will handle the UI change.
+
+            await api.put(`/messages/${messageId}/delete-for-everyone`);
+            // console.log('Delete for everyone successful for message:', messageId);
+            // No explicit client-side removal here; wait for 'messageUpdated' socket event
+        } catch (err) {
+            console.error('Error deleting message for everyone:', err);
+            alert(`Failed to delete message: ${err.response?.data?.message || err.message}`);
+        }
+        setActiveMessageMenu(null); // Close the menu regardless of outcome
+    };
+
+    const handleDeleteForMyself = async (messageId) => {
+        if (!window.confirm('Are you sure you want to delete this message only for yourself? Others will still see it.')) {
+            return;
+        }
+        try {
+            await api.post(`/messages/${messageId}/delete-for-myself`);
+            // Optimistically remove the message from the local state
+            setMessages(prevMessages => prevMessages.filter(msg => msg._id !== messageId));
+            // console.log('Delete for myself successful for message:', messageId);
+        } catch (err) {
+            console.error('Error deleting message for myself:', err);
+            alert(`Failed to delete message for yourself: ${err.response?.data?.message || err.message}`);
+        }
+        setActiveMessageMenu(null); // Close the menu
+    };
+
     // Diagnostic logs (placed after all hooks and handlers, before return)
     console.log('[ChatPage] Debug: Right before UserSearchModal. userInfo:', userInfo);
     if (userInfo) console.log('[ChatPage] Debug: userInfo.employee:', userInfo.employee);
@@ -329,19 +368,103 @@ const ChatPage = () => {
                                             console.warn("ChatPage: Rendering message with missing _id:", msg);
                                             return null;
                                         }
+                                        const isMyMessage = msg.senderId?._id === currentChatUserId;
                                         return (
-                                        <div key={msg._id.toString()} style={{ marginBottom: '10px', textAlign: msg.senderId?._id === currentChatUserId ? 'right' : 'left' }}>
-                                            <div style={{ display: 'inline-block', padding: '8px 12px', borderRadius: '15px', backgroundColor: msg.senderId?._id === currentChatUserId ? '#007bff' : '#e9ecef', color: msg.senderId?._id === currentChatUserId ? 'white' : 'black', maxWidth: '70%', wordWrap: 'break-word' }}>
-                                                <strong style={{display: 'block', marginBottom: '5px'}}>{msg.senderId?._id === currentChatUserId ? 'You' : (msg.senderId?.firstName || 'Sender')}</strong>
-                                                {msg.contentType === 'text' && <p className="mb-0" style={{whiteSpace: 'pre-wrap'}}>{msg.content}</p>}
-                                                {msg.contentType === 'image' && msg.fileUrl && (<img src={`${FILE_BASE_URL}${msg.fileUrl}`} alt={msg.fileName || 'Uploaded image'} style={{ maxWidth: '100%', height: 'auto', borderRadius: '8px', maxHeight: '300px' }} />)}
-                                                {msg.contentType === 'pdf' && msg.fileUrl && (<a href={`${FILE_BASE_URL}${msg.fileUrl}`} target="_blank" rel="noopener noreferrer" className="text-decoration-none" style={{color: msg.senderId?._id === currentChatUserId ? '#fff' : '#000'}}><i className="bi bi-file-earmark-pdf-fill me-1"></i>{msg.fileName || 'View PDF'}</a>)}
-                                                {(msg.contentType === 'file' || (msg.contentType !== 'text' && msg.contentType !== 'image' && msg.contentType !== 'pdf')) && msg.fileUrl && (<a href={`${FILE_BASE_URL}${msg.fileUrl}`} target="_blank" rel="noopener noreferrer" className="text-decoration-none" style={{color: msg.senderId?._id === currentChatUserId ? '#fff' : '#000'}}><i className="bi bi-file-earmark-arrow-down-fill me-1"></i>{msg.fileName || 'Download File'}</a>)}
-                                                {msg.contentType !== 'text' && !msg.content && msg.fileName && (<p className="mb-0 text-muted" style={{fontSize: '0.8em', marginTop: '4px'}}>{msg.fileName}</p>)}
-                                                <small className="text-muted" style={{fontSize: '0.75rem', display: 'block', marginTop: '4px', color: msg.senderId?._id === currentChatUserId ? '#f0f0f0' : '#6c757d !important'}}>{formatTimestamp(msg.createdAt)}</small>
+                                            <div
+                                                key={msg._id.toString()}
+                                                style={{
+                                                    marginBottom: '10px',
+                                                    display: 'flex',
+                                                    justifyContent: isMyMessage ? 'flex-end' : 'flex-start'
+                                                }}
+                                                onMouseLeave={() => setActiveMessageMenu(null)} // Close menu when mouse leaves the whole message area
+                                            >
+                                                <div
+                                                    style={{
+                                                        position: 'relative', // For menu positioning
+                                                        padding: '8px 12px',
+                                                        borderRadius: '15px',
+                                                        backgroundColor: isMyMessage ? '#007bff' : '#e9ecef',
+                                                        color: isMyMessage ? 'white' : 'black',
+                                                        maxWidth: '70%',
+                                                        wordWrap: 'break-word'
+                                                    }}
+                                                    onMouseEnter={() => {/* Potentially show dots icon on hover here if it's initially hidden */}}
+                                                >
+                                                    {/* Existing content: sender name, message content, timestamp */}
+                                                    <strong style={{display: 'block', marginBottom: '5px'}}>{isMyMessage ? 'You' : (msg.senderId?.firstName || 'Sender')}</strong>
+
+                                                    {/* Message Content (text, image, file, etc.) - RENDER AS IS */}
+                                                    {msg.contentType === 'text' && <p className="mb-0" style={{whiteSpace: 'pre-wrap'}}>{msg.content}</p>}
+                                                    {msg.contentType === 'image' && msg.fileUrl && (<img src={`${FILE_BASE_URL}${msg.fileUrl}`} alt={msg.fileName || 'Uploaded image'} style={{ maxWidth: '100%', height: 'auto', borderRadius: '8px', maxHeight: '300px' }} />)}
+                                                    {msg.contentType === 'pdf' && msg.fileUrl && (<a href={`${FILE_BASE_URL}${msg.fileUrl}`} target="_blank" rel="noopener noreferrer" className="text-decoration-none" style={{color: isMyMessage ? '#fff' : '#000'}}><i className="bi bi-file-earmark-pdf-fill me-1"></i>{msg.fileName || 'View PDF'}</a>)}
+                                                    {(msg.contentType === 'file' || (msg.contentType !== 'text' && msg.contentType !== 'image' && msg.contentType !== 'pdf')) && msg.fileUrl && (<a href={`${FILE_BASE_URL}${msg.fileUrl}`} target="_blank" rel="noopener noreferrer" className="text-decoration-none" style={{color: isMyMessage ? '#fff' : '#000'}}><i className="bi bi-file-earmark-arrow-down-fill me-1"></i>{msg.fileName || 'Download File'}</a>)}
+                                                    {msg.contentType !== 'text' && !msg.content && msg.fileName && (<p className="mb-0 text-muted" style={{fontSize: '0.8em', marginTop: '4px'}}>{msg.fileName}</p>)}
+
+                                                    <small className="text-muted" style={{fontSize: '0.75rem', display: 'block', marginTop: '4px', color: isMyMessage ? '#f0f0f0' : '#6c757d !important'}}>{formatTimestamp(msg.createdAt)}</small>
+
+                                                    {/* "More Options" Button (Three Dots) */}
+                                                    {!msg.isDeletedForAll && ( // Don't show options for already deleted messages
+                                                        <button
+                                                            onClick={(e) => { e.stopPropagation(); setActiveMessageMenu(activeMessageMenu === msg._id ? null : msg._id); }}
+                                                            style={{
+                                                                background: 'none',
+                                                                border: 'none',
+                                                                color: isMyMessage ? 'white' : 'grey',
+                                                                position: 'absolute',
+                                                                top: '2px',
+                                                                right: isMyMessage ? '2px' : 'auto', // Adjust based on message alignment
+                                                                left: !isMyMessage ? '2px' : 'auto',
+                                                                cursor: 'pointer',
+                                                                padding: '2px',
+                                                                fontSize: '0.8rem', // Smaller icon
+                                                                lineHeight: '1'
+                                                            }}
+                                                            title="More options"
+                                                        >
+                                                            <i className="bi bi-three-dots-vertical"></i>
+                                                        </button>
+                                                    )}
+
+                                                    {/* Context Menu */}
+                                                    {activeMessageMenu === msg._id && !msg.isDeletedForAll && (
+                                                        <div
+                                                            style={{
+                                                                position: 'absolute',
+                                                                top: '25px', // Adjust as needed
+                                                                right: isMyMessage ? '5px' : 'auto',
+                                                                left: !isMyMessage ? '5px' : 'auto',
+                                                                backgroundColor: 'white',
+                                                                border: '1px solid #ccc',
+                                                                borderRadius: '4px',
+                                                                padding: '5px 0',
+                                                                zIndex: 10,
+                                                                minWidth: '150px',
+                                                                boxShadow: '0 2px 5px rgba(0,0,0,0.15)'
+                                                            }}
+                                                            // onMouseLeave={() => setActiveMessageMenu(null)} // This might make it hard to click items
+                                                        >
+                                                            <button
+                                                                className="dropdown-item" // Using Bootstrap class for styling if available
+                                                                style={{display: 'block', width: '100%', padding: '5px 10px', textAlign: 'left', background: 'none', border: 'none', color: 'black'}}
+                                                                onClick={(e) => { e.stopPropagation(); handleDeleteForMyself(msg._id); /* setActiveMessageMenu is called within the handler */ }}
+                                                            >
+                                                                Delete for Myself
+                                                            </button>
+                                                            {isMyMessage && !msg.isDeletedForAll && (
+                                                                <button
+                                                                    className="dropdown-item"
+                                                                    style={{display: 'block', width: '100%', padding: '5px 10px', textAlign: 'left', background: 'none', border: 'none', color: 'black'}}
+                                                                    onClick={(e) => { e.stopPropagation(); handleDeleteForEveryone(msg._id); /* setActiveMessageMenu is called within the handler */ }}
+                                                                >
+                                                                    Delete for Everyone
+                                                                </button>
+                                                            )}
+                                                        </div>
+                                                    )}
+                                                </div>
                                             </div>
-                                        </div>
-                                        )
+                                        );
                                     })}
                                     {!loadingMessages && messages.length === 0 && !errorMessages && <p>No messages in this conversation yet. Say hi!</p>}
                                     <div ref={messagesEndRef} />
@@ -418,7 +541,7 @@ const UserSearchModal = ({ isOpen, onClose, onSelectUser, loggedInUserInfo, curr
                         <input type="text" className="form-control mb-3" placeholder="Search by name or email..." value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
                         {loadingSearch && <p>Searching...</p>}
                         {searchError && <p className="text-danger">{searchError}</p>}
-                        {searchResults.length > 0 ? (<ul className="list-group">{searchResults.map(user => (<li key={user._id} className="list-group-item list-group-item-action" onClick={() => handleSelect(user)} style={{cursor: 'pointer'}}>{user.firstName} {user.lastName} ({user.email})</li>))}</ul>) : (!loadingSearch && debouncedSearchTerm && <p>No users found matching "{debouncedSearchTerm}".</p>)}
+                        {searchResults.length > 0 ? (<ul className="list-group">{searchResults.map(user => (<li key={user._id} className="list-group-item list-group-item-action" onClick={() => handleSelect(user)} style={{cursor: 'pointer'}}>{user.firstName} {user.lastName} ({user.personalEmail})</li>))}</ul>) : (!loadingSearch && debouncedSearchTerm && <p>No users found matching "{debouncedSearchTerm}".</p>)}
                         {!loadingSearch && !debouncedSearchTerm && <p className="text-muted">Start typing to search for users in your company.</p>}
                     </div>
                 </div>
