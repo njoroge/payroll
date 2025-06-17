@@ -6,6 +6,7 @@ const http = require('http');
 const { Server } = require("socket.io");
 const jwt = require('jsonwebtoken');
 const User = require('./models/User');
+const Employee = require('./models/Employee'); // Added
 const Conversation = require('./models/Conversation'); // Added
 const Message = require('./models/Message'); // Added
 
@@ -125,25 +126,50 @@ io.on('connection', (socket) => {
                     return;
                 }
                 const participants = [senderId, recipientId].sort();
-                conversation = await Conversation.findOneAndUpdate(
-                    {
-                        companyId: socket.user.companyId,
-                        participants: { $all: participants, $size: participants.length }
-                    },
-                    {
-                        $setOnInsert: {
-                            companyId: socket.user.companyId,
-                            participants: participants
-                        }
-                    },
-                    { upsert: true, new: true, setDefaultsOnInsert: true }
-                );
-                currentConversationId = conversation._id;
-                socket.join(currentConversationId.toString());
-                console.log(`User ${socket.user.email} joined newly created/found conversation room ${currentConversationId}`);
 
-                // Notify the recipient that a new conversation has been created/found for them
-                io.to(recipientId.toString()).emit('newConversation', conversation);
+                // 1. Attempt to find an existing conversation
+                let isNewConversation = false; // Flag to track if we created it
+                conversation = await Conversation.findOne({
+                    companyId: socket.user.companyId,
+                    participants: { $all: participants, $size: participants.length }
+                });
+
+                // 2. If not found, create a new one
+                if (!conversation) {
+                    conversation = await Conversation.create({
+                        companyId: socket.user.companyId,
+                        participants: participants
+                        // type defaults to 'direct'
+                    });
+                    isNewConversation = true;
+                }
+
+                currentConversationId = conversation._id;
+                socket.join(currentConversationId.toString()); // Join the room
+                console.log(`User ${socket.user.email} ensured joined to room ${currentConversationId}. New: ${isNewConversation}`);
+
+                // If it's a newly created conversation, notify the recipient so they can update their UI.
+                if (isNewConversation) {
+                    // recipientId is an Employee._id, passed from client search selection
+                    const recipientEmployee = await Employee.findById(recipientId).select('userId');
+                    if (recipientEmployee && recipientEmployee.userId) {
+                        const recipientUserIdStr = recipientEmployee.userId.toString();
+
+                        // Populate conversation details for the specific recipient
+                        // This ensures the recipient gets fully populated participant info for the new conversation item
+                        const populatedNewConversation = await Conversation.findById(currentConversationId)
+                            .populate('participants', 'firstName lastName email role _id') // Populate all participants
+                            .populate({ // Optionally populate lastMessage if it's set by this point (though for a new conv, it might not be)
+                                path: 'lastMessage',
+                                populate: { path: 'senderId', select: 'firstName lastName email _id' }
+                            });
+
+                        io.to(recipientUserIdStr).emit('newConversation', populatedNewConversation);
+                        console.log(`Emitted 'newConversation' to user room ${recipientUserIdStr} (for employee ${recipientId}) for conv ${currentConversationId}`);
+                    } else {
+                        console.error(`Could not find/get user ID for employee ${recipientId} to send 'newConversation' event for conversation ${currentConversationId}.`);
+                    }
+                }
 
             } else if (currentConversationId) {
                 conversation = await Conversation.findOne({

@@ -336,5 +336,48 @@ module.exports = {
     getMyEmployeeDetails,
     getMyAnnualEarnings,
     getMyFinancialSummary,
-    getMyAdvances
+    getMyAdvances,
+    searchEmployees // Added
+};
+
+// @desc    Search for employees
+// @route   GET /api/employees/search?term=searchTerm
+// @access  Private (Authenticated users)
+const searchEmployees = async (req, res) => {
+    try {
+        const { term } = req.query;
+        const { id, companyId } = req.user; // Assuming req.user contains logged-in user's ID and companyId
+
+        if (!term || term.trim().length < 2) {
+            return res.json([]); // Return empty array if term is too short or missing
+        }
+
+        const searchRegex = new RegExp(term, 'i');
+
+        const query = {
+            companyId: companyId,
+            _id: { $ne: id }, // Exclude the current user from search results
+            $or: [
+                { firstName: searchRegex },
+                { lastName: searchRegex },
+                { email: searchRegex } // If your Employee model has an email field directly
+            ]
+        };
+
+        // If email is on the User model and Employee has a userId reference
+        // You might need a more complex query if email is only on the User model
+        // For instance, first find users, then find employees by those user IDs.
+        // Or, if employee schema has email directly, the above is fine.
+        // For this example, I'll assume Employee schema might have email or you're searching by name.
+
+        const employees = await Employee.find(query)
+            .select('_id firstName lastName email') // Select fields you want to return
+            .limit(10); // Limit results for performance
+
+        res.json(employees);
+
+    } catch (error) {
+        console.error('Search employees error:', error);
+        res.status(500).json({ message: 'Server error searching employees.', error: error.message });
+    }
 };

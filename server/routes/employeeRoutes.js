@@ -9,12 +9,16 @@ const {
     getMyEmployeeDetails,
     getMyAnnualEarnings,
     getMyFinancialSummary,
-    getMyAdvances // Added
+    getMyAdvances, // Added
+    searchEmployees // Added for search
 } = require('../controllers/employeeController');
 const { protect, isHrManager, isEmployeeAdmin, isCompanyAdmin, hasRole } = require('../middleware/authMiddleware');
 
 // Apply protect middleware to all employee routes
 router.use(protect);
+
+// New route for searching employees
+router.get('/search', searchEmployees);
 
 // Route for employee to get their own details
 router.get('/me', getMyEmployeeDetails);

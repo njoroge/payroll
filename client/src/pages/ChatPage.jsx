@@ -81,11 +81,13 @@ const ChatPage = () => {
 
     useEffect(() => {
         if (userInfo && userInfo.token) {
-            const newSocket = io('/', { auth: { token: userInfo.token } });
+            const newSocket = io('http://localhost:5001', { auth: { token: userInfo.token } });
             setSocket(newSocket);
-            newSocket.on('connect', () => console.log('Socket connected:', newSocket.id));
+            newSocket.on('connect', () => {
+                console.log('[ChatPage] Socket successfully connected to server. Socket ID:', newSocket.id);
+            });
             newSocket.on('connect_error', (err) => {
-                console.error('Socket connection error:', err.message);
+                console.error('[ChatPage] Socket connection error. Message:', err.message, 'Data:', err.data, 'Description:', err.description, 'Full error object:', err);
                 setErrorConversations('Failed to connect to messaging service. Please try refreshing.');
             });
             newSocket.on('disconnect', (reason) => console.log('Socket disconnected:', reason));
@@ -94,6 +96,8 @@ const ChatPage = () => {
                 alert(`Message error: ${errorData.message}`);
             });
             newSocket.on('newMessage', ({ message, conversation: updatedConversation }) => {
+                console.log('[User B Client] Received newMessage event. Message:', message, 'Updated Conversation:', updatedConversation);
+
                 setSelectedConversationId(prevSelectedId => {
                     if (prevSelectedId === message.conversationId) {
                         setMessages(prevMessages => [...prevMessages, message]);
@@ -101,20 +105,57 @@ const ChatPage = () => {
                     return prevSelectedId;
                 });
                 setConversations(prevConversations => {
-                    const newConversations = prevConversations.filter(conv => conv._id !== updatedConversation._id);
-                    return [updatedConversation, ...newConversations];
+                    if (!updatedConversation || !updatedConversation._id) {
+                        console.error("ChatPage: Received newMessage with invalid updatedConversation data (ID missing):", updatedConversation);
+                        return prevConversations;
+                    }
+                    const updatedConvId = updatedConversation._id;
+
+                    // Create a new list by filtering out any existing version of this conversation.
+                    const listWithoutThisConv = prevConversations.filter(conv => {
+                        return conv && conv._id && conv._id !== updatedConvId;
+                    });
+
+                    // Prepend the new/updated version of the conversation to the front.
+                    return [updatedConversation, ...listWithoutThisConv];
                 });
                 if (message.senderId?._id === currentChatUserId) {
                     setNewMessage('');
                 }
             });
-            newSocket.on('newConversation', (newConversation) => {
+            newSocket.on('newConversation', (newConversationObject) => { // Renamed parameter
+                console.log('[Client] Received newConversation event:', newConversationObject); // Adjusted log
+
+                // Update conversations state (using the robust logic from previous steps)
                 setConversations(prevConversations => {
-                    if (prevConversations.find(c => c._id === newConversation._id)) {
-                        return prevConversations.map(c => c._id === newConversation._id ? newConversation : c);
+                    if (!newConversationObject || !newConversationObject._id) {
+                        console.error("ChatPage: Received newConversation event with invalid data (ID missing):", newConversationObject);
+                        return prevConversations;
                     }
-                    return [newConversation, ...prevConversations];
+                    const newConvId = newConversationObject._id;
+                    const existingConvIndex = prevConversations.findIndex(conv => conv && conv._id === newConvId);
+
+                    if (existingConvIndex !== -1) {
+                        // This case should be rare for a 'newConversation' event, but handle it by updating.
+                        console.warn(`ChatPage: 'newConversation' event received for an already existing conversation ID: ${newConvId}. Updating it in the list.`);
+                        const updatedList = [...prevConversations];
+                        updatedList[existingConvIndex] = newConversationObject;
+                        return updatedList;
+                    } else {
+                        // Add the new conversation to the beginning of the list.
+                        return [newConversationObject, ...prevConversations.filter(c => c && c._id)];
+                    }
                 });
+
+                // --- BEGIN NEW LOGIC ---
+                // After the state update for conversations is queued,
+                // automatically join the room for this new conversation and select it.
+                if (newConversationObject && newConversationObject._id && socket) { // Check if socket is available
+                    console.log(`[Client] Auto-joining room and selecting new conversation: ${newConversationObject._id}`);
+                    socket.emit('joinConversationRoom', newConversationObject._id);
+                    setSelectedConversationId(newConversationObject._id);
+                }
+                // --- END NEW LOGIC ---
             });
             return () => {
                 newSocket.disconnect();
@@ -138,6 +179,7 @@ const ChatPage = () => {
                 socket.emit('leaveConversationRoom', previousConversationIdRef.current);
             }
             if (selectedConversationId) {
+                console.log('[User B Client] Emitting joinConversationRoom for ID:', selectedConversationId);
                 socket.emit('joinConversationRoom', selectedConversationId);
                 setLoadingMessages(true);
                 setErrorMessages(null);
@@ -174,6 +216,7 @@ const ChatPage = () => {
     useEffect(() => {
         if (socket) {
             const newConversationHandler = (newlyCreatedConv) => {
+                console.log('[User B Client] Received newConversation event (handler 2 - for pending recipient):', newlyCreatedConv);
                 const isInitiator = newlyCreatedConv.participants.some(p => p._id === currentChatUserId);
                 const hasPendingRecipient = pendingRecipient && newlyCreatedConv.participants.some(p => p._id === pendingRecipient._id);
                 if (isInitiator && hasPendingRecipient) {
@@ -253,8 +296,13 @@ const ChatPage = () => {
                             {loadingConversations && <p className="p-2">Loading conversations...</p>}
                             {errorConversations && <p className="text-danger p-2">{errorConversations}</p>}
                             {!loadingConversations && !errorConversations && conversations.length === 0 && (<p className="p-2">No conversations yet.</p>)}
-                            {conversations.map(conv => (
-                                <div key={conv._id} onClick={() => handleSelectConversation(conv._id)} style={{ padding: '10px', cursor: 'pointer', borderBottom: '1px solid #eee', backgroundColor: selectedConversationId === conv._id ? '#e9ecef' : 'transparent' }} title={conv.participants?.map(p => p.email).join(', ')}>
+                            {conversations.map(conv => {
+                                if (!conv || !conv._id) {
+                                    console.warn("ChatPage: Rendering conversation with missing _id:", conv);
+                                    return null;
+                                }
+                                return (
+                                <div key={conv._id.toString()} onClick={() => handleSelectConversation(conv._id)} style={{ padding: '10px', cursor: 'pointer', borderBottom: '1px solid #eee', backgroundColor: selectedConversationId === conv._id ? '#e9ecef' : 'transparent' }} title={conv.participants?.map(p => p.email).join(', ')}>
                                     <div style={{display: 'flex', justifyContent: 'space-between', alignItems: 'center'}}>
                                         <span className="text-truncate" style={{maxWidth: '180px', display: 'flex', alignItems: 'center'}}>
                                             {conv.type === 'group' && <i className="bi bi-people-fill me-2"></i>}
@@ -264,7 +312,8 @@ const ChatPage = () => {
                                     </div>
                                     <small className="d-block text-muted text-truncate" style={{fontSize: '0.85em'}}>{conv.lastMessage ? `${conv.lastMessage.senderId?._id === currentChatUserId ? 'You: ' : (conv.lastMessage.senderId?.firstName ? conv.lastMessage.senderId?.firstName + ': ' : '')}${conv.lastMessage.contentType === 'text' ? conv.lastMessage.content : (conv.lastMessage.fileName || conv.lastMessage.contentType)}` : 'No messages yet'}</small>
                                 </div>
-                            ))}
+                                )
+                            })}
                         </div>
                         <div style={{ padding: '10px', borderTop: '1px solid #ccc' }}><button className="btn btn-outline-primary w-100" onClick={() => setIsUserSearchModalOpen(true)}><i className="bi bi-plus-circle-fill me-2"></i>New Chat</button></div>
                     </div>
@@ -275,8 +324,13 @@ const ChatPage = () => {
                                 <div style={{ overflowY: 'auto', flexGrow: 1, padding: '10px' }}>
                                     {selectedConversationId && loadingMessages && <p>Loading messages...</p>}
                                     {errorMessages && <p className="text-danger">{errorMessages}</p>}
-                                    {messages.map((msg) => (
-                                        <div key={msg._id} style={{ marginBottom: '10px', textAlign: msg.senderId?._id === currentChatUserId ? 'right' : 'left' }}>
+                                    {messages.map(msg => {
+                                        if (!msg || !msg._id) {
+                                            console.warn("ChatPage: Rendering message with missing _id:", msg);
+                                            return null;
+                                        }
+                                        return (
+                                        <div key={msg._id.toString()} style={{ marginBottom: '10px', textAlign: msg.senderId?._id === currentChatUserId ? 'right' : 'left' }}>
                                             <div style={{ display: 'inline-block', padding: '8px 12px', borderRadius: '15px', backgroundColor: msg.senderId?._id === currentChatUserId ? '#007bff' : '#e9ecef', color: msg.senderId?._id === currentChatUserId ? 'white' : 'black', maxWidth: '70%', wordWrap: 'break-word' }}>
                                                 <strong style={{display: 'block', marginBottom: '5px'}}>{msg.senderId?._id === currentChatUserId ? 'You' : (msg.senderId?.firstName || 'Sender')}</strong>
                                                 {msg.contentType === 'text' && <p className="mb-0" style={{whiteSpace: 'pre-wrap'}}>{msg.content}</p>}
@@ -287,7 +341,8 @@ const ChatPage = () => {
                                                 <small className="text-muted" style={{fontSize: '0.75rem', display: 'block', marginTop: '4px', color: msg.senderId?._id === currentChatUserId ? '#f0f0f0' : '#6c757d !important'}}>{formatTimestamp(msg.createdAt)}</small>
                                             </div>
                                         </div>
-                                    ))}
+                                        )
+                                    })}
                                     {!loadingMessages && messages.length === 0 && !errorMessages && <p>No messages in this conversation yet. Say hi!</p>}
                                     <div ref={messagesEndRef} />
                                 </div>
@@ -321,29 +376,28 @@ const UserSearchModal = ({ isOpen, onClose, onSelectUser, loggedInUserInfo, curr
     const debouncedSearchTerm = useDebounce(searchTerm, 300);
 
     useEffect(() => {
-        if (debouncedSearchTerm) {
+        if (debouncedSearchTerm && debouncedSearchTerm.length >= 2) { // Added length check
             setLoadingSearch(true);
             setSearchError('');
-            const companyId = loggedInUserInfo?.company?._id;
-            console.log('UserSearchModal: companyId for search:', companyId); // Debug log for companyId
-            if (companyId) {
-                console.log("Mock API: Searching users for:", debouncedSearchTerm, "in company:", companyId);
-                setTimeout(() => {
-                    let mockUsers = [
-                        { _id: 'mockUserId123', firstName: 'Test', lastName: 'User', email: 'test@example.com' },
-                        { _id: 'mockUserId456', firstName: 'Another', lastName: 'Person', email: 'another@example.com'},
-                        { _id: 'knownUserId789', firstName: 'Known', lastName: 'Contact', email: 'known@example.com'}
-                    ];
-                    setSearchResults(mockUsers.filter(u => (u.firstName.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) || u.lastName.toLowerCase().includes(debouncedSearchTerm.toLowerCase()) || u.email.toLowerCase().includes(debouncedSearchTerm.toLowerCase())) && u._id !== currentUserId ));
+            // const companyId = loggedInUserInfo?.company?._id; // Not needed for the API call as backend handles company context
+
+            api.get(`/employees/search?term=${debouncedSearchTerm}`) // Use the new endpoint
+                .then(response => {
+                    setSearchResults(response.data || []);
+                })
+                .catch(err => {
+                    console.error("Error searching users:", err);
+                    setSearchError(err.response?.data?.message || "Failed to search users.");
+                    setSearchResults([]); // Clear results on error
+                })
+                .finally(() => {
                     setLoadingSearch(false);
-                }, 500);
-            } else {
-                setSearchResults([]); setLoadingSearch(false);
-            }
+                });
         } else {
             setSearchResults([]);
+            setLoadingSearch(false); // Ensure loading is false if no search term
         }
-    }, [debouncedSearchTerm, currentUserId, loggedInUserInfo]);
+    }, [debouncedSearchTerm, currentUserId, loggedInUserInfo]); // Keep dependencies as they might be relevant for other logic or if companyId was used directly
 
     const handleSelect = (user) => {
         const existingDirectConv = conversations.find(conv => conv.type === 'direct' && conv.participants.length === 2 && conv.participants.some(p => p._id === user._id) && conv.participants.some(p => p._id === currentUserId));
