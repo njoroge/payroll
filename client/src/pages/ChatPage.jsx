@@ -4,6 +4,25 @@ import api from '../services/api';
 import io from 'socket.io-client';
 import ErrorBoundary from '../components/common/ErrorBoundary';
 
+// Reusable conversation sorting function
+const sortConversationsGlobally = (conversationsArray) => {
+    if (!conversationsArray) return [];
+    return [...conversationsArray].sort((a, b) => {
+        // Prioritize direct messages
+        if (a.type === 'direct' && b.type === 'group') {
+            return -1; // a comes first
+        }
+        if (a.type === 'group' && b.type === 'direct') {
+            return 1; // b comes first
+        }
+
+        // If types are the same, sort by date
+        const dateA = a.lastMessage ? new Date(a.lastMessage.createdAt) : new Date(a.updatedAt);
+        const dateB = b.lastMessage ? new Date(b.lastMessage.createdAt) : new Date(b.updatedAt);
+        return dateB - dateA; // Most recent first
+    });
+};
+
 // Define useDebounce hook (can be moved to a separate utility file later)
 const useDebounce = (value, delay) => {
     const [debouncedValue, setDebouncedValue] = useState(value);
@@ -117,8 +136,8 @@ const ChatPage = () => {
                         return conv && conv._id && conv._id !== updatedConvId;
                     });
 
-                    // Prepend the new/updated version of the conversation to the front.
-                    return [updatedConversation, ...listWithoutThisConv];
+                    // Prepend the new/updated version of the conversation and sort.
+                    return sortConversationsGlobally([updatedConversation, ...listWithoutThisConv]);
                 });
                 if (message.senderId?._id === currentChatUserId) {
                     setNewMessage('');
@@ -136,16 +155,18 @@ const ChatPage = () => {
                     const newConvId = newConversationObject._id;
                     const existingConvIndex = prevConversations.findIndex(conv => conv && conv._id === newConvId);
 
+                    let newList;
                     if (existingConvIndex !== -1) {
                         // This case should be rare for a 'newConversation' event, but handle it by updating.
                         console.warn(`ChatPage: 'newConversation' event received for an already existing conversation ID: ${newConvId}. Updating it in the list.`);
                         const updatedList = [...prevConversations];
                         updatedList[existingConvIndex] = newConversationObject;
-                        return updatedList;
+                        newList = updatedList;
                     } else {
                         // Add the new conversation to the beginning of the list.
-                        return [newConversationObject, ...prevConversations.filter(c => c && c._id)];
+                        newList = [newConversationObject, ...prevConversations.filter(c => c && c._id)];
                     }
+                    return sortConversationsGlobally(newList);
                 });
 
                 // --- BEGIN NEW LOGIC ---
@@ -169,7 +190,9 @@ const ChatPage = () => {
         if (!userInfo || !socket) return;
         setLoadingConversations(true);
         api.get('/messages/conversations')
-            .then(response => setConversations(response.data || []))
+            .then(response => {
+                setConversations(sortConversationsGlobally(response.data || []));
+            })
             .catch(err => setErrorConversations(err.response?.data?.message || "Failed to fetch conversations."))
             .finally(() => setLoadingConversations(false));
     }, [userInfo, socket]);
@@ -180,6 +203,7 @@ const ChatPage = () => {
                 socket.emit('leaveConversationRoom', previousConversationIdRef.current);
             }
             if (selectedConversationId) {
+                console.log('[ChatPage DEBUG] useEffect[selectedConversationId]: Joining room and fetching messages for conversationId:', selectedConversationId);
                 console.log('[User B Client] Emitting joinConversationRoom for ID:', selectedConversationId);
                 socket.emit('joinConversationRoom', selectedConversationId);
                 setLoadingMessages(true);
@@ -197,6 +221,7 @@ const ChatPage = () => {
     }, [selectedConversationId, socket]);
 
     const handleSelectConversation = (conversationId) => {
+        console.log('[ChatPage DEBUG] handleSelectConversation: selected conversationId:', conversationId);
         if (selectedConversationId === conversationId && !pendingRecipient) return;
         setPendingRecipient(null);
         setSelectedConversationId(conversationId);
@@ -205,10 +230,18 @@ const ChatPage = () => {
     const handleSendMessage = (e) => {
         e.preventDefault();
         if (!newMessage.trim() || !socket) return;
+
+        console.log('[ChatPage DEBUG] handleSendMessage: selectedConversationId:', selectedConversationId);
+        console.log('[ChatPage DEBUG] handleSendMessage: pendingRecipient:', pendingRecipient);
+        const messagePayload = selectedConversationId ?
+            { conversationId: selectedConversationId, content: newMessage.trim() } :
+            { recipientId: pendingRecipient._id, content: newMessage.trim() };
+        console.log('[ChatPage DEBUG] handleSendMessage: messagePayload:', messagePayload);
+
         if (selectedConversationId) {
-            socket.emit('sendMessage', { conversationId: selectedConversationId, content: newMessage.trim() });
+            socket.emit('sendMessage', messagePayload);
         } else if (pendingRecipient?._id) {
-            socket.emit('sendMessage', { recipientId: pendingRecipient._id, content: newMessage.trim() });
+            socket.emit('sendMessage', messagePayload);
         } else {
             alert("Please select a conversation or a recipient to send a message.");
         }
@@ -258,7 +291,8 @@ const ChatPage = () => {
     };
 
     const handleUserSelectForNewChat = (user, isExistingConversation) => {
-        console.log("User selected for new chat:", user, "isExisting:", isExistingConversation);
+        console.log('[ChatPage DEBUG] handleUserSelectForNewChat: user:', user, 'isExistingConversation:', isExistingConversation);
+        // console.log("User selected for new chat:", user, "isExisting:", isExistingConversation); // Original log, can be removed or kept
         setIsUserSearchModalOpen(false);
         if (isExistingConversation) {
             const existingConv = conversations.find(conv =>
@@ -392,7 +426,21 @@ const ChatPage = () => {
                                                     onMouseEnter={() => {/* Potentially show dots icon on hover here if it's initially hidden */}}
                                                 >
                                                     {/* Existing content: sender name, message content, timestamp */}
-                                                    <strong style={{display: 'block', marginBottom: '5px'}}>{isMyMessage ? 'You' : (msg.senderId?.firstName || 'Sender')}</strong>
+                                                    <strong style={{display: 'block', marginBottom: '5px'}}>
+                                                        {isMyMessage ? 'You' : (() => {
+                                                            let senderDisplayName = 'Sender'; // Default
+                                                            if (msg.senderId) {
+                                                                if (msg.senderId.firstName && msg.senderId.lastName) {
+                                                                    senderDisplayName = `${msg.senderId.firstName} ${msg.senderId.lastName}`;
+                                                                } else if (msg.senderId.firstName) {
+                                                                    senderDisplayName = msg.senderId.firstName;
+                                                                } else if (msg.senderId.email) { // Fallback to email if no name parts
+                                                                    senderDisplayName = msg.senderId.email;
+                                                                }
+                                                            }
+                                                            return senderDisplayName;
+                                                        })()}
+                                                    </strong>
 
                                                     {/* Message Content (text, image, file, etc.) - RENDER AS IS */}
                                                     {msg.contentType === 'text' && <p className="mb-0" style={{whiteSpace: 'pre-wrap'}}>{msg.content}</p>}

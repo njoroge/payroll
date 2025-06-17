@@ -108,9 +108,13 @@ io.on('connection', (socket) => {
     });
 
     socket.on('sendMessage', async (data) => {
+        const senderId = socket.user._id; // Assuming socket.user is populated by auth middleware
+        console.log(`[Socket DEBUG] sendMessage: Received from senderId: ${senderId}`);
+        console.log(`[Socket DEBUG] sendMessage: Data received:`, data);
+
         try {
             const { conversationId, content, recipientId } = data;
-            const senderId = socket.user._id;
+            // senderId is already defined above
 
             if (!content || !content.trim()) {
                 socket.emit('sendMessageError', { message: 'Message content cannot be empty.' });
@@ -121,11 +125,15 @@ io.on('connection', (socket) => {
             let conversation;
 
             if (!currentConversationId && recipientId) {
-                if (senderId.toString() === recipientId.toString()) {
-                    // This initial check is using Employee._id for recipientId.
-                    // It's a basic check, but the more robust check against actual User IDs is below.
-                    socket.emit('sendMessageError', { message: 'Cannot start a conversation with yourself.' });
-                    return;
+                console.log(`[Socket DEBUG] sendMessage: Handling direct message to recipientId (Employee ID): ${recipientId}`);
+
+                if (senderId.toString() === recipientId.toString()) { // This check is against Employee ID, which is fine for an initial client mistake check.
+                    // However, recipientId here is an Employee ID, senderId is a User ID. This comparison might not be what's intended.
+                    // The more robust check is after fetching actualRecipientUserId.
+                    console.log(`[Socket DEBUG] sendMessage: senderId (${senderId}) and recipientId (${recipientId}) appear to be the same. This check might be comparing User ID to Employee ID.`);
+                    // It's better to rely on the check after converting recipientId (Employee ID) to a User ID.
+                    // socket.emit('sendMessageError', { message: 'Cannot start a conversation with yourself.' }); // Potentially remove this early check
+                    // return;
                 }
 
                 // The recipientId from client is an Employee._id. We need the User._id.
@@ -135,33 +143,41 @@ io.on('connection', (socket) => {
                     return;
                 }
                 const actualRecipientUserId = recipientEmployeeDoc.userId;
+                console.log(`[Socket DEBUG] sendMessage: Mapped recipient Employee ID ${recipientId} to User ID: ${actualRecipientUserId}`);
 
                 // Ensure sender is not trying to message themselves using the actual User ID
                 if (senderId.toString() === actualRecipientUserId.toString()) {
+                    console.log(`[Socket DEBUG] sendMessage: Sender ${senderId} is trying to message themselves (User ID ${actualRecipientUserId}).`);
                     socket.emit('sendMessageError', { message: 'Cannot start a conversation with yourself.' });
                     return;
                 }
 
                 const participants = [senderId, actualRecipientUserId].sort();
+                console.log(`[Socket DEBUG] sendMessage: Sorted participants for direct conversation:`, participants);
 
                 // 1. Attempt to find an existing conversation
                 let isNewConversation = false; // Flag to track if we created it
                 conversation = await Conversation.findOne({
                     companyId: socket.user.companyId,
+                    type: 'direct', // Explicitly check for direct type
                     participants: { $all: participants, $size: participants.length }
                 });
 
-                // 2. If not found, create a new one
-                if (!conversation) {
+                if (conversation) {
+                    console.log(`[Socket DEBUG] sendMessage: Found existing direct conversationId: ${conversation._id}`);
+                } else {
+                    console.log(`[Socket DEBUG] sendMessage: No existing direct conversation found. Creating new one.`);
                     conversation = await Conversation.create({
                         companyId: socket.user.companyId,
-                        participants: participants
-                        // type defaults to 'direct'
+                        participants: participants,
+                        type: 'direct' // Explicitly set type
                     });
+                    console.log(`[Socket DEBUG] sendMessage: Created new direct conversationId: ${conversation._id}`);
                     isNewConversation = true;
                 }
 
                 currentConversationId = conversation._id;
+                console.log(`[Socket DEBUG] sendMessage: Using/created direct conversationId: ${conversation._id} with participants: ${conversation.participants.map(p => p.toString())}`);
                 socket.join(currentConversationId.toString()); // Join the room
                 console.log(`User ${socket.user.email} ensured joined to room ${currentConversationId}. New: ${isNewConversation}`);
 
@@ -174,12 +190,12 @@ io.on('connection', (socket) => {
                         // Populate conversation details for the specific recipient
                         // This ensures the recipient gets fully populated participant info for the new conversation item
                         const populatedNewConversation = await Conversation.findById(currentConversationId)
-                            .populate('participants', 'firstName lastName email role _id') // Populate all participants
-                            .populate({ // Optionally populate lastMessage if it's set by this point (though for a new conv, it might not be)
+                            .populate('participants', 'firstName lastName email role _id')
+                            .populate({
                                 path: 'lastMessage',
                                 populate: { path: 'senderId', select: 'firstName lastName email _id' }
                             });
-
+                        console.log(`[Socket DEBUG] sendMessage: Emitting 'newConversation' to room: ${recipientUserIdStr}, payload:`, { id: populatedNewConversation._id, participants: populatedNewConversation.participants.map(p=>p._id) });
                         io.to(recipientUserIdStr).emit('newConversation', populatedNewConversation);
                         // Log still uses recipientId (Employee._id) for context from client, and recipientUserIdStr (User._id) for actual target room
                         console.log(`Emitted 'newConversation' to user room ${recipientUserIdStr} (for employee ${recipientId}) for conv ${currentConversationId}`);
@@ -195,10 +211,13 @@ io.on('connection', (socket) => {
                     participants: senderId, // Ensure sender is part of the conversation
                     companyId: socket.user.companyId // Ensure conversation belongs to the same company
                 });
+
                 if (!conversation) {
+                    console.log(`[Socket DEBUG] sendMessage: Conversation ${currentConversationId} not found or sender ${senderId} is not a participant.`);
                     socket.emit('sendMessageError', { conversationId: currentConversationId, message: 'Conversation not found or you are not a participant.' });
                     return;
                 }
+                console.log(`[Socket DEBUG] sendMessage: Found conversation type: ${conversation.type}, participants: ${conversation.participants.map(p => p.toString())}`);
             } else {
                 socket.emit('sendMessageError', { message: 'Conversation ID or Recipient ID must be provided.' });
                 return;
@@ -209,6 +228,7 @@ io.on('connection', (socket) => {
                 senderId,
                 content: content.trim(),
             });
+            console.log(`[Socket DEBUG] sendMessage: Saving message for conversationId: ${currentConversationId}`);
             await message.save();
 
             // Update conversation's last message
@@ -228,32 +248,29 @@ io.on('connection', (socket) => {
                 });
 
             // Emit the new message to all clients in the conversation room
+            console.log(`[Socket DEBUG] sendMessage: Emitting 'newMessage' to room: ${currentConversationId.toString()}, messageId: ${populatedMessage._id}, conversationId: ${populatedConversationForEmit._id}`);
             io.to(currentConversationId.toString()).emit('newMessage', {
                 message: populatedMessage,
                 conversation: populatedConversationForEmit // Send the updated conversation object
             });
 
-            // Additionally, if it's a direct message, emit to the recipient's personal room
+            // Additionally, if it's a direct message, emit to the recipient's personal room AND sender's personal room
+            // to ensure both get immediate UI updates even if not actively in the conversation room (e.g., for conversation list updates)
+            // This is an expansion of the original logic for robustness.
             if (conversation.type === 'direct') {
-                // The 'conversation' object here should already be populated with participant User objects
-                // from earlier in the handler (e.g., when it was fetched or created).
-                // If conversation.participants are just IDs, it would need repopulating or a specific query.
-                // Assuming conversation.participants contains at least _id for each participant.
-                const recipientParticipant = conversation.participants.find(
-                    p => p._id.toString() !== senderId.toString()
-                );
-
-                if (recipientParticipant) {
-                    const recipientUserIdStr = recipientParticipant._id.toString();
-
-                    console.log(`Direct message: Emitting 'newMessage' also to recipient user room ${recipientUserIdStr} for conversation ${currentConversationId}`);
-                    io.to(recipientUserIdStr).emit('newMessage', {
-                        message: populatedMessage,
-                        conversation: populatedConversationForEmit
-                    });
-                } else {
-                    console.warn(`Direct message in conversation ${currentConversationId}, but could not identify recipient among participants:`, conversation.participants);
-                }
+                conversation.participants.forEach(participant => {
+                    const participantUserIdStr = participant._id.toString();
+                    // Avoid double-sending if user is already in the conversation room (socket.rooms handles this)
+                    // but this ensures their "personal" room gets it for other UI updates.
+                    if (participantUserIdStr !== socket.id) { // Check if it's not the sender's current socket connection ID (already covered by conversation room emit if joined)
+                         // Actually, emit to their user ID room, not socket.id room.
+                        console.log(`[Socket DEBUG] sendMessage: Emitting 'newMessage' (as part of direct message) to participant user room ${participantUserIdStr} for conversation ${currentConversationId}`);
+                        io.to(participantUserIdStr).emit('newMessage', {
+                            message: populatedMessage,
+                            conversation: populatedConversationForEmit
+                        });
+                    }
+                });
             }
 
         } catch (error) {
