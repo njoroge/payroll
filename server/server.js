@@ -1,4 +1,5 @@
 const express = require('express');
+const path = require('path'); // Added path module
 const dotenv = require('dotenv');
 const cors = require('cors');
 const connectDB = require('./config/db');
@@ -21,6 +22,9 @@ const app = express();
 // Middleware
 app.use(cors());
 app.use(express.json());
+
+// Serve static files from the 'uploads' directory
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Simple Route
 app.get('/', (req, res) => {

@@ -305,12 +305,44 @@ const ChatPage = () => {
 
     const FILE_BASE_URL = api.defaults.baseURL.replace('/api', '');
 
-    const handleFileSelect = (e) => {
-        console.log("File selected:", e.target.files[0]);
-        // Placeholder for actual file upload logic: api.post('/messages/upload', formData) etc.
-        // For now, just clear the input to allow selecting the same file again if needed
-        if (fileInputRef.current) {
-            fileInputRef.current.value = "";
+    const handleFileSelect = async (e) => {
+        const file = e.target.files[0];
+        if (!file) {
+            return;
+        }
+
+        if (!selectedConversationId) {
+            setFileUploadError("Please select a conversation before uploading a file.");
+            if (fileInputRef.current) {
+                fileInputRef.current.value = ""; // Clear the file input
+            }
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('chatFile', file);
+
+        setFileUploading(true);
+        setFileUploadError(null);
+
+        try {
+            await api.post(`/messages/upload/${selectedConversationId}`, formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            });
+            // The 'newMessage' socket event should handle displaying the new file message.
+            // Optionally, clear file input or show a success message if needed,
+            // but often the file input is cleared immediately after selection for UX.
+        } catch (err) {
+            console.error("File upload error:", err);
+            setFileUploadError(err.response?.data?.message || "File upload failed. Please try again.");
+        } finally {
+            setFileUploading(false);
+            // Clear the file input regardless of success or failure to allow re-selection of the same file
+            if (fileInputRef.current) {
+                fileInputRef.current.value = "";
+            }
         }
     };
 
