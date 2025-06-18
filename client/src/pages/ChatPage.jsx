@@ -66,6 +66,8 @@ const ChatPage = () => {
     const [isUserSearchModalOpen, setIsUserSearchModalOpen] = useState(false);
     const [pendingRecipient, setPendingRecipient] = useState(null);
     const [activeMessageMenu, setActiveMessageMenu] = useState(null); // To store msg._id of open menu
+    const [showNotification, setShowNotification] = useState(false);
+    const [notificationMessage, setNotificationMessage] = useState('');
 
     const previousConversationIdRef = useRef(null);
     const messagesEndRef = useRef(null);
@@ -118,9 +120,21 @@ const ChatPage = () => {
             newSocket.on('newMessage', ({ message, conversation: updatedConversation }) => {
                 console.log('[User B Client] Received newMessage event. Message:', message, 'Updated Conversation:', updatedConversation);
 
+                // Input validation for the message object itself
+                if (!message || !message._id) {
+                    console.warn("ChatPage: Received newMessage event with invalid message object (ID missing):", message);
+                    return; // Skip processing if message or message._id is missing
+                }
+
                 setSelectedConversationId(prevSelectedId => {
                     if (prevSelectedId === message.conversationId) {
-                        setMessages(prevMessages => [...prevMessages, message]);
+                        setMessages(prevMessages => {
+                            // Check if message already exists
+                            if (prevMessages.some(m => m._id === message._id)) {
+                                return prevMessages; // If exists, return current messages, no change
+                            }
+                            return [...prevMessages, message]; // If not, add new message
+                        });
                     }
                     return prevSelectedId;
                 });
@@ -141,6 +155,14 @@ const ChatPage = () => {
                 });
                 if (message.senderId?._id === currentChatUserId) {
                     setNewMessage('');
+                } else {
+                    // Show notification for messages from others
+                    const senderName = message.senderId?.firstName || 'Someone';
+                    setNotificationMessage(`New message from ${senderName}: ${message.contentType === 'text' ? message.content.substring(0, 30) + '...' : (message.fileName || 'attachment')}`);
+                    setShowNotification(true);
+                    setTimeout(() => {
+                        setShowNotification(false);
+                    }, 5000); // Auto-dismiss after 5 seconds
                 }
             });
             newSocket.on('newConversation', (newConversationObject) => { // Renamed parameter
@@ -240,8 +262,10 @@ const ChatPage = () => {
 
         if (selectedConversationId) {
             socket.emit('sendMessage', messagePayload);
+            setNewMessage(''); // Clear input after sending
         } else if (pendingRecipient?._id) {
             socket.emit('sendMessage', messagePayload);
+            setNewMessage(''); // Clear input after sending
         } else {
             alert("Please select a conversation or a recipient to send a message.");
         }
@@ -360,6 +384,35 @@ const ChatPage = () => {
 
     return (
         <ErrorBoundary>
+            {/* Notification Area */}
+            {showNotification && (
+                <div style={{
+                    position: 'fixed',
+                    top: '20px',
+                    right: '20px',
+                    padding: '15px',
+                    backgroundColor: '#28a745', // Bootstrap success green
+                    color: 'white',
+                    borderRadius: '5px',
+                    zIndex: 1050, // High z-index
+                    boxShadow: '0 2px 10px rgba(0,0,0,0.2)'
+                }}>
+                    {notificationMessage}
+                    <button onClick={() => setShowNotification(false)} style={{
+                        marginLeft: '15px',
+                        color: 'white',
+                        background: 'none',
+                        border: 'none',
+                        fontWeight: 'bold',
+                        cursor: 'pointer',
+                        fontSize: '1.2em',
+                        lineHeight: '1' // Ensure consistent vertical alignment
+                    }}>
+                        &times; {/* Close icon */}
+                    </button>
+                </div>
+            )}
+            {/* Main Chat Layout */}
             <div className="container-fluid mt-3" style={{ height: 'calc(100vh - 100px)', display: 'flex', flexDirection: 'column' }}>
                 <h3>Messaging</h3>
                 <div style={{ display: 'flex', flexGrow: 1, border: '1px solid #ccc', borderRadius: '4px', overflow: 'hidden' }}>
@@ -599,4 +652,3 @@ const UserSearchModal = ({ isOpen, onClose, onSelectUser, loggedInUserInfo, curr
 };
 
 export default ChatPage;
-```
