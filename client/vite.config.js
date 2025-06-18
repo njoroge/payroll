@@ -7,9 +7,7 @@ const mode = process.env.NODE_ENV || 'development';
 
 export default defineConfig({
   plugins: [
-    react({
-      jsxRuntime: 'classic' // Explicitly set to classic runtime
-    })
+    react() // Use default automatic JSX runtime
   ],
   define: {
     // Define process.env as an object.

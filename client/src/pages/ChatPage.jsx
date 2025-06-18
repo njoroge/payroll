@@ -50,7 +50,7 @@ const ChatPage = () => {
         return <p>User information not available. You might need to log in.</p>;
     }
 
-    const currentChatUserId = userInfo.employee?._id || userInfo._id;
+    const currentChatUserId = userInfo._id;
 
     const [socket, setSocket] = useState(null);
     const [conversations, setConversations] = useState([]);
