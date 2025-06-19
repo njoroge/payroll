@@ -1,11 +1,13 @@
-import React from 'react';
-import { Outlet, Link, useNavigate } from 'react-router-dom';
-import { useAuth } from '../store/authContext'; // Adjust path if necessary
+import React, { useState, useEffect, useLayoutEffect } from 'react'; // Added useLayoutEffect
+import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom'; // Added useLocation
+import { useAuth } from '../store/authContext';
+import Sidebar from '../components/common/Sidebar';
+import styles from './MainLayout.module.css';
+import { FaBars as MobileMenuIcon } from 'react-icons/fa'; // Icon for mobile toggle
 
-// Basic Footer component (can be enhanced or moved later)
 const Footer = () => {
   return (
-    <footer className="bg-dark text-white text-center p-4 mt-auto">
+    <footer className={styles.appFooter}>
       © {new Date().getFullYear()} Payroll App. All rights reserved.
     </footer>
   );
@@ -14,99 +16,134 @@ const Footer = () => {
 const MainLayout = () => {
   const { isAuthenticated, userInfo, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation(); // For closing mobile sidebar on route change
 
-  const handleLogout = () => {
-    logout();
-    navigate('/login');
+  const [isDesktopSidebarCollapsed, setIsDesktopSidebarCollapsed] = useState(false);
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+  const [isTabletView, setIsTabletView] = useState(false); // Initialize based on initial check
+  const [isMobileView, setIsMobileView] = useState(false); // Initialize based on initial check
+
+
+  // Hook to update view type on resize
+  useLayoutEffect(() => {
+    const updateViewModes = () => {
+      const currentIsMobile = window.innerWidth <= 767;
+      const currentIsTablet = window.innerWidth <= 991 && window.innerWidth > 767;
+
+      if (currentIsMobile !== isMobileView) {
+        setIsMobileView(currentIsMobile);
+      }
+      if (currentIsTablet !== isTabletView) {
+        setIsTabletView(currentIsTablet);
+        if (currentIsTablet) { // Entering Tablet view
+            setIsDesktopSidebarCollapsed(true);
+        } else if (!currentIsMobile && isDesktopSidebarCollapsed) {
+            // Optional: If leaving tablet UP to desktop, and it was collapsed, un-collapse it?
+            // For now, it stays collapsed unless user expands.
+        }
+      }
+
+      // Close mobile sidebar if screen becomes too large for it
+      if (!currentIsMobile && isMobileSidebarOpen) {
+        setIsMobileSidebarOpen(false);
+      }
+    };
+
+    window.addEventListener('resize', updateViewModes);
+    updateViewModes(); // Initial check
+    return () => window.removeEventListener('resize', updateViewModes);
+  }, [isMobileView, isTabletView, isMobileSidebarOpen]); // Added dependencies
+
+
+  // Close mobile sidebar on route change
+  useEffect(() => {
+    if (isMobileSidebarOpen) {
+      setIsMobileSidebarOpen(false);
+    }
+  }, [location.pathname]);
+
+
+  const handleDesktopSidebarToggle = (collapsedStateFromSidebar) => {
+    setIsDesktopSidebarCollapsed(collapsedStateFromSidebar);
   };
 
+  const handleMobileSidebarToggle = (openState) => {
+    setIsMobileSidebarOpen(typeof openState === 'boolean' ? openState : !isMobileSidebarOpen);
+  };
+
+  const sidebarTheme = 'dark';
+
+  let mainContentClass = styles.mainContent;
+  if (isAuthenticated) {
+    if (isMobileView) { // Check isMobileView state
+      mainContentClass = `${styles.mainContent} ${styles.contentNoShiftMobile}`;
+    } else { // Desktop or Tablet
+      mainContentClass = `${styles.mainContent} ${isDesktopSidebarCollapsed ? styles.contentShiftCollapsed : styles.contentShiftExpanded}`;
+    }
+  } else {
+    mainContentClass = `${styles.mainContent} ${styles.contentNoSidebar}`;
+  }
+
+
   return (
-    // Updated outer div to be a flex column for Navbar, Main Content, Footer
-    <div className="d-flex flex-column min-vh-100 bg-light">
-      <nav className="navbar navbar-expand-lg navbar-light bg-light border-bottom"> {/* Added border-bottom for subtle separation */}
+    <div className={`${styles.mainLayout} ${isMobileSidebarOpen ? styles.mobileSidebarActive : ''}`}>
+      <nav className={`navbar navbar-expand-lg navbar-light bg-light ${styles.appNavbar}`}>
         <div className="container-fluid">
-          <Link className="navbar-brand" to="/">Payroll App</Link>
-          <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+          {/* Mobile Sidebar Toggle - visible only on small screens */}
+          {isAuthenticated && isMobileView && ( // Check isMobileView state
+            <button
+              className={`${styles.mobileSidebarToggle} d-lg-none`} // d-lg-none hides on large screens and up
+              onClick={() => handleMobileSidebarToggle()}
+              aria-label="Open navigation menu"
+              aria-expanded={isMobileSidebarOpen}
+              aria-controls="appSidebar" // Point to sidebar ID if it has one
+            >
+              <MobileMenuIcon />
+            </button>
+          )}
+          <Link className="navbar-brand" to="/">{isAuthenticated && isMobileView ? '' : 'Payroll App'}</Link> {/* Hide brand on mobile if toggle is there to save space */}
+
+          <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavMain" aria-controls="navbarNavMain" aria-expanded="false" aria-label="Toggle navigation">
             <span className="navbar-toggler-icon"></span>
           </button>
-          <div className="collapse navbar-collapse" id="navbarNav">
+
+          <div className="collapse navbar-collapse" id="navbarNavMain">
             <ul className="navbar-nav me-auto mb-2 mb-lg-0">
-              {isAuthenticated && userInfo && ( // Show links if user is logged in and userInfo is available
+              {isAuthenticated && userInfo && (
                 <>
-                  <li className="nav-item">
-                    <Link className="nav-link" to="/">Home</Link>
-                  </li>
-                  {/* Messages link for all authenticated users */}
-                  <li className="nav-item">
-                    <Link className="nav-link" to="/messages">Messages</Link>
-                  </li>
-                  {/* Employee specific links */}
-                  {userInfo.role === 'employee' && (
-                    <>
-                      <li className="nav-item">
-                        <Link className="nav-link" to="/my-paystubs">My Paystubs</Link>
-                      </li>
-                      <li className="nav-item">
-                        <Link className="nav-link" to="/my-benefits">My Benefits</Link>
-                      </li>
-                      <li className="nav-item">
-                        <Link className="nav-link" to="/help">Help</Link>
-                      </li>
-                    </>
-                  )}
-                  { userInfo.role !== 'employee' && (
-                    <>
-                      <li className="nav-item">
-                        <Link className="nav-link" to="/employees">Employees</Link>
-                      </li>
-                      <li className="nav-item">
-                        <Link className="nav-link" to="/departments">Departments</Link>
-                      </li>
-                      <li className="nav-item">
-                        <Link className="nav-link" to="/payrolls">Payrolls</Link>
-                      </li>
-                    </>
-                  )}
-                  {/* Add other links based on roles if needed, e.g., Income Grades, Payroll Ops */}
-                  {/* Ensure userInfo is checked before accessing its properties */}
-                  {(userInfo.role === 'company_admin' || userInfo.role === 'hr_manager' || userInfo.role === 'employee_admin') && (
-                     <li className="nav-item dropdown">
-                        <a className="nav-link dropdown-toggle" href="#" id="navbarDropdownOps" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                            Operations
-                        </a>
-                        <ul className="dropdown-menu" aria-labelledby="navbarDropdownOps">
-                            <li><Link className="dropdown-item" to="/income-grades">Income Grades</Link></li>
-                            <li><Link className="dropdown-item" to="/payroll-ops/advances">Advances</Link></li>
-                            {/* Add other ops links here */}
-                        </ul>
-                    </li>
-                  )}
-                  {/* Settings link for all authenticated users */}
-                  <li className="nav-item">
-                    <Link className="nav-link" to="/settings">Settings</Link>
-                  </li>
+                  {/* <li className="nav-item"><Link className="nav-link" to="/messages">Messages</Link></li> */}
                 </>
               )}
             </ul>
-            {isAuthenticated ? (
-              null // Logout button removed, alternative is on Settings page
+             {isAuthenticated ? (
+              <button onClick={() => { logout(); navigate('/login'); }} className="btn btn-outline-danger">Logout</button>
             ) : (
               <>
                 <Link className="btn btn-outline-primary me-2" to="/login">Login</Link>
-                <Link className="btn btn-primary" to="/register-company">Register Company</Link>
+                <Link className="btn btn-primary" to="/register-company">Register</Link>
               </>
             )}
           </div>
         </div>
       </nav>
 
-      {/* Wrapper for main content and footer, to grow and push footer down */}
-      <div className="d-flex flex-column flex-grow-1">
-        <main className="flex-grow-1 p-4">
-          <Outlet /> {/* This renders the actual page content */}
+      <div className={styles.contentWrapper}>
+        {isAuthenticated && (
+          <Sidebar
+            id="appSidebar" // Added ID for aria-controls
+            theme={sidebarTheme}
+            onDesktopToggle={handleDesktopSidebarToggle}
+            initialDesktopCollapsed={isTabletView || isDesktopSidebarCollapsed}
+            isMobileOpen={isMobileSidebarOpen}
+            onMobileToggle={handleMobileSidebarToggle}
+          />
+        )}
+        <main className={mainContentClass}>
+          <Outlet />
         </main>
-        <Footer /> {/* Footer component */}
       </div>
+      {/* Backdrop is now part of Sidebar.jsx and controlled there */}
+      <Footer />
     </div>
   );
 };
