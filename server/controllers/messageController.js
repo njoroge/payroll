@@ -263,11 +263,10 @@ const uploadFileForConversation = async (req, res) => {
         res.status(201).json(populatedFileMessage);
 
     } catch (error) {
+        console.error('Original error during file upload:', error);
         console.error('Error uploading file:', error);
-        if (req.file && req.file.path) {
-            if (fs.existsSync(req.file.path)) {
-                 fs.unlinkSync(req.file.path);
-            }
+        if (req.file && req.file.path && fs.existsSync(req.file.path)) {
+            fs.unlinkSync(req.file.path);
         }
         if (error.message.startsWith('Invalid file type')) {
              return res.status(400).json({ message: error.message });

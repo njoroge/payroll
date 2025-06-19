@@ -19,8 +19,9 @@ const messageSchema = new mongoose.Schema({
     // Let's keep it simple for now and rely on conversation.participants.
     content: {
         type: String,
-        required: true,
+        required: false, // Changed from true to false
         trim: true,
+        default: '', // Optionally, provide a default empty string
     },
     contentType: { // E.g., 'text', 'image', 'file', 'pdf'
         type: String,
