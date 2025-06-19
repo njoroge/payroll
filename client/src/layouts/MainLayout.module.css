@@ -1,0 +1,80 @@
+/* client/src/layouts/MainLayout.module.css */
+.mainLayout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.contentWrapper {
+  display: flex;
+  flex-grow: 1;
+  position: relative;
+}
+
+.mainContent {
+  flex-grow: 1;
+  padding: 20px;
+  overflow-y: auto;
+  transition: margin-left 0.3s ease-in-out;
+  background-color: #ffffff;
+}
+
+.contentShiftExpanded {
+  margin-left: 260px;
+}
+
+.contentShiftCollapsed {
+  margin-left: 70px;
+}
+
+.contentNoSidebar {
+  margin-left: 0px;
+}
+
+.appNavbar {
+   border-bottom: 1px solid #dee2e6;
+   /* Bootstrap navbar z-index is 1030. Sidebar mobile is 1050. */
+}
+
+.appFooter {
+    background-color: #343a40;
+    color: white;
+    text-align: center;
+    padding: 1rem;
+}
+
+/* Styles for responsive behavior */
+.contentNoShiftMobile {
+  margin-left: 0px !important; /* Ensure no margin for mobile overlay */
+}
+
+.mobileSidebarToggle {
+  background: none;
+  border: none;
+  font-size: 24px; /* Size of the icon */
+  color: rgba(0,0,0,.55); /* Bootstrap navbar-light color for toggler icon */
+  padding: 0.25rem 0.5rem; /* Similar to Bootstrap's navbar-toggler */
+  margin-right: 10px;
+  line-height: 1; /* Ensure it aligns well */
+}
+.mobileSidebarToggle:hover {
+  color: rgba(0,0,0,.7);
+}
+.mobileSidebarToggle:focus {
+  outline: none;
+  box-shadow: 0 0 0 0.2rem rgba(0,123,255,.25);
+}
+
+/* Dim content when mobile sidebar is open - Optional */
+/* These can be problematic with fixed elements or cause repaints */
+/* .mainLayout.mobileSidebarActive > .contentWrapper {
+  filter: brightness(0.7);
+  transition: filter 0.3s ease-in-out;
+}
+.mainLayout:not(.mobileSidebarActive) > .contentWrapper {
+  filter: brightness(1);
+  transition: filter 0.3s ease-in-out;
+} */
+
+/* The backdrop is now part of Sidebar.jsx and styled in Sidebar.module.css */
+/* No need for .backdrop styles here anymore */
