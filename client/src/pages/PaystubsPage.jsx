@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import api from '../services/api';
 import { useAuth } from '../store/authContext';
-import { formatCurrency } from '../../utils/formatting';
+import { formatCurrency } from '../utils/formatting';
 
 const PaystubsPage = () => {
     const { payslipId } = useParams();

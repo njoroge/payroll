@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import api from '../../services/api';
 import { useAuth } from '../../store/authContext';
-import { formatCurrency } from '../../../utils/formatting';
+import { formatCurrency } from '../../utils/formatting';
 
 const PayrollListPage = () => {
     const [payrolls, setPayrolls] = useState([]);

@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import api from '../../services/api';
-import { formatCurrency } from '../../../utils/formatting'; // Added import
+import { formatCurrency } from '../../utils/formatting'; // Added import
 
 const ViewPayslipPage = () => {
     const { id: payslipId } = useParams();

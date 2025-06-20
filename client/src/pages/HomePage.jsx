@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../store/authContext';
 import { Link } from 'react-router-dom';
 import api from '../services/api.jsx'; // Corrected import path
-import { formatCurrency } from '../../utils/formatting';
+import { formatCurrency } from '../utils/formatting';
 
 const HomePage = () => {
     const { userInfo, isAuthenticated } = useAuth();
