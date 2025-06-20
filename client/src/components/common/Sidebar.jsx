@@ -58,7 +58,7 @@ const navItems = [
   },
 ];
 
-const Sidebar = ({ theme = 'dark', onDesktopToggle, initialDesktopCollapsed = false, isMobileOpen = false, onMobileToggle }) => {
+const Sidebar = ({ theme = 'dark', onDesktopToggle, initialDesktopCollapsed = false, isMobileOpen = false, onMobileToggle, onLogoutClick, userInfo }) => {
   const [isDesktopCollapsed, setIsDesktopCollapsed] = useState(initialDesktopCollapsed);
   const [openAccordionSubmenu, setOpenAccordionSubmenu] = useState(null); // For accordion
   const [hoveredFlyoutParentId, setHoveredFlyoutParentId] = useState(null); // For flyout
@@ -251,16 +251,18 @@ const Sidebar = ({ theme = 'dark', onDesktopToggle, initialDesktopCollapsed = fa
           </div>
           {(!currentIsEffectivelyCollapsed || isMobileOpen) && (
             <div className={styles.userDetails}>
-              <p className={styles.userName} title="User Name">User Name</p>
-              <Link to="#" onClick={() => {alert('Logout clicked!'); if(isMobileOpen && onMobileToggle) onMobileToggle(false); setHoveredFlyoutParentId(null);}} className={styles.logoutLink} role="menuitem">
+              <p className={styles.userName} title={userInfo?.lastName || userInfo?.firstName || ''}>
+                {userInfo?.lastName || userInfo?.firstName || ''}
+              </p>
+              <a href="#" onClick={(e) => { e.preventDefault(); if(onLogoutClick) onLogoutClick(); if(isMobileOpen && onMobileToggle) onMobileToggle(false); setHoveredFlyoutParentId(null); }} className={styles.logoutLink} role="menuitem">
                 <FaSignOutAlt className={styles.icon} /> <span className={styles.text}>Logout</span>
-              </Link>
+              </a>
             </div>
           )}
            {(currentIsEffectivelyCollapsed && !isMobileOpen) && (
-              <Link to="#" onClick={() => {alert('Logout clicked!'); setHoveredFlyoutParentId(null);}} className={styles.logoutLink} title="Logout" role="menuitem">
+              <a href="#" onClick={(e) => { e.preventDefault(); if(onLogoutClick) onLogoutClick(); setHoveredFlyoutParentId(null); }} className={styles.logoutLink} title="Logout" role="menuitem">
                 <FaSignOutAlt className={styles.icon} />
-              </Link>
+              </a>
             )}
         </div>
       </div>
@@ -274,5 +276,17 @@ Sidebar.propTypes = {
   initialDesktopCollapsed: PropTypes.bool,
   isMobileOpen: PropTypes.bool,
   onMobileToggle: PropTypes.func,
+  onLogoutClick: PropTypes.func,
+  userInfo: PropTypes.shape({
+    firstName: PropTypes.string,
+    lastName: PropTypes.string,
+  }),
+};
+
+Sidebar.defaultProps = {
+  userInfo: {
+    firstName: '',
+    lastName: '', // Change 'User' to an empty string
+  }
 };
 export default Sidebar;

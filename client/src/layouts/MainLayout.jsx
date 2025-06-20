@@ -73,6 +73,11 @@ const MainLayout = () => {
 
   const sidebarTheme = 'dark';
 
+  const handleLogout = () => {
+    logout(); // This is from useAuth()
+    navigate('/login'); // This is from useNavigate()
+  };
+
   let mainContentClass = styles.mainContent;
   if (isAuthenticated) {
     if (isMobileView) { // Check isMobileView state
@@ -115,9 +120,7 @@ const MainLayout = () => {
                 </>
               )}
             </ul>
-             {isAuthenticated ? (
-              <button onClick={() => { logout(); navigate('/login'); }} className="btn btn-outline-danger">Logout</button>
-            ) : (
+             {!isAuthenticated && ( // Show only if not authenticated
               <>
                 <Link className="btn btn-outline-primary me-2" to="/login">Login</Link>
                 <Link className="btn btn-primary" to="/register-company">Register</Link>
@@ -136,6 +139,8 @@ const MainLayout = () => {
             initialDesktopCollapsed={isTabletView || isDesktopSidebarCollapsed}
             isMobileOpen={isMobileSidebarOpen}
             onMobileToggle={handleMobileSidebarToggle}
+            onLogoutClick={handleLogout} // Add this line
+            userInfo={userInfo} // Add this line
           />
         )}
         <main className={mainContentClass}>

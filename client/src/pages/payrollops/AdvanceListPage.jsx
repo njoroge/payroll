@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import api from '../../services/api';
 import AdvanceFormModal from './AdvanceFormModal';
 import { useAuth } from '../../store/authContext';
-import { formatCurrency } from '../../../utils/formatting';
+import { formatCurrency } from '../../utils/formatting';
 
 const AdvanceListPage = () => {
     const [advances, setAdvances] = useState([]);
