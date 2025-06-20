@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import { Link, useLocation } from 'react-router-dom';
 import styles from './Sidebar.module.css';
 import {
-  FaBars, FaTachometerAlt, FaFileInvoiceDollar, FaUsers, FaChartBar, FaCog, FaQuestionCircle, FaSignOutAlt, FaUserCircle, FaAngleDown, FaAngleRight, FaTimes
+  FaBars, FaTachometerAlt, FaFileInvoiceDollar, FaUsers, FaChartBar, FaCog, FaQuestionCircle, FaSignOutAlt, FaUserCircle, FaAngleDown, FaAngleRight, FaTimes, FaHistory, FaComments, FaEnvelope, FaUserCheck, FaMoneyBillWave, FaLeaf, FaFileContract, FaCalendarAlt, FaIdCard
 } from 'react-icons/fa';
 
 const navItems = [
@@ -15,13 +15,25 @@ const navItems = [
     path: '/',
   },
   {
+    id: 'employeeSelfService',
+    text: 'Employee Self Service',
+    icon: <FaUserCheck />,
+    path: '/my-personal-info', // Default path for the parent item
+    subItems: [
+      { id: 'myPaystubs', text: 'Paystubs', path: '/my-paystubs', icon: <FaMoneyBillWave className={styles.submenuIcon} /> },
+      { id: 'myBenefits', text: 'Benefits', path: '/my-benefits', icon: <FaLeaf className={styles.submenuIcon} /> },
+      { id: 'myTaxForms', text: 'Tax Forms', path: '/my-tax-forms', icon: <FaFileContract className={styles.submenuIcon} /> },
+      { id: 'myLeave', text: 'Leave', path: '/my-leave', icon: <FaCalendarAlt className={styles.submenuIcon} /> },
+      { id: 'myPersonalInfo', text: 'Personal Information', path: '/my-personal-info', icon: <FaIdCard className={styles.submenuIcon} /> },
+    ],
+  },
+  {
     id: 'payrollProcessing',
     text: 'Payroll Processing',
     icon: <FaFileInvoiceDollar />,
     path: '/payrolls',
     subItems: [
       { id: 'runPayroll', text: 'Run Payroll', path: '/payrolls/run', icon: <FaAngleRight className={styles.submenuIcon} /> },
-      { id: 'payrollHistory', text: 'Payroll History', path: '/payrolls', icon: <FaAngleRight className={styles.submenuIcon} /> },
     ],
   },
   {
@@ -38,7 +50,19 @@ const navItems = [
     id: 'reportsAnalytics',
     text: 'Reports & Analytics',
     icon: <FaChartBar />,
-    path: '/reports',
+    path: '/reports', // This path might need to be adjusted if it's a parent now
+    subItems: [
+      { id: 'payrollHistoryReport', text: 'Payroll History', path: '/payrolls', icon: <FaHistory className={styles.submenuIcon} /> },
+    ],
+  },
+  {
+    id: 'communication',
+    text: 'Communication',
+    icon: <FaComments />,
+    path: '/communication', // Define a base path, can be adjusted later
+    subItems: [
+      { id: 'messages', text: 'Messages', path: '/messages', icon: <FaEnvelope className={styles.submenuIcon} /> },
+    ],
   },
   {
     id: 'configurationAdmin',
