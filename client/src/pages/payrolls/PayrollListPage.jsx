@@ -64,11 +64,6 @@ const PayrollListPage = () => {
     return (
         <div>
             <h2>Payroll Records</h2>
-            {(userInfo.role === 'company_admin' || userInfo.role === 'hr_manager' || userInfo.role === 'employee_admin') && (
-                <button onClick={handleRunPayroll} className="btn btn-success mb-3">
-                    Run New Payroll
-                </button>
-            )}
             <div className="mb-3 d-flex align-items-center"> {/* Added d-flex for better alignment */}
                 <span className="me-2">Filter by:</span> {/* Added span and margin for label */}
                 <select value={filterMonth} onChange={e => setFilterMonth(e.target.value)} className="form-select form-select-sm me-2" style={{width: 'auto'}}> {/* Added form-select, width auto */}

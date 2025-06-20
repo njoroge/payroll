@@ -15,6 +15,10 @@ import ViewEmployeePage from './pages/employees/ViewEmployeePage';
 import MyPayslipsPage from './pages/employees/MyPayslipsPage'; // Existing, may be different from new PaystubsPage
 import PaystubsPage from './pages/PaystubsPage'; // New page for /my-paystubs
 
+// Employee Self-Service Pages
+import TaxFormsPage from './pages/employee_self_service/TaxFormsPage';
+import LeavePage from './pages/employee_self_service/LeavePage';
+import PersonalInformationPage from './pages/employee_self_service/PersonalInformationPage';
 
 // Department Pages
 import DepartmentListPage from './pages/departments/DepartmentListPage';
@@ -140,6 +144,23 @@ function AppContent() {
         <Route path="/my-benefits" element={
           <ProtectedRoute roles={['employee']}>
             <BenefitsPage />
+          </ProtectedRoute>
+        } />
+
+        {/* Employee Self-Service Routes */}
+        <Route path="/my-tax-forms" element={
+          <ProtectedRoute roles={['employee']}>
+            <TaxFormsPage />
+          </ProtectedRoute>
+        } />
+        <Route path="/my-leave" element={
+          <ProtectedRoute roles={['employee']}>
+            <LeavePage />
+          </ProtectedRoute>
+        } />
+        <Route path="/my-personal-info" element={
+          <ProtectedRoute roles={['employee']}>
+            <PersonalInformationPage />
           </ProtectedRoute>
         } />
 
