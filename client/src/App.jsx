@@ -7,6 +7,7 @@ import LoginPage from './pages/auth/LoginPage';
 import RegisterCompanyPage from './pages/auth/RegisterCompanyPage';
 import UnauthorizedPage from './pages/UnauthorizedPage';
 import ProtectedRoute from './components/common/ProtectedRoute';
+import PublicRouteOnly from './components/common/PublicRouteOnly';
 
 // Employee Pages
 import EmployeeListPage from './pages/employees/EmployeeListPage';
@@ -46,14 +47,18 @@ import SettingsPage from './pages/SettingsPage';
 // Chat Page
 import ChatPage from './pages/ChatPage';
 
+// Report Pages
+import UserPayslipReportPage from './pages/reports/UserPayslipReportPage';
+import PrintablePayslipView from './components/reports/PrintablePayslipView';
+
 
 function AppContent() {
   return (
     <Routes>
       <Route element={<MainLayout />}>
         {/* Public Routes */}
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/register-company" element={<RegisterCompanyPage />} />
+        <Route path="/login" element={<PublicRouteOnly><LoginPage /></PublicRouteOnly>} />
+        <Route path="/register-company" element={<PublicRouteOnly><RegisterCompanyPage /></PublicRouteOnly>} />
         <Route path="/unauthorized" element={<UnauthorizedPage />} />
 
         {/* Protected Routes */}
@@ -172,6 +177,20 @@ function AppContent() {
 
         {/* Chat/Messages Page Route - Accessible to all authenticated users (further role restrictions can be added if needed) */}
         <Route path="/messages" element={<ChatPage />} />
+
+        {/* User Payslip Report Route - Accessible to all authenticated users with an employee profile */}
+        <Route path="/reports/my-payslips" element={
+          <ProtectedRoute roles={['employee', 'company_admin', 'hr_manager', 'employee_admin']}>
+            <UserPayslipReportPage />
+          </ProtectedRoute>
+        } />
+
+        {/* Route for printing a single payslip from the report - Accessible to relevant roles */}
+        <Route path="/reports/my-payslips/print/:payslipId" element={
+          <ProtectedRoute roles={['employee', 'company_admin', 'hr_manager', 'employee_admin']}>
+            <PrintablePayslipView />
+          </ProtectedRoute>
+        } />
 
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>
