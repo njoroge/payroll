@@ -86,7 +86,8 @@ const navItems = [
   },
 ];
 
-const Sidebar = ({ theme = 'dark', onDesktopToggle, initialDesktopCollapsed = false, isMobileOpen = false, onMobileToggle, onLogoutClick, userInfo }) => {
+// Defaulting theme prop to 'light' as a safeguard, though MainLayout should always pass 'light'.
+const Sidebar = ({ theme = 'light', onDesktopToggle, initialDesktopCollapsed = false, isMobileOpen = false, onMobileToggle, onLogoutClick, userInfo }) => {
   const [isDesktopCollapsed, setIsDesktopCollapsed] = useState(initialDesktopCollapsed);
   const [openAccordionSubmenu, setOpenAccordionSubmenu] = useState(null); // For accordion
   const [hoveredFlyoutParentId, setHoveredFlyoutParentId] = useState(null); // For flyout

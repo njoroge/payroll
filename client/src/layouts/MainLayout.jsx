@@ -71,7 +71,9 @@ const MainLayout = () => {
     setIsMobileSidebarOpen(typeof openState === 'boolean' ? openState : !isMobileSidebarOpen);
   };
 
-  const sidebarTheme = 'dark';
+  const currentTheme = 'light'; // Set 'light' as the default theme
+  // const sidebarTheme = 'dark'; // Previous hardcoded theme
+  const sidebarTheme = currentTheme; // Sidebar theme will match the current application theme
 
   const handleLogout = () => {
     logout(); // This is from useAuth()
@@ -91,7 +93,7 @@ const MainLayout = () => {
 
 
   return (
-    <div className={`${styles.mainLayout} ${isMobileSidebarOpen ? styles.mobileSidebarActive : ''}`}>
+    <div className={`${styles.mainLayout} ${isMobileSidebarOpen ? styles.mobileSidebarActive : ''} theme-${currentTheme}`}> {/* Added theme class */}
       <nav className={`navbar navbar-expand-lg navbar-light bg-light ${styles.appNavbar}`}>
         <div className="container-fluid">
           {/* Mobile Sidebar Toggle - visible only on small screens */}
