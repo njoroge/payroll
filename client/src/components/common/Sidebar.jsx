@@ -4,7 +4,7 @@ import PropTypes from 'prop-types';
 import { Link, useLocation } from 'react-router-dom';
 import styles from './Sidebar.module.css';
 import {
-  FaBars, FaTachometerAlt, FaFileInvoiceDollar, FaUsers, FaChartBar, FaCog, FaQuestionCircle, FaSignOutAlt, FaUserCircle, FaAngleDown, FaAngleRight, FaTimes, FaHistory, FaComments, FaEnvelope, FaUserCheck, FaMoneyBillWave, FaLeaf, FaFileContract, FaCalendarAlt, FaIdCard
+  FaBars, FaTachometerAlt, FaFileInvoiceDollar, FaUsers, FaChartBar, FaCog, FaQuestionCircle, FaSignOutAlt, FaUserCircle, FaAngleDown, FaAngleRight, FaTimes, FaHistory, FaComments, FaEnvelope, FaUserCheck, FaMoneyBillWave, FaLeaf, FaFileContract, FaCalendarAlt, FaIdCard, FaPrint
 } from 'react-icons/fa';
 
 const navItems = [
@@ -32,6 +32,7 @@ const navItems = [
     text: 'Payroll Processing',
     icon: <FaFileInvoiceDollar />,
     path: '/payrolls',
+    roles: ['company_admin', 'employee_admin', 'hr_manager'],
     subItems: [
       { id: 'runPayroll', text: 'Run Payroll', path: '/payrolls/run', icon: <FaAngleRight className={styles.submenuIcon} /> },
     ],
@@ -41,6 +42,7 @@ const navItems = [
     text: 'Employee Management',
     icon: <FaUsers />,
     path: '/employees',
+    roles: ['company_admin', 'employee_admin', 'hr_manager'],
     subItems: [
       { id: 'employeeList', text: 'Employee List', path: '/employees', icon: <FaAngleRight className={styles.submenuIcon} /> },
       { id: 'addEmployee', text: 'Add Employee', path: '/employees/new', icon: <FaAngleRight className={styles.submenuIcon} /> },
@@ -52,7 +54,8 @@ const navItems = [
     icon: <FaChartBar />,
     path: '/reports', // This path might need to be adjusted if it's a parent now
     subItems: [
-      { id: 'payrollHistoryReport', text: 'Payroll History', path: '/payrolls', icon: <FaHistory className={styles.submenuIcon} /> },
+      { id: 'payrollHistoryReport', text: 'Payroll History', path: '/payrolls', icon: <FaHistory className={styles.submenuIcon} />, roles: ['company_admin', 'employee_admin', 'hr_manager'] },
+      { id: 'myPayslipReport', text: 'My Payslip Report', path: '/reports/my-payslips', icon: <FaPrint className={styles.submenuIcon} /> }
     ],
   },
   {
@@ -69,6 +72,7 @@ const navItems = [
     text: 'Configuration',
     icon: <FaCog />,
     path: '/settings',
+    roles: ['company_admin', 'employee_admin', 'hr_manager'],
     subItems: [
       { id: 'departments', text: 'Departments', path: '/departments', icon: <FaAngleRight className={styles.submenuIcon} /> },
       { id: 'incomeGrades', text: 'Income Grades', path: '/income-grades', icon: <FaAngleRight className={styles.submenuIcon} /> },
@@ -140,8 +144,17 @@ const Sidebar = ({ theme = 'dark', onDesktopToggle, initialDesktopCollapsed = fa
 
   const currentIsEffectivelyCollapsed = isDesktopCollapsed && !isMobileOpen;
 
-  const renderNavItems = (items) => {
-    return items.map((item) => {
+  const renderNavItems = (items) => { // items parameter is the navItems array
+    // userInfo is available from Sidebar component's props
+    return items
+      .filter(item => {
+        if (item.roles) {
+          // Ensure userInfo and userInfo.role are available
+          return userInfo && userInfo.role && item.roles.includes(userInfo.role);
+        }
+        return true; // If no roles are defined, item is visible
+      })
+      .map((item) => {
       const { id, text, icon, path, subItems } = item;
       const isParentActive = location.pathname.startsWith(path) && path !== '/';
       const isExactlyActive = location.pathname === path;
@@ -196,16 +209,23 @@ const Sidebar = ({ theme = 'dark', onDesktopToggle, initialDesktopCollapsed = fa
                   onMouseEnter={() => isFlyoutSubmenuVisible && clearTimeout(flyoutTimeoutRef.current)}
                   onMouseLeave={() => isFlyoutSubmenuVisible && handleFlyoutMouseLeave()}
                 >
-                  {subItems.map((subItem) => {
-                    const isSubActive = location.pathname === subItem.path;
-                    return (
-                      <li key={subItem.id} className={`${styles.submenuItem} ${isSubActive ? styles.active : ''}`} role="none">
-                        <Link
-                          to={subItem.path}
-                          className={styles.navLink}
-                          role="menuitem"
-                          onClick={() => {
-                            if (isMobileOpen && onMobileToggle) onMobileToggle(false);
+                  {subItems
+                    .filter(subItem => { // Added .filter() for subItems
+                      if (subItem.roles) {
+                        return userInfo && userInfo.role && subItem.roles.includes(userInfo.role);
+                      }
+                      return true; // If no roles on subItem, it's visible (assuming parent is visible)
+                    })
+                    .map((subItem) => { // Map the filtered subItems
+                      const isSubActive = location.pathname === subItem.path;
+                      return (
+                        <li key={subItem.id} className={`${styles.submenuItem} ${isSubActive ? styles.active : ''}`} role="none">
+                          <Link
+                            to={subItem.path}
+                            className={styles.navLink} // Ensure className is applied for consistent styling
+                            role="menuitem"
+                            onClick={() => {
+                              if (isMobileOpen && onMobileToggle) onMobileToggle(false);
                             setHoveredFlyoutParentId(null);
                           }}
                         >

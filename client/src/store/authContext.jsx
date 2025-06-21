@@ -15,7 +15,7 @@ export const AuthProvider = ({ children }) => {
                     const token = storedUserInfo?.token;
 
                     if (token) {
-                        const response = await fetch('/api/auth/me', {
+                        const response = await fetch(window.location.origin + '/api/auth/me', {
                             headers: {
                                 'Authorization': `Bearer ${token}`,
                             },

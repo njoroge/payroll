@@ -6,6 +6,14 @@ const ProtectedRoute = ({ children, roles }) => {
     const { isAuthenticated, userInfo, loading } = useAuth();
     const location = useLocation();
 
+    console.log(
+        '[ProtectedRoute] Path:', location.pathname,
+        '| AuthLoading:', loading,
+        '| IsAuthenticated:', isAuthenticated,
+        '| UserRole:', userInfo?.role,
+        '| RequiredRoles:', roles
+    );
+
     if (loading) {
         // Basic Bootstrap styled loading message
         return (
