@@ -1,0 +1,43 @@
+/* client/src/index.css */
+@import './theme.css';
+
+/* Other global styles can go here */
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  /* The theme.css already applies default background and text color to body */
+}
+
+code {
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+/* Ensure Bootstrap is loaded before this if not handled by JS imports */
+/* If Bootstrap is imported via JS (e.g. in index.jsx or App.jsx),
+   its styles will be injected. We can override them here or in theme.css */
+
+/* Example of overriding Bootstrap variables (if not using SASS build) */
+/* These are already in theme.css but shown here for clarity */
+/*
+:root {
+  --bs-primary: var(--theme-light-accent-primary);
+  --bs-secondary: var(--theme-light-accent-secondary);
+  --bs-body-bg: var(--theme-light-bg-primary);
+  --bs-body-color: var(--theme-light-text-primary);
+  --bs-border-color: var(--theme-light-border-primary);
+}
+
+.theme-dark {
+  --bs-primary: var(--theme-dark-accent-primary);
+  --bs-secondary: var(--theme-dark-accent-secondary);
+  --bs-body-bg: var(--theme-dark-bg-primary);
+  --bs-body-color: var(--theme-dark-text-primary);
+  --bs-border-color: var(--theme-dark-border-primary);
+}
+*/

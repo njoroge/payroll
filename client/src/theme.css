@@ -1,0 +1,192 @@
+/* client/src/theme.css */
+:root {
+  /* Light Theme (Default) */
+  --theme-light-bg-primary: #FFFFFF; /* Page background */
+  --theme-light-bg-secondary: #F8F9FA; /* Card headers, slightly off-white sections */
+  --theme-light-bg-tertiary: #E9ECEF; /* Hover states, subtle backgrounds */
+
+  --theme-light-text-primary: #212529; /* Main text color */
+  --theme-light-text-secondary: #495057; /* Subtler text, placeholders */
+  --theme-light-text-accent: #007BFF; /* Links, primary action text */
+
+  --theme-light-border-primary: #DEE2E6; /* Standard borders */
+  --theme-light-border-secondary: #CED4DA; /* Stronger borders */
+
+  --theme-light-accent-primary: #007BFF; /* Primary buttons, active states */
+  --theme-light-accent-primary-rgb: 0,123,255;
+  --theme-light-accent-primary-hover: #0056b3;
+  --theme-light-accent-secondary: #6C757D; /* Secondary buttons */
+  --theme-light-accent-secondary-rgb: 108,117,125;
+  --theme-light-accent-secondary-hover: #545b62;
+
+  /* Additional component-specific variables */
+  --theme-light-success: var(--theme-light-accent-primary); /* Mapping success to primary for now */
+  --theme-light-success-rgb: var(--theme-light-accent-primary-rgb);
+  --theme-light-success-hover: var(--theme-light-accent-primary-hover);
+
+
+  /* RGB versions for text and background (if not already defined elsewhere) */
+  --theme-light-bg-primary-rgb: 255,255,255;
+  --theme-light-text-primary-rgb: 33,37,41;
+
+
+  /* Sidebar Specific (Light) - will be used by Sidebar.module.css */
+  --theme-light-sidebar-bg: #F8F9FA;
+  --theme-light-sidebar-text: #495057;
+  --theme-light-sidebar-active-bg: #E2F1FB;
+  --theme-light-sidebar-active-text: #007BFF;
+  --theme-light-sidebar-hover-bg: #E9ECEF;
+  --theme-light-sidebar-border: #DEE2E6;
+  --theme-light-sidebar-submenu-bg: rgba(0,0,0,0.05);
+  --theme-light-sidebar-logout-text: #6c757d;
+  --theme-light-sidebar-logout-hover-bg: #dc3545; /* Bootstrap danger */
+  --theme-light-sidebar-focus-ring: var(--theme-light-accent-primary);
+
+  --theme-light-footer-bg: #343a40; /* Existing color, but now as a variable */
+  --theme-light-footer-text: #FFFFFF;
+
+
+  /* Dark Theme (Define structure, can be populated later if theme switching is added) */
+  --theme-dark-bg-primary: #1A202C; /* Example: Dark page background */
+  --theme-dark-bg-secondary: #2D3748; /* Example: Dark card headers */
+  --theme-dark-bg-tertiary: #4A5568; /* Example: Dark hover states */
+
+  --theme-dark-text-primary: #F7FAFC; /* Example: Light text on dark background */
+  --theme-dark-text-secondary: #E2E8F0; /* Example: Subtler light text */
+  --theme-dark-text-accent: #3498DB; /* Example: Accent color for dark theme */
+
+  --theme-dark-border-primary: #4A5568;
+  --theme-dark-border-secondary: #718096;
+
+  --theme-dark-accent-primary: #3498DB;
+  --theme-dark-accent-primary-hover: #217dbb;
+  --theme-dark-accent-secondary: #BDC3C7;
+  --theme-dark-accent-secondary-hover: #95a5a6;
+
+  /* Sidebar Specific (Dark) - will be used by Sidebar.module.css */
+  --theme-dark-sidebar-bg: #2C3E50;
+  --theme-dark-sidebar-text: #ECF0F1;
+  --theme-dark-sidebar-active-bg: #3498DB;
+  --theme-dark-sidebar-active-text: #FFFFFF;
+  --theme-dark-sidebar-hover-bg: #34495E;
+  --theme-dark-sidebar-border: #34495E;
+  --theme-dark-sidebar-submenu-bg: rgba(0,0,0,0.15);
+  --theme-dark-sidebar-logout-text: #bdc3c7;
+  --theme-dark-sidebar-logout-hover-bg: #c0392b;
+  --theme-dark-sidebar-focus-ring: var(--theme-dark-accent-primary);
+
+  --theme-dark-footer-bg: #22272B; /* A bit darker for dark theme */
+  --theme-dark-footer-text: var(--theme-dark-text-secondary);
+}
+
+/* Apply a default theme to the body or a root app element */
+body, .theme-light {
+  background-color: var(--theme-light-bg-primary);
+  color: var(--theme-light-text-primary);
+
+  /* You can also set Bootstrap variable overrides here if not using SASS */
+  /* For example: */
+  --bs-body-bg: var(--theme-light-bg-primary);
+  --bs-body-color: var(--theme-light-text-primary);
+  --bs-primary: var(--theme-light-accent-primary);
+  --bs-primary-rgb: var(--theme-light-accent-primary-rgb);
+  --bs-secondary: var(--theme-light-accent-secondary);
+  --bs-secondary-rgb: var(--theme-light-accent-secondary-rgb);
+  --bs-success: var(--theme-light-success);
+  --bs-success-rgb: var(--theme-light-success-rgb);
+  --bs-border-color: var(--theme-light-border-primary);
+  --bs-light-bg-subtle: var(--theme-light-bg-secondary); /* For .bg-light */
+  --bs-body-bg-rgb: var(--theme-light-bg-primary-rgb);
+  --bs-body-color-rgb: var(--theme-light-text-primary-rgb);
+  --bs-link-color: var(--theme-light-text-accent);
+  --bs-link-hover-color: var(--theme-light-accent-primary-hover);
+  --bs-card-bg: var(--theme-light-bg-secondary);
+  --bs-card-border-color: var(--theme-light-border-primary);
+  --bs-card-color: var(--theme-light-text-primary);
+  --bs-secondary-bg: var(--theme-light-bg-tertiary); /* For things like contextual backgrounds */
+
+  /* Navbar specific overrides for light theme */
+  --bs-navbar-color: var(--theme-light-text-secondary);
+  --bs-navbar-hover-color: var(--theme-light-text-accent);
+  --bs-navbar-disabled-color: rgba(var(--theme-light-text-secondary-rgb, 108,117,125), 0.3);
+  --bs-navbar-active-color: var(--theme-light-text-accent);
+  --bs-navbar-brand-color: var(--theme-light-text-primary);
+  --bs-navbar-brand-hover-color: var(--theme-light-text-primary);
+  --bs-navbar-toggler-border-color: transparent; /* Example: remove toggler border */
+  /* --bs-navbar-toggler-icon-bg: url("data:image/svg+xml,..."); custom icon if needed */
+}
+
+.theme-dark {
+  background-color: var(--theme-dark-bg-primary);
+  color: var(--theme-dark-text-primary);
+
+  /* Bootstrap overrides for dark theme */
+  --bs-body-bg: var(--theme-dark-bg-primary);
+  --bs-body-color: var(--theme-dark-text-primary);
+  --bs-primary: var(--theme-dark-accent-primary);
+  --bs-secondary: var(--theme-dark-accent-secondary);
+  --bs-border-color: var(--theme-dark-border-primary);
+  --bs-light-bg-subtle: var(--theme-dark-bg-secondary); /* For .bg-light in dark theme */
+  --bs-body-bg-rgb: var(--theme-dark-bg-primary-rgb, 26,32,44);
+  --bs-body-color-rgb: var(--theme-dark-text-primary-rgb, 247,250,252);
+  --bs-link-color: var(--theme-dark-text-accent);
+  --bs-link-hover-color: var(--theme-dark-accent-primary-hover);
+  --bs-card-bg: var(--theme-dark-bg-secondary);
+  --bs-card-border-color: var(--theme-dark-border-primary);
+  --bs-card-color: var(--theme-dark-text-primary);
+  --bs-secondary-bg: var(--theme-dark-bg-tertiary);
+}
+
+/* Basic styling for common elements using theme variables */
+a {
+  color: var(--theme-light-text-accent);
+}
+a:hover {
+  color: var(--theme-light-accent-primary-hover);
+}
+
+.theme-dark a {
+  color: var(--theme-dark-text-accent);
+}
+.theme-dark a:hover {
+  color: var(--theme-dark-accent-primary-hover);
+}
+
+/* Example: Themed card (if not relying solely on Bootstrap overrides) */
+.themed-card {
+  background-color: var(--theme-light-bg-secondary);
+  border: 1px solid var(--theme-light-border-primary);
+  color: var(--theme-light-text-primary);
+  border-radius: 0.25rem;
+  padding: 1.25rem;
+  margin-bottom: 1rem;
+}
+
+.theme-dark .themed-card {
+  background-color: var(--theme-dark-bg-secondary);
+  border: 1px solid var(--theme-dark-border-primary);
+  color: var(--theme-dark-text-primary);
+}
+
+/* Button theming example (if Bootstrap button overrides are not enough) */
+.btn-themed-primary {
+  background-color: var(--theme-light-accent-primary);
+  color: #fff;
+  border-color: var(--theme-light-accent-primary);
+}
+.btn-themed-primary:hover {
+  background-color: var(--theme-light-accent-primary-hover);
+  border-color: var(--theme-light-accent-primary-hover);
+}
+
+.theme-dark .btn-themed-primary {
+  background-color: var(--theme-dark-accent-primary);
+  border-color: var(--theme-dark-accent-primary);
+}
+.theme-dark .btn-themed-primary:hover {
+  background-color: var(--theme-dark-accent-primary-hover);
+  border-color: var(--theme-dark-accent-primary-hover);
+}
+
+/* This is a basic set. More variables can be added for fonts, spacing, etc. */
+/* Also, more specific overrides for Bootstrap components can be added here or by modifying SASS variables if the project uses SASS. */

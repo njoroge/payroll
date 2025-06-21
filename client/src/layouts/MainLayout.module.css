@@ -16,7 +16,8 @@
   padding: 20px;
   overflow-y: auto;
   transition: margin-left 0.3s ease-in-out;
-  background-color: #ffffff;
+  /* background-color will be inherited from body or specific theme class */
+  /* or explicitly set: background-color: var(--theme-light-bg-primary); */
 }
 
 .contentShiftExpanded {
@@ -37,8 +38,8 @@
 }
 
 .appFooter {
-    background-color: #343a40;
-    color: white;
+    background-color: var(--theme-light-footer-bg); /* Use theme variable */
+    color: var(--theme-light-footer-text);       /* Use theme variable */
     text-align: center;
     padding: 1rem;
 }

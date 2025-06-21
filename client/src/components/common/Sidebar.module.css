@@ -1,62 +1,41 @@
 /* client/src/components/common/Sidebar.module.css */
-/* ... (existing variables and styles up to .submenu) ... */
+
+/* Common sidebar structural variables (not theme-specific colors) */
 :root {
-  /* Common */
   --sidebar-transition-duration: 0.3s;
   --sidebar-icon-size: 20px;
   --sidebar-collapsed-icon-size: 22px;
   --sidebar-submenu-icon-size: 16px;
-
-  /* Dark Theme Colors (as per issue) */
-  --dark-bg: #2C3E50;
-  --dark-text: #ECF0F1;
-  --dark-active-bg: #3498DB;
-  --dark-active-text: #FFFFFF;
-  --dark-hover-bg: #34495E;
-  --dark-border: #34495E;
-  --dark-submenu-bg: rgba(0,0,0,0.15); /* Current one, can be derived from main colors */
-  --dark-logout-hover-bg: #c0392b;
-  --dark-logout-text: #bdc3c7;
-
-  /* Light Theme Colors (as per issue) */
-  --light-bg: #F8F9FA;
-  --light-text: #495057;
-  --light-active-bg: #E2F1FB; /* Very Light Blue */
-  --light-active-text: #007BFF; /* Medium Blue */
-  --light-hover-bg: #E9ECEF; /* Slightly Darker Light Grey */
-  --light-border: #DEE2E6; /* Example border for light theme */
-  --light-submenu-bg: rgba(0,0,0,0.05);
-  --light-logout-hover-bg: #dc3545; /* Bootstrap danger red */
-  --light-logout-text: #6c757d; /* Bootstrap secondary text */
 }
 
-/* Theme Classes */
+/* Theme Classes - These will now map to the global theme variables from theme.css */
 .darkTheme {
-  --sidebar-bg-color: var(--dark-bg);
-  --sidebar-text-color: var(--dark-text);
-  --sidebar-active-bg-color: var(--dark-active-bg);
-  --sidebar-active-text-color: var(--dark-active-text);
-  --sidebar-hover-bg-color: var(--dark-hover-bg);
-  --sidebar-border-color: var(--dark-border);
-  --sidebar-submenu-bg-color: var(--dark-submenu-bg);
-  --sidebar-logout-text-color: var(--dark-logout-text);
-  --sidebar-logout-hover-bg-color: var(--dark-logout-hover-bg);
-  --sidebar-focus-ring-color: var(--dark-active-bg); /* For focus outline */
+  --sidebar-bg-color: var(--theme-dark-sidebar-bg);
+  --sidebar-text-color: var(--theme-dark-sidebar-text);
+  --sidebar-active-bg-color: var(--theme-dark-sidebar-active-bg);
+  --sidebar-active-text-color: var(--theme-dark-sidebar-active-text);
+  --sidebar-hover-bg-color: var(--theme-dark-sidebar-hover-bg);
+  --sidebar-border-color: var(--theme-dark-sidebar-border);
+  --sidebar-submenu-bg-color: var(--theme-dark-sidebar-submenu-bg);
+  --sidebar-logout-text-color: var(--theme-dark-sidebar-logout-text);
+  --sidebar-logout-hover-bg-color: var(--theme-dark-sidebar-logout-hover-bg);
+  --sidebar-focus-ring-color: var(--theme-dark-sidebar-focus-ring);
 }
 
 .lightTheme {
-  --sidebar-bg-color: var(--light-bg);
-  --sidebar-text-color: var(--light-text);
-  --sidebar-active-bg-color: var(--light-active-bg);
-  --sidebar-active-text-color: var(--light-active-text);
-  --sidebar-hover-bg-color: var(--light-hover-bg);
-  --sidebar-border-color: var(--light-border);
-  --sidebar-submenu-bg-color: var(--light-submenu-bg);
-  --sidebar-logout-text-color: var(--light-logout-text);
-  --sidebar-logout-hover-bg-color: var(--light-logout-hover-bg);
-  --sidebar-focus-ring-color: var(--light-active-text); /* For focus outline */
+  --sidebar-bg-color: var(--theme-light-sidebar-bg);
+  --sidebar-text-color: var(--theme-light-sidebar-text);
+  --sidebar-active-bg-color: var(--theme-light-sidebar-active-bg);
+  --sidebar-active-text-color: var(--theme-light-sidebar-active-text);
+  --sidebar-hover-bg-color: var(--theme-light-sidebar-hover-bg);
+  --sidebar-border-color: var(--theme-light-sidebar-border);
+  --sidebar-submenu-bg-color: var(--theme-light-sidebar-submenu-bg);
+  --sidebar-logout-text-color: var(--theme-light-sidebar-logout-text);
+  --sidebar-logout-hover-bg-color: var(--theme-light-sidebar-logout-hover-bg);
+  --sidebar-focus-ring-color: var(--theme-light-sidebar-focus-ring);
 }
 
+/* Styles below this point use the --sidebar-*** variables defined by .lightTheme or .darkTheme */
 
 .sidebar {
   background-color: var(--sidebar-bg-color);
@@ -313,7 +292,7 @@
   .sidebar.desktopCollapsed .userProfile .userDetails { display: none !important; }
   .sidebar.desktopCollapsed .userProfile .avatarContainer { margin-bottom: 10px !important; }
   .sidebar.desktopCollapsed .submenu.accordionActive { display: none !important; } /* Ensure accordion is hidden on tablet collapsed */
-  .sidebar.desktopCollapsed .submenu.flyoutActive { /* Flyouts should still work on tablet */ }
+  /* Removed empty .sidebar.desktopCollapsed .submenu.flyoutActive {} rule that was reportedly causing issues */
 }
 
 
