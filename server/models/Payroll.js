@@ -25,12 +25,15 @@ const payrollSchema = new mongoose.Schema({
     taxableIncome: { type: Number, required: true },
     paye: { type: Number, default: 0 },
     nssfDeduction: { type: Number, default: 0 },
-    nhifDeduction: { type: Number, default: 0 },
+    nssfEmployerContribution: { type: Number, default: 0 }, // Added for employer's NSSF
+    shifDeduction: { type: Number, default: 0 }, // SHIF replaces NHIF
+    ahlDeduction: { type: Number, default: 0 }, // Employee's AHL contribution
+    ahlEmployerContribution: { type: Number, default: 0 }, // Employer's AHL contribution
     advanceDeducted: { type: Number, default: 0 },
     damageDeducted: { type: Number, default: 0 },
     otherDeductionsTotal: { type: Number, default: 0 }, // For future flexibility
     reimbursementAdded: { type: Number, default: 0 },
-    totalDeductions: { type: Number, required: true }, // PAYE + NSSF + NHIF + Advance + Damage + Other
+    totalDeductions: { type: Number, required: true }, // PAYE + NSSF + SHIF + AHL + Advance + Damage + Other
     netPay: { type: Number, required: true },
     processingDate: { type: Date, default: Date.now },
     status: {
