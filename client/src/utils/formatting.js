@@ -25,4 +25,32 @@ export const formatCurrency = (amount, currencyCode = 'KES') => {
   }).format(numericAmount);
 };
 
+/**
+ * Formats a date string or Date object into "DD Mon YYYY" format.
+ * e.g., "01 Jan 2023"
+ *
+ * @param {string|Date|null|undefined} dateInput - The date to format.
+ * @returns {string} The formatted date string, or the original input if invalid.
+ */
+export const formatDate = (dateInput) => {
+  if (!dateInput) {
+    return ''; // Or handle as per desired UX for null/undefined inputs
+  }
+
+  const date = new Date(dateInput);
+
+  // Check if the date is valid
+  if (isNaN(date.getTime())) {
+    return String(dateInput); // Return original input if it's not a valid date
+  }
+
+  const day = String(date.getDate()).padStart(2, '0');
+  const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun",
+                      "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const month = monthNames[date.getMonth()];
+  const year = date.getFullYear();
+
+  return `${day} ${month} ${year}`;
+};
+
 // You can add other formatting utilities here in the future.
