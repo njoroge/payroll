@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useContext } from 'react';
-import { AuthContext } from '../../store/authContext';
+import React, { useState, useEffect } from 'react'; // Removed useContext
+import { useAuth } from '../../store/authContext'; // Changed to useAuth
 import api from '../../services/api';
 import { formatDate } from '../../utils/formatting'; // Assuming you have a formatting util
 
@@ -7,11 +7,17 @@ function MyLeaveHistoryPage() {
     const [leaves, setLeaves] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
-    const { user } = useContext(AuthContext);
+    const { userInfo: user } = useAuth(); // Changed to useAuth and aliased userInfo
 
     useEffect(() => {
         const fetchLeaveHistory = async () => {
-            if (!user || !user.token) { // Check if user and token exist
+            // user object from useAuth might be null initially if auth state is loading
+            // or if user is not logged in.
+            // The token is typically inside the user object, e.g., user.token or user.data.token
+            // Let's assume user object itself or user.token will be checked.
+            // The original code checked !user || !user.token.
+            // If userInfo is null, !user is true. If userInfo exists, then userInfo.token is checked.
+            if (!user || !user.token) {
                 setError("Authentication required.");
                 setLoading(false);
                 return;

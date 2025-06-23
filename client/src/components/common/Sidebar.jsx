@@ -175,11 +175,26 @@ const Sidebar = ({ theme = 'light', onDesktopToggle, initialDesktopCollapsed = f
       const isAccordionSubmenuOpen = openAccordionSubmenu === id && (!isDesktopCollapsed || isMobileOpen);
       const isFlyoutSubmenuVisible = hoveredFlyoutParentId === id && currentIsEffectivelyCollapsed;
 
+      // Helper to ensure title attribute gets a string
+      const getTitleString = (value) => {
+        if (typeof value === 'string') return value;
+        if (value && typeof value.toString === 'function' && !React.isValidElement(value)) {
+            // Only call toString if it's not a React element, to avoid "[object Object]" from elements.
+            // If it IS a React element, we probably don't want it as a title anyway, so return empty or a generic placeholder.
+            return value.toString();
+        }
+        // If value is a React element or otherwise not stringifiable to meaningful text for a title,
+        // return undefined so the title attribute is omitted or return a generic description.
+        // For this specific case, if `text` is an element, it's an error in data structure.
+        // Assuming `text` should be a string for titles.
+        return typeof value === 'string' ? value : undefined;
+      };
+
       return (
         <li
           key={id}
           className={`${styles.navItem} ${itemIsActive ? styles.activeParent : ''}`}
-          title={currentIsEffectivelyCollapsed && !isFlyoutSubmenuVisible ? text : undefined}
+          title={currentIsEffectivelyCollapsed && !isFlyoutSubmenuVisible ? getTitleString(text) : undefined}
           role="none"
           onMouseEnter={() => subItems && handleFlyoutMouseEnter(id)}
           onMouseLeave={() => subItems && handleFlyoutMouseLeave()}
@@ -252,7 +267,7 @@ const Sidebar = ({ theme = 'light', onDesktopToggle, initialDesktopCollapsed = f
             <Link
               to={path}
               className={`${styles.navLink} ${itemIsActive ? styles.active : ''}`}
-              title={currentIsEffectivelyCollapsed ? text : undefined}
+              title={currentIsEffectivelyCollapsed ? getTitleString(text) : undefined} // Applied getTitleString here
               role="menuitem"
               onClick={() => {
                 if (isMobileOpen && onMobileToggle) onMobileToggle(false);
@@ -352,8 +367,31 @@ Sidebar.defaultProps = {
 export default Sidebar;
 
 // Helper to combine base nav items with dynamically generated ones (like from MainLayout)
+
+// React-friendly deep cloning function for navigation items
+const deepCloneNavItems = (items) => {
+  if (!items) return [];
+  return items.map(item => {
+    // Shallow clone the item first to get all properties
+    const clonedItem = { ...item };
+
+    // If there's an icon, it's a React element, keep its reference
+    // (React elements are generally treated as immutable or cloned via React.cloneElement if props need changing)
+    if (item.icon) {
+      clonedItem.icon = item.icon;
+    }
+
+    // If there are subItems, recursively clone them
+    if (item.subItems) {
+      clonedItem.subItems = deepCloneNavItems(item.subItems);
+    }
+    return clonedItem;
+  });
+};
+
 const getCombinedNavItems = (propNavItemsFromMainLayout, userInfoFromContext) => {
-  let combinedItems = JSON.parse(JSON.stringify(baseNavItems)); // Deep clone base
+  // Use the React-friendly deep clone
+  let combinedItems = deepCloneNavItems(baseNavItems);
 
   // Add items from MainLayout (propNavItemsFromMainLayout) if they exist
   // These are top-level items like "Manage Leave Requests"

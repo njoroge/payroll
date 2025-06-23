@@ -1,5 +1,5 @@
-import React, { useState, useContext } from 'react';
-import { AuthContext } from '../../store/authContext';
+import React, { useState } from 'react'; // Removed useContext
+import { useAuth } from '../../store/authContext'; // Changed import
 import api from '../../services/api'; // Assuming api.js is configured for JWT
 import { useNavigate } from 'react-router-dom';
 
@@ -9,7 +9,7 @@ function RequestLeavePage() {
     const [reason, setReason] = useState('');
     const [message, setMessage] = useState('');
     const [error, setError] = useState('');
-    const { user } = useContext(AuthContext);
+    const { userInfo: user, loading: authLoading } = useAuth(); // Changed to useAuth and aliased userInfo
     const navigate = useNavigate();
 
     const handleSubmit = async (e) => {

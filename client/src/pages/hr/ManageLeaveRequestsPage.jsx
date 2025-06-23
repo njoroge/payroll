@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useContext } from 'react';
-import { AuthContext } from '../../store/authContext';
+import React, { useState, useEffect } from 'react'; // Removed useContext
+import { useAuth } from '../../store/authContext'; // Changed to useAuth
 import api from '../../services/api';
 import { formatDate } from '../../utils/formatting';
 
@@ -8,7 +8,7 @@ function ManageLeaveRequestsPage() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [actionMessage, setActionMessage] = useState('');
-    const { user } = useContext(AuthContext);
+    const { userInfo: user } = useAuth(); // Changed to useAuth and aliased userInfo
 
     const fetchAllLeaveRequests = async () => {
         if (!user || !user.token) {
