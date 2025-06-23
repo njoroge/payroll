@@ -1,6 +1,6 @@
-import React, { useState, useEffect, useLayoutEffect } from 'react'; // Added useLayoutEffect
-import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom'; // Added useLocation
-import { useAuth } from '../store/authContext';
+import React, { useState, useEffect, useLayoutEffect } from 'react'; // Removed useContext
+import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom';
+import { useAuth } from '../store/authContext'; // Removed AuthContext import
 import Sidebar from '../components/common/Sidebar';
 import styles from './MainLayout.module.css';
 import { FaBars as MobileMenuIcon } from 'react-icons/fa'; // Icon for mobile toggle
@@ -14,7 +14,7 @@ const Footer = () => {
 };
 
 const MainLayout = () => {
-  const { isAuthenticated, userInfo, logout } = useAuth();
+  const { isAuthenticated, userInfo, logout } = useAuth(); // userInfo is available from useAuth
   const navigate = useNavigate();
   const location = useLocation(); // For closing mobile sidebar on route change
 
@@ -141,8 +141,8 @@ const MainLayout = () => {
             initialDesktopCollapsed={isTabletView || isDesktopSidebarCollapsed}
             isMobileOpen={isMobileSidebarOpen}
             onMobileToggle={handleMobileSidebarToggle}
-            onLogoutClick={handleLogout} // Add this line
-            userInfo={userInfo} // Add this line
+            onLogoutClick={handleLogout}
+            userInfo={userInfo}
           />
         )}
         <main className={mainContentClass}>
@@ -156,3 +156,25 @@ const MainLayout = () => {
 };
 
 export default MainLayout;
+
+// Helper function to generate sidebar links based on role
+// This can be expanded and moved to a separate file if it grows too large
+const getSidebarNavItems = (userInfo) => {
+  const items = [];
+  if (!userInfo) return items;
+
+  // Common links for all authenticated users (example)
+  // items.push({ path: "/", label: "Home", icon: "someIcon" });
+
+  if (userInfo.role === 'employee') {
+    items.push({ path: "/my-leave-request", label: "Request Leave" });
+    items.push({ path: "/my-leave-history", label: "My Leave History" });
+    // Add other employee-specific links here
+  }
+
+  if (['hr_manager', 'employee_admin', 'company_admin'].includes(userInfo.role)) {
+    items.push({ path: "/hr/manage-leave-requests", label: "Manage Leave Requests" });
+    // Add other admin/HR specific links here
+  }
+  return items;
+};

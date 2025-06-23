@@ -40,6 +40,7 @@ app.use('/api/income-grades', require('./routes/incomeGradeRoutes'));
 app.use('/api/payroll-ops', require('./routes/payrollOperationsRoutes'));
 app.use('/api/payrolls', require('./routes/payrollRoutes'));
 app.use('/api/messages', require('./routes/messageRoutes'));
+app.use('/api/leaves', require('./routes/leaveRoutes')); // Added leave routes
 
 const httpServer = http.createServer(app);
 const io = new Server(httpServer, {

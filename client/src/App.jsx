@@ -18,7 +18,8 @@ import PaystubsPage from './pages/PaystubsPage'; // New page for /my-paystubs
 
 // Employee Self-Service Pages
 import TaxFormsPage from './pages/employee_self_service/TaxFormsPage';
-import LeavePage from './pages/employee_self_service/LeavePage';
+import RequestLeavePage from './pages/employee_self_service/RequestLeavePage'; // New
+import MyLeaveHistoryPage from './pages/employee_self_service/MyLeaveHistoryPage'; // New
 import PersonalInformationPage from './pages/employee_self_service/PersonalInformationPage';
 
 // Department Pages
@@ -46,6 +47,9 @@ import SettingsPage from './pages/SettingsPage';
 
 // Chat Page
 import ChatPage from './pages/ChatPage';
+
+// HR Specific Pages
+import ManageLeaveRequestsPage from './pages/hr/ManageLeaveRequestsPage'; // New
 
 // Report Pages
 import UserPayslipReportPage from './pages/reports/UserPayslipReportPage';
@@ -158,9 +162,14 @@ function AppContent() {
             <TaxFormsPage />
           </ProtectedRoute>
         } />
-        <Route path="/my-leave" element={
+        <Route path="/my-leave-request" element={
           <ProtectedRoute roles={['employee']}>
-            <LeavePage />
+            <RequestLeavePage />
+          </ProtectedRoute>
+        } />
+        <Route path="/my-leave-history" element={
+          <ProtectedRoute roles={['employee']}>
+            <MyLeaveHistoryPage />
           </ProtectedRoute>
         } />
         <Route path="/my-personal-info" element={
@@ -189,6 +198,13 @@ function AppContent() {
         <Route path="/reports/my-payslips/print/:payslipId" element={
           <ProtectedRoute roles={['employee', 'company_admin', 'hr_manager', 'employee_admin']}>
             <PrintablePayslipView />
+          </ProtectedRoute>
+        } />
+
+        {/* HR/Admin specific routes */}
+        <Route path="/hr/manage-leave-requests" element={
+          <ProtectedRoute roles={['hr_manager', 'employee_admin', 'company_admin']}>
+            <ManageLeaveRequestsPage />
           </ProtectedRoute>
         } />
 
