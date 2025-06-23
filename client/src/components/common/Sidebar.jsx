@@ -1,13 +1,16 @@
 // client/src/components/common/Sidebar.jsx
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useContext } from 'react'; // Added useContext
 import PropTypes from 'prop-types';
 import { Link, useLocation } from 'react-router-dom';
 import styles from './Sidebar.module.css';
 import {
-  FaBars, FaTachometerAlt, FaFileInvoiceDollar, FaUsers, FaChartBar, FaCog, FaQuestionCircle, FaSignOutAlt, FaUserCircle, FaAngleDown, FaAngleRight, FaTimes, FaHistory, FaComments, FaEnvelope, FaUserCheck, FaMoneyBillWave, FaLeaf, FaFileContract, FaCalendarAlt, FaIdCard, FaPrint
-} from 'react-icons/fa';
+  FaBars, FaTachometerAlt, FaFileInvoiceDollar, FaUsers, FaChartBar, FaCog, FaQuestionCircle, FaSignOutAlt, FaUserCircle, FaAngleDown, FaAngleRight, FaTimes, FaHistory, FaComments, FaEnvelope, FaUserCheck, FaMoneyBillWave, FaLeaf, FaFileContract, FaCalendarAlt, FaIdCard, FaPrint, FaPlusSquare, FaListAlt
+} from 'react-icons/fa'; // Added FaPlusSquare and FaListAlt for leave icons
 
-const navItems = [
+// This will be populated by getSidebarNavItemsFromRoles or similar logic later
+// const navItems = [ // This static navItems array will be replaced or augmented
+// Default navItems structure - this can be merged with role-based items
+const baseNavItems = [
   {
     id: 'dashboard',
     text: 'Dashboard',
@@ -19,13 +22,17 @@ const navItems = [
     text: 'Employee Self Service',
     icon: <FaUserCheck />,
     path: '/my-personal-info', // Default path for the parent item
+    // Sub-items for employeeSelfService will be dynamically added based on role, including new leave links
     subItems: [
-      { id: 'myPaystubs', text: 'Paystubs', path: '/my-paystubs', icon: <FaMoneyBillWave className={styles.submenuIcon} /> },
-      { id: 'myBenefits', text: 'Benefits', path: '/my-benefits', icon: <FaLeaf className={styles.submenuIcon} /> },
-      { id: 'myTaxForms', text: 'Tax Forms', path: '/my-tax-forms', icon: <FaFileContract className={styles.submenuIcon} /> },
-      { id: 'myLeave', text: 'Leave', path: '/my-leave', icon: <FaCalendarAlt className={styles.submenuIcon} /> },
-      { id: 'myPersonalInfo', text: 'Personal Information', path: '/my-personal-info', icon: <FaIdCard className={styles.submenuIcon} /> },
+      { id: 'myPaystubs', text: 'Paystubs', path: '/my-paystubs', icon: <FaMoneyBillWave className={styles.submenuIcon} />, roles: ['employee'] },
+      { id: 'myBenefits', text: 'Benefits', path: '/my-benefits', icon: <FaLeaf className={styles.submenuIcon} />, roles: ['employee'] },
+      { id: 'myTaxForms', text: 'Tax Forms', path: '/my-tax-forms', icon: <FaFileContract className={styles.submenuIcon} />, roles: ['employee'] },
+      // { id: 'myLeave', text: 'Leave', path: '/my-leave', icon: <FaCalendarAlt className={styles.submenuIcon} />, roles: ['employee'] }, // Original single leave link
+      { id: 'requestLeave', text: 'Request Leave', path: '/my-leave-request', icon: <FaPlusSquare className={styles.submenuIcon} />, roles: ['employee'] },
+      { id: 'myLeaveHistory', text: 'My Leave History', path: '/my-leave-history', icon: <FaListAlt className={styles.submenuIcon} />, roles: ['employee'] },
+      { id: 'myPersonalInfo', text: 'Personal Information', path: '/my-personal-info', icon: <FaIdCard className={styles.submenuIcon} />, roles: ['employee'] },
     ],
+    roles: ['employee'] // Parent item also needs role check if all sub-items are for 'employee'
   },
   {
     id: 'payrollProcessing',
@@ -87,7 +94,7 @@ const navItems = [
 ];
 
 // Defaulting theme prop to 'light' as a safeguard, though MainLayout should always pass 'light'.
-const Sidebar = ({ theme = 'light', onDesktopToggle, initialDesktopCollapsed = false, isMobileOpen = false, onMobileToggle, onLogoutClick, userInfo }) => {
+const Sidebar = ({ theme = 'light', onDesktopToggle, initialDesktopCollapsed = false, isMobileOpen = false, onMobileToggle, onLogoutClick, userInfo, navItems: propNavItems }) => { // Added navItems prop
   const [isDesktopCollapsed, setIsDesktopCollapsed] = useState(initialDesktopCollapsed);
   const [openAccordionSubmenu, setOpenAccordionSubmenu] = useState(null); // For accordion
   const [hoveredFlyoutParentId, setHoveredFlyoutParentId] = useState(null); // For flyout
@@ -145,15 +152,16 @@ const Sidebar = ({ theme = 'light', onDesktopToggle, initialDesktopCollapsed = f
 
   const currentIsEffectivelyCollapsed = isDesktopCollapsed && !isMobileOpen;
 
-  const renderNavItems = (items) => { // items parameter is the navItems array
+  const renderNavItems = (itemsToRender) => { // itemsToRender will be the merged list
     // userInfo is available from Sidebar component's props
-    return items
+    return itemsToRender
       .filter(item => {
-        if (item.roles) {
-          // Ensure userInfo and userInfo.role are available
+        // If item has roles, check if userInfo.role is one of them
+        if (item.roles && Array.isArray(item.roles)) {
           return userInfo && userInfo.role && item.roles.includes(userInfo.role);
         }
-        return true; // If no roles are defined, item is visible
+        // If item has no roles array, it's visible to all authenticated users (or handled by parent's role)
+        return true;
       })
       .map((item) => {
       const { id, text, icon, path, subItems } = item;
@@ -223,19 +231,20 @@ const Sidebar = ({ theme = 'light', onDesktopToggle, initialDesktopCollapsed = f
                         <li key={subItem.id} className={`${styles.submenuItem} ${isSubActive ? styles.active : ''}`} role="none">
                           <Link
                             to={subItem.path}
-                            className={styles.navLink} // Ensure className is applied for consistent styling
+                            className={styles.navLink}
                             role="menuitem"
                             onClick={() => {
                               if (isMobileOpen && onMobileToggle) onMobileToggle(false);
-                            setHoveredFlyoutParentId(null);
-                          }}
-                        >
-                          <span className={styles.icon}>{subItem.icon}</span>
-                          <span className={styles.text}>{subItem.text}</span>
-                        </Link>
-                      </li>
-                    );
-                  })}
+                              setHoveredFlyoutParentId(null); // Close any flyouts
+                              // Do not toggle accordion here, it's handled by parent click
+                            }}
+                          >
+                            <span className={styles.icon}>{subItem.icon}</span>
+                            <span className={styles.text}>{subItem.text}</span>
+                          </Link>
+                        </li>
+                      );
+                    })}
                 </ul>
               )}
             </>
@@ -288,7 +297,8 @@ const Sidebar = ({ theme = 'light', onDesktopToggle, initialDesktopCollapsed = f
             </button>
         )}
         <nav className={styles.navigation} aria-label="Main navigation">
-          <ul className={styles.navList} role="menu"> {renderNavItems(navItems)} </ul>
+          {/* Pass propNavItems from props and userInfo from props to getCombinedNavItems */}
+          <ul className={styles.navList} role="menu"> {renderNavItems(getCombinedNavItems(propNavItems, userInfo))} </ul>
         </nav>
         <div className={styles.userProfile} title={currentIsEffectivelyCollapsed && !hoveredFlyoutParentId && !isMobileOpen ? "User Menu" : undefined} role="none">
           <div className={styles.avatarContainer}>
@@ -325,13 +335,70 @@ Sidebar.propTypes = {
   userInfo: PropTypes.shape({
     firstName: PropTypes.string,
     lastName: PropTypes.string,
+    role: PropTypes.string, // Added role to userInfo proptypes
   }),
+  navItems: PropTypes.array, // For navItems passed from MainLayout
 };
 
 Sidebar.defaultProps = {
   userInfo: {
     firstName: '',
-    lastName: '', // Change 'User' to an empty string
-  }
+    lastName: '',
+    role: '', // Default role
+  },
+  navItems: [], // Default to empty array
 };
+
 export default Sidebar;
+
+// Helper to combine base nav items with dynamically generated ones (like from MainLayout)
+const getCombinedNavItems = (propNavItemsFromMainLayout, userInfoFromContext) => {
+  let combinedItems = JSON.parse(JSON.stringify(baseNavItems)); // Deep clone base
+
+  // Add items from MainLayout (propNavItemsFromMainLayout) if they exist
+  // These are top-level items like "Manage Leave Requests"
+  if (propNavItemsFromMainLayout && propNavItemsFromMainLayout.length > 0) {
+    propNavItemsFromMainLayout.forEach(propItem => {
+      // Simple merge: add if not already present by path (can be made more sophisticated)
+      if (!combinedItems.find(item => item.path === propItem.path)) {
+        // Determine appropriate icon (this is a placeholder, ideally icons come from MainLayout or a config)
+        let icon = <FaAngleRight />;
+        if (propItem.path.includes('manage-leave-requests')) {
+          icon = <FaCalendarAlt />; // Example icon for manage leave
+        }
+
+        combinedItems.push({
+          id: propItem.label.toLowerCase().replace(/\s+/g, '-') + '-prop', // Ensure unique ID
+          text: propItem.label,
+          path: propItem.path,
+          icon: icon, // Add an icon
+          // roles: propItem.roles, // Assuming MainLayout's getSidebarNavItems correctly assigns roles
+                                  // Actually, getSidebarNavItems in MainLayout already filters by role
+                                  // So, items received here are already role-appropriate.
+                                  // No need for additional role check here for these items.
+        });
+      }
+    });
+  }
+
+  // Filter items and their subItems based on user role
+  const filterByRole = (items, userRole) => {
+    if (!userRole) return []; // Or return all items if no role context for some reason
+    return items.map(item => {
+      // If item itself has role restrictions
+      if (item.roles && !item.roles.includes(userRole)) {
+        return null; // Remove item
+      }
+      // If item has subItems, filter them too
+      if (item.subItems) {
+        item.subItems = item.subItems.filter(subItem => !subItem.roles || subItem.roles.includes(userRole));
+        // If a parent item has no visible sub-items after filtering (and isn't a direct link itself),
+        // you might choose to hide it, unless it's a non-clickable category header.
+        // For now, if subItems becomes empty, the parent might still show if it has a path.
+      }
+      return item;
+    }).filter(item => item !== null); // Remove null entries
+  };
+
+  return filterByRole(combinedItems, userInfoFromContext?.role);
+};
