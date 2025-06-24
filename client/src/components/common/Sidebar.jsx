@@ -53,6 +53,7 @@ const baseNavItems = [
     subItems: [
       { id: 'employeeList', text: 'Employee List', path: '/employees', icon: <FaAngleRight className={styles.submenuIcon} /> },
       { id: 'addEmployee', text: 'Add Employee', path: '/employees/new', icon: <FaAngleRight className={styles.submenuIcon} /> },
+      { id: 'manageLeaveRequests', text: 'Manage Leave Requests', path: '/employees/manage-leave-requests', icon: <FaCalendarAlt className={styles.submenuIcon} />, roles: ['hr_manager', 'employee_admin', 'company_admin'] },
     ],
   },
   {
@@ -94,7 +95,7 @@ const baseNavItems = [
 ];
 
 // Defaulting theme prop to 'light' as a safeguard, though MainLayout should always pass 'light'.
-const Sidebar = ({ theme = 'light', onDesktopToggle, initialDesktopCollapsed = false, isMobileOpen = false, onMobileToggle, onLogoutClick, userInfo, navItems: propNavItems }) => { // Added navItems prop
+const Sidebar = ({ theme = 'light', onDesktopToggle, initialDesktopCollapsed = false, isMobileOpen = false, onMobileToggle, onLogoutClick, userInfo }) => { // Removed navItems prop
   const [isDesktopCollapsed, setIsDesktopCollapsed] = useState(initialDesktopCollapsed);
   const [openAccordionSubmenu, setOpenAccordionSubmenu] = useState(null); // For accordion
   const [hoveredFlyoutParentId, setHoveredFlyoutParentId] = useState(null); // For flyout
@@ -312,8 +313,8 @@ const Sidebar = ({ theme = 'light', onDesktopToggle, initialDesktopCollapsed = f
             </button>
         )}
         <nav className={styles.navigation} aria-label="Main navigation">
-          {/* Pass propNavItems from props and userInfo from props to getCombinedNavItems */}
-          <ul className={styles.navList} role="menu"> {renderNavItems(getCombinedNavItems(propNavItems, userInfo))} </ul>
+          {/* Pass userInfo from props to getCombinedNavItems */}
+          <ul className={styles.navList} role="menu"> {renderNavItems(getCombinedNavItems(userInfo))} </ul>
         </nav>
         <div className={styles.userProfile} title={currentIsEffectivelyCollapsed && !hoveredFlyoutParentId && !isMobileOpen ? "User Menu" : undefined} role="none">
           <div className={styles.avatarContainer}>
@@ -352,7 +353,7 @@ Sidebar.propTypes = {
     lastName: PropTypes.string,
     role: PropTypes.string, // Added role to userInfo proptypes
   }),
-  navItems: PropTypes.array, // For navItems passed from MainLayout
+  // navItems: PropTypes.array, // For navItems passed from MainLayout // Removed
 };
 
 Sidebar.defaultProps = {
@@ -361,7 +362,7 @@ Sidebar.defaultProps = {
     lastName: '',
     role: '', // Default role
   },
-  navItems: [], // Default to empty array
+  // navItems: [], // Default to empty array // Removed
 };
 
 export default Sidebar;
@@ -389,35 +390,35 @@ const deepCloneNavItems = (items) => {
   });
 };
 
-const getCombinedNavItems = (propNavItemsFromMainLayout, userInfoFromContext) => {
+const getCombinedNavItems = (userInfoFromContext) => { // Removed propNavItemsFromMainLayout
   // Use the React-friendly deep clone
   let combinedItems = deepCloneNavItems(baseNavItems);
 
   // Add items from MainLayout (propNavItemsFromMainLayout) if they exist
   // These are top-level items like "Manage Leave Requests"
-  if (propNavItemsFromMainLayout && propNavItemsFromMainLayout.length > 0) {
-    propNavItemsFromMainLayout.forEach(propItem => {
-      // Simple merge: add if not already present by path (can be made more sophisticated)
-      if (!combinedItems.find(item => item.path === propItem.path)) {
-        // Determine appropriate icon (this is a placeholder, ideally icons come from MainLayout or a config)
-        let icon = <FaAngleRight />;
-        if (propItem.path.includes('manage-leave-requests')) {
-          icon = <FaCalendarAlt />; // Example icon for manage leave
-        }
-
-        combinedItems.push({
-          id: propItem.label.toLowerCase().replace(/\s+/g, '-') + '-prop', // Ensure unique ID
-          text: propItem.label,
-          path: propItem.path,
-          icon: icon, // Add an icon
-          // roles: propItem.roles, // Assuming MainLayout's getSidebarNavItems correctly assigns roles
-                                  // Actually, getSidebarNavItems in MainLayout already filters by role
-                                  // So, items received here are already role-appropriate.
-                                  // No need for additional role check here for these items.
-        });
-      }
-    });
-  }
+  // if (propNavItemsFromMainLayout && propNavItemsFromMainLayout.length > 0) { // Removed this block
+  //   propNavItemsFromMainLayout.forEach(propItem => {
+  //     // Simple merge: add if not already present by path (can be made more sophisticated)
+  //     if (!combinedItems.find(item => item.path === propItem.path)) {
+  //       // Determine appropriate icon (this is a placeholder, ideally icons come from MainLayout or a config)
+  //       let icon = <FaAngleRight />;
+  //       if (propItem.path.includes('manage-leave-requests')) {
+  //         icon = <FaCalendarAlt />; // Example icon for manage leave
+  //       }
+  //
+  //       combinedItems.push({
+  //         id: propItem.label.toLowerCase().replace(/\s+/g, '-') + '-prop', // Ensure unique ID
+  //         text: propItem.label,
+  //         path: propItem.path,
+  //         icon: icon, // Add an icon
+  //         // roles: propItem.roles, // Assuming MainLayout's getSidebarNavItems correctly assigns roles
+  //                                 // Actually, getSidebarNavItems in MainLayout already filters by role
+  //                                 // So, items received here are already role-appropriate.
+  //                                 // No need for additional role check here for these items.
+  //       });
+  //     }
+  //   });
+  // }
 
   // Filter items and their subItems based on user role
   const filterByRole = (items, userRole) => {
