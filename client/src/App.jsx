@@ -49,7 +49,7 @@ import SettingsPage from './pages/SettingsPage';
 import ChatPage from './pages/ChatPage';
 
 // HR Specific Pages
-import ManageLeaveRequestsPage from './pages/hr/ManageLeaveRequestsPage'; // New
+import ManageLeaveRequestsPage from './pages/employees/ManageLeaveRequestsPage'; // New
 
 // Report Pages
 import UserPayslipReportPage from './pages/reports/UserPayslipReportPage';
@@ -202,7 +202,7 @@ function AppContent() {
         } />
 
         {/* HR/Admin specific routes */}
-        <Route path="/hr/manage-leave-requests" element={
+        <Route path="/employees/manage-leave-requests" element={
           <ProtectedRoute roles={['hr_manager', 'employee_admin', 'company_admin']}>
             <ManageLeaveRequestsPage />
           </ProtectedRoute>

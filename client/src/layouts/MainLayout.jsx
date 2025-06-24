@@ -143,6 +143,7 @@ const MainLayout = () => {
             onMobileToggle={handleMobileSidebarToggle}
             onLogoutClick={handleLogout}
             userInfo={userInfo}
+            navItems={getSidebarNavItems(userInfo)}
           />
         )}
         <main className={mainContentClass}>
@@ -172,9 +173,9 @@ const getSidebarNavItems = (userInfo) => {
     // Add other employee-specific links here
   }
 
-  if (['hr_manager', 'employee_admin', 'company_admin'].includes(userInfo.role)) {
-    items.push({ path: "/hr/manage-leave-requests", label: "Manage Leave Requests" });
-    // Add other admin/HR specific links here
-  }
+  // if (['hr_manager', 'employee_admin', 'company_admin'].includes(userInfo.role)) {
+  //   items.push({ path: "/employees/manage-leave-requests", label: "Manage Leave Requests" });
+  //   // Add other admin/HR specific links here
+  // }
   return items;
 };
