@@ -4,8 +4,8 @@ import PropTypes from 'prop-types';
 import { Link, useLocation } from 'react-router-dom';
 import styles from './Sidebar.module.css';
 import {
-  FaBars, FaTachometerAlt, FaFileInvoiceDollar, FaUsers, FaChartBar, FaCog, FaQuestionCircle, FaSignOutAlt, FaUserCircle, FaAngleDown, FaAngleRight, FaTimes, FaHistory, FaComments, FaEnvelope, FaUserCheck, FaMoneyBillWave, FaLeaf, FaFileContract, FaCalendarAlt, FaIdCard, FaPrint, FaPlusSquare, FaListAlt
-} from 'react-icons/fa'; // Added FaPlusSquare and FaListAlt for leave icons
+  FaBars, FaTachometerAlt, FaFileInvoiceDollar, FaUsers, FaChartBar, FaCog, FaQuestionCircle, FaSignOutAlt, FaUserCircle, FaAngleDown, FaAngleRight, FaTimes, FaHistory, FaComments, FaEnvelope, FaUserCheck, FaMoneyBillWave, FaLeaf, FaFileContract, FaCalendarAlt, FaIdCard, FaPrint, FaPlusSquare, FaListAlt, FaPuzzlePiece
+} from 'react-icons/fa'; // Added FaPlusSquare and FaListAlt for leave icons, Added FaPuzzlePiece
 
 // This will be populated by getSidebarNavItemsFromRoles or similar logic later
 // const navItems = [ // This static navItems array will be replaced or augmented
@@ -64,6 +64,17 @@ const baseNavItems = [
     subItems: [
       { id: 'payrollHistoryReport', text: 'Payroll History', path: '/payrolls', icon: <FaHistory className={styles.submenuIcon} />, roles: ['company_admin', 'employee_admin', 'hr_manager'] },
       { id: 'myPayslipReport', text: 'My Payslip Report', path: '/reports/my-payslips', icon: <FaPrint className={styles.submenuIcon} /> }
+    ],
+  },
+  {
+    id: 'integrations',
+    text: 'Integrations',
+    icon: <FaPuzzlePiece />,
+    path: '/integrations', // Parent path for all integrations
+    roles: ['company_admin', 'hr_manager', 'SUPERADMIN'], // Or other appropriate admin roles
+    subItems: [
+      { id: 'quickbooksIntegration', text: 'QuickBooks Online', path: '/integrations/quickbooks', icon: <FaAngleRight className={styles.submenuIcon} /> },
+      // Future integrations can be added here
     ],
   },
   {

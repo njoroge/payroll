@@ -55,6 +55,9 @@ import ManageLeaveRequestsPage from './pages/employees/ManageLeaveRequestsPage';
 import UserPayslipReportPage from './pages/reports/UserPayslipReportPage';
 import PrintablePayslipView from './components/reports/PrintablePayslipView';
 
+// Integrations Pages
+import QuickbooksIntegrationPage from './pages/integrations/QuickbooksIntegrationPage';
+
 
 function AppContent() {
   return (
@@ -205,6 +208,13 @@ function AppContent() {
         <Route path="/employees/manage-leave-requests" element={
           <ProtectedRoute roles={['hr_manager', 'employee_admin', 'company_admin']}>
             <ManageLeaveRequestsPage />
+          </ProtectedRoute>
+        } />
+
+        {/* Integrations Route */}
+        <Route path="/integrations/quickbooks" element={
+          <ProtectedRoute roles={['company_admin', 'hr_manager', 'SUPERADMIN']}>
+            <QuickbooksIntegrationPage />
           </ProtectedRoute>
         } />
 

@@ -45,7 +45,23 @@ const payrollSchema = new mongoose.Schema({
     approvedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     dateApproved: { type: Date },
     paymentDate: { type: Date },
-    notes: { type: String }
+    notes: { type: String },
+
+    // QuickBooks Sync Fields
+    quickbooksSyncStatus: {
+        type: String,
+        enum: ['PENDING', 'SYNCED', 'FAILED', 'NOT_SYNCED'],
+        default: 'NOT_SYNCED'
+    },
+    quickbooksJournalEntryId: {
+        type: String, // Store the ID of the Journal Entry created in QuickBooks
+    },
+    quickbooksLastSyncAt: {
+        type: Date,
+    },
+    quickbooksSyncError: { // To store any error message if sync failed
+        type: String,
+    }
 }, { timestamps: true });
 
 payrollSchema.index({ employeeId: 1, month: 1, year: 1 }, { unique: true }); // One payslip per employee per month/year
