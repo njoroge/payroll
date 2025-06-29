@@ -27,13 +27,20 @@ const getOAuthClient = () => {
 
 /**
  * Generates the authorization URI to redirect the user to QuickBooks.
+ * @param {string} state The state parameter to be included in the authorization URI.
  * @returns {string} The authorization URI.
  */
-const getAuthorizationUri = () => {
+const getAuthorizationUri = (state) => {
     const qbo = getOAuthClient();
+    if (!state) {
+        // Fallback or error if state is critical and not provided,
+        // though controller should always provide it.
+        console.warn('State parameter not provided to getAuthorizationUri. Using default.');
+        state = 'qb-auth-request-default';
+    }
     const authUri = qbo.authorizeUri({
         scope: [QuickBooks.scopes.Accounting], // Add other scopes if needed
-        state: 'qb-auth-request', // Optional state parameter for CSRF protection
+        state: state, // Use the provided state
     });
     return authUri;
 };
@@ -124,30 +131,33 @@ const getQboClientForCompany = async (companyId) => {
     if (new Date() >= new Date(tokenData.tokenExpiryDate - 5 * 60 * 1000)) { // 5 min buffer
         console.log(`Access token for company ${companyId} expired or expiring soon. Attempting refresh.`);
         try {
-            await refreshAccessToken(companyId, tokenData.refreshToken, tokenData.realmId);
-            // Re-fetch tokenData after refresh
-            const refreshedTokenData = await QuickbooksToken.findOne({ companyId });
-            if (!refreshedTokenData) throw new Error('Failed to retrieve token data after refresh.');
-            // TODO: Decrypt refreshedTokenData.accessToken
+            // refreshAccessToken will throw an error if it fails, esp. if re-auth is needed.
+            // That error will be caught by the outer catch block of getQboClientForCompany or by the caller.
+            const refreshedTokenDoc = await refreshAccessToken(companyId, tokenData.refreshToken, tokenData.realmId);
+            // If refreshAccessToken was successful, it returns the updated token document.
+            // No need to re-fetch if refreshAccessToken returns the updated document.
+            // TODO: Decrypt refreshedTokenDoc.accessToken
             return new QuickBooks(
                 QB_CLIENT_ID,
                 QB_CLIENT_SECRET,
-                refreshedTokenData.accessToken,
+                refreshedTokenDoc.accessToken, // Corrected: use refreshedTokenDoc
                 false, // noQuery
-                refreshedTokenData.realmId,
+                refreshedTokenDoc.realmId,    // Corrected: use refreshedTokenDoc
                 QB_ENVIRONMENT === 'sandbox',
                 false, // debug
                 null, // minorversion
                 '2.0',
-                refreshedTokenData.refreshToken // Pass refresh token for potential future use by SDK
+                refreshedTokenDoc.refreshToken // Corrected: use refreshedTokenDoc
             );
         } catch (refreshError) {
-            console.error(`Failed to refresh token for company ${companyId}:`, refreshError);
-            // If refresh fails, might need to prompt for re-authentication
-            throw new Error('QuickBooks token refresh failed. Please re-authenticate.');
+            // Log the error and then re-throw it to be handled by the calling function (e.g., in the controller)
+            // This ensures the specific error message from refreshAccessToken (like "Please re-authorize") is propagated.
+            console.error(`Failed to refresh token for company ${companyId} during client acquisition: ${refreshError.message}`);
+            throw refreshError; // Re-throw the original error from refreshAccessToken
         }
     }
 
+    // TODO: Decrypt tokenData.accessToken if not already done by a getter or another layer
     return new QuickBooks(
         QB_CLIENT_ID,
         QB_CLIENT_SECRET,
@@ -330,6 +340,9 @@ const createPayrollJournalEntry = async (companyId, payrollData) => {
         throw new Error('QuickBooks client not available. Please connect to QuickBooks first.');
     }
 
+    // In-memory cache for account IDs for the duration of this function call
+    const accountCache = {};
+
     // --- Helper to get Account Refs ---
     // In a real scenario, these account names should be configurable by the user
     // or fetched and cached from QBO's Chart of Accounts.
@@ -351,25 +364,45 @@ const createPayrollJournalEntry = async (companyId, payrollData) => {
     // For this example, I'll use placeholder IDs. In a real app, these MUST be fetched.
 
     const getAccountId = async (accountName) => {
-        // This is a mock. In reality, you'd query QBO for the account ID.
-        // Example: qbo.findAccounts({ Name: accountName }, callback)
-        // For now, returning a placeholder. THIS WILL NOT WORK with actual QBO.
-        // You MUST replace this with actual account ID fetching.
-        console.warn(`[getAccountId] Using placeholder ID for account "${accountName}". This needs to be replaced with actual QBO account ID fetching.`);
-        const accounts = await new Promise((resolve, reject) => {
+    if (accountCache[accountName]) {
+        return accountCache[accountName];
+    }
+
+    console.log(`Fetching account ID for: ${accountName}`);
+    try {
+        const accountsResponse = await new Promise((resolve, reject) => {
             qbo.findAccounts({
                 Name: accountName,
-                Active: true // Typically you want active accounts
+                Active: true,
+                // AccountType: QB_ENVIRONMENT === 'sandbox' ? null : undefined // Be careful with AccountType, might make it too restrictive if not perfectly matching QBO. For now, let's rely on Name and Active status.
             }, (err, queryResult) => {
-                if (err) return reject(err);
-                if (!queryResult || !queryResult.QueryResponse || !queryResult.QueryResponse.Account || queryResult.QueryResponse.Account.length === 0) {
-                    return reject(new Error(`Account named "${accountName}" not found in QuickBooks.`));
+                if (err) {
+                    console.error(`Error finding account "${accountName}" in QuickBooks:`, err.Fault ? JSON.stringify(err.Fault) : err.message);
+                    return reject(new Error(`QuickBooks API error while searching for account "${accountName}": ${err.Fault?.Error?.[0]?.Message || err.message}`));
                 }
-                // Assuming the first match is the correct one if multiple have the same name (should be unique by type)
+                if (!queryResult || !queryResult.QueryResponse || !queryResult.QueryResponse.Account || queryResult.QueryResponse.Account.length === 0) {
+                    console.warn(`Account named "${accountName}" not found in QuickBooks. Ensure it exists and is active.`);
+                    return reject(new Error(`Account named "${accountName}" not found in your QuickBooks Chart of Accounts. Please ensure it is set up correctly and is active.`));
+                }
+                if (queryResult.QueryResponse.Account.length > 1) {
+                    // If multiple accounts with the same name exist, this is ambiguous.
+                    // For robust handling, you might need to filter by AccountType or other criteria.
+                    // For now, we'll pick the first one but warn. This should be addressed with more specific account names or types.
+                    console.warn(`Multiple active accounts found for "${accountName}". Using the first one: ID ${queryResult.QueryResponse.Account[0].Id} (${queryResult.QueryResponse.Account[0].AccountType}). Consider making account names more specific or implementing mapping by account type.`);
+                }
                 resolve(queryResult.QueryResponse.Account[0]);
             });
-        });
-        return { value: accounts.Id, name: accounts.Name }; // QBO expects { value: ID, name: Name (optional) }
+            });
+
+        const accountRef = { value: accountsResponse.Id, name: accountsResponse.Name };
+        accountCache[accountName] = accountRef; // Cache it
+        return accountRef;
+
+    } catch (error) {
+        // Ensure the error is propagated correctly
+        console.error(`Error in getAccountId for "${accountName}":`, error.message);
+        throw error; // Re-throw to be caught by the controller and sent to user
+    }
     };
 
     // --- Start Journal Entry Lines ---

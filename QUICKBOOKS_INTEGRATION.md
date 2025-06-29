@@ -103,9 +103,9 @@ The Journal Entry date will typically be the last day of the payroll month.
     *   Ensure environment variables are correctly set.
     *   Verify the `QUICKBOOKS_REDIRECT_URI` exactly matches the one in your Intuit Developer app settings.
 *   **Sync Failures:**
-    *   **"Account not found..." error:** This is the most common issue. Ensure all required accounts (listed in "Chart of Accounts" section above) exist in your QBO company with the exact names.
+    *   **"Account not found..." error:** This is the most common issue. Ensure all required accounts (listed in "Chart of Accounts" section above) exist in your QBO company with the exact names. The error message from the application should now specify which account name it was unable to find.
     *   Check the application logs for more detailed error messages from QuickBooks.
-    *   Ensure your QBO access token has not expired or been revoked. Try disconnecting and reconnecting the integration.
+    *   Ensure your QBO access token has not expired or been revoked. If it has, the system may prompt for re-authorization, or you may need to try disconnecting and reconnecting the integration.
 
 ## API Endpoints
 
