@@ -18,6 +18,9 @@ const QuickbooksIntegrationPage = () => {
     const [actionMessage, setActionMessage] = useState(''); // For success messages from actions
 
     useEffect(() => {
+        // Define the roles allowed to manage QBO on this page
+        const allowedRoles = ['company_admin', 'ADMIN', 'SUPERADMIN', 'COMPANY_OWNER'];
+
         const fetchStatus = async () => {
             setIsLoading(true);
             setError('');
@@ -26,15 +29,11 @@ const QuickbooksIntegrationPage = () => {
                 const status = await getQuickbooksStatus();
                 setConnectionStatus(status);
                 if (!status.isConnected && status.message && status.needsReAuth) {
-                    // If not connected AND needs re-auth, display this as the primary action message
                     setActionMessage(status.message);
                 } else if (status.isConnected && status.message) {
-                     // If connected and there's a status message (e.g. "Successfully connected")
                     setActionMessage(status.message);
                 }
 
-
-                // Check for redirect query params from QBO callback
                 const queryParams = new URLSearchParams(window.location.search);
                 const qboAction = queryParams.get('qbo_action');
                 const qboStatus = queryParams.get('qbo_status');
@@ -42,7 +41,6 @@ const QuickbooksIntegrationPage = () => {
                 if (qboAction === 'callback') {
                     if (qboStatus === 'success') {
                         setActionMessage('Successfully connected to QuickBooks! Status has been updated.');
-                        // Optionally, clear query params from URL
                         window.history.replaceState({}, document.title, window.location.pathname);
                     } else if (qboStatus === 'error') {
                         const errorMessage = queryParams.get('qbo_message') || 'An error occurred during QuickBooks connection.';
@@ -50,8 +48,6 @@ const QuickbooksIntegrationPage = () => {
                         window.history.replaceState({}, document.title, window.location.pathname);
                     }
                 }
-
-
             } catch (err) {
                 console.error("Error fetching QuickBooks status:", err);
                 setError(err.message || 'Failed to fetch QuickBooks status.');
@@ -61,13 +57,15 @@ const QuickbooksIntegrationPage = () => {
             }
         };
 
-        if (user && (user.role === 'company_admin' || user.role === 'hr_manager' || user.role === 'SUPERADMIN')) {
+        if (user && allowedRoles.includes(user.role)) {
             fetchStatus();
-        } else {
-            // This case should ideally be handled by a higher-order component or route protection
+        } else if (user) { // User is loaded but not in allowedRoles
             setError('You are not authorized to manage QuickBooks integration.');
         }
-    }, [user]); // Re-fetch if user changes
+        // If !user, the main component return will handle "Loading user information..."
+        // or the authLoading state will prevent premature rendering.
+    }, [user]); // Re-fetch if user or user.role changes
+
 
     const handleConnect = () => {
         setActionMessage('');
@@ -108,11 +106,15 @@ const QuickbooksIntegrationPage = () => {
     };
 
     // Basic loading and error display
-    if (!user) return <div className={styles.container}><p className={styles.info}>Loading user information...</p></div>;
-    if (user.role !== 'company_admin' && user.role !== 'hr_manager' && user.role !== 'SUPERADMIN') {
+    if (authLoading || !user) return <div className={styles.container}><p className={styles.info}>Loading user information...</p></div>;
+
+    // Define roles allowed to view this page's content (management UI)
+    const allowedRolesForPageAccess = ['company_admin', 'ADMIN', 'SUPERADMIN', 'COMPANY_OWNER'];
+    if (!allowedRolesForPageAccess.includes(user.role)) {
          return <div className={styles.container}><p className={styles.error}>Access Denied: You do not have permission to view this page.</p></div>;
     }
-    // Initial page load message
+
+    // Initial page load message for authorized users
     if (isLoading && !connectionStatus.realmId && !error) return <div className={styles.container}><p className={styles.info}>Loading QuickBooks connection status...</p></div>;
 
 
