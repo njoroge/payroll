@@ -61,15 +61,26 @@ exports.handleQuickbooksCallback = async (req, res) => {
         await quickbooksService.exchangeCodeForTokens(code, realmId, companyInternalId);
 
         // Redirect user to a page indicating successful connection
-        // This URL should be a frontend route
-        // For example: res.redirect('/app/settings/integrations?qbo=success');
-        res.status(200).json({ message: 'Successfully connected to QuickBooks and tokens stored.' });
+        const clientAppUrl = process.env.CLIENT_APP_URL || 'http://localhost:5173'; // Default for local dev
+        const successRedirectUrl = `${clientAppUrl}/integrations/quickbooks?qbo_action=callback&qbo_status=success`;
+        console.log(`Redirecting to: ${successRedirectUrl}`);
+        res.redirect(successRedirectUrl);
 
     } catch (error) {
         console.error('Error handling QuickBooks callback:', error);
-        // Redirect user to an error page or show error
-        // For example: res.redirect('/app/settings/integrations?qbo=error&message=' + encodeURIComponent(error.message));
-        res.status(500).json({ message: 'Failed to handle QuickBooks callback.', error: error.message });
+        const clientAppUrl = process.env.CLIENT_APP_URL || 'http://localhost:5173';
+        // It's important to check the type of error. If it's a known issue like "company identification failed",
+        // we might want a more specific message.
+        let errorMessage = 'Failed to handle QuickBooks callback.';
+        if (error.message && error.message.includes('Company identification failed')) {
+            errorMessage = error.message;
+        } else if (error.message && error.message.includes('User not authorized')) {
+            errorMessage = error.message;
+        }
+        // Consider logging the full error for internal review but only sending a user-friendly message.
+        const errorRedirectUrl = `${clientAppUrl}/integrations/quickbooks?qbo_action=callback&qbo_status=error&qbo_message=${encodeURIComponent(errorMessage)}`;
+        console.log(`Redirecting to: ${errorRedirectUrl}`);
+        res.redirect(errorRedirectUrl);
     }
 };
 
@@ -90,25 +101,38 @@ exports.getQuickbooksConnectionStatus = async (req, res) => {
                 const qbo = await quickbooksService.getQboClientForCompany(companyId);
                 if (qbo) {
                     // Optionally, make a simple API call to verify connection, e.g., qbo.getCompanyInfo()
+                    // For now, successfully getting a qbo client instance means tokens are likely fine (or were refreshed)
                     return res.status(200).json({
                         isConnected: true,
                         realmId: token.realmId,
                         connectedAt: token.createdAt,
-                        lastRefreshedAt: token.lastRefreshedAt
+                        lastRefreshedAt: token.lastRefreshedAt // This comes from the stored token, not necessarily the moment of refresh
                     });
                 }
+                // This part might be unreachable if getQboClientForCompany always throws on failure or returns null only if no token initially.
+                // If getQboClientForCompany returns null (e.g., token was deleted by refreshAccessToken due to invalid_grant, and then re-fetched as null),
+                // it would fall through to the isConnected: false at the end.
             } catch (qboClientError) {
-                 // If getQboClientForCompany throws (e.g. refresh failed and needs re-auth)
                 console.warn(`QBO client acquisition failed for company ${companyId}: ${qboClientError.message}`);
-                 return res.status(200).json({
+                // Check if the error message indicates re-authentication is needed (propagated from refreshAccessToken)
+                if (qboClientError.message && qboClientError.message.includes('Please re-authorize')) {
+                    return res.status(200).json({
+                        isConnected: false,
+                        message: qboClientError.message, // Use the specific error message
+                        needsReAuth: true
+                    });
+                }
+                // For other errors during client acquisition
+                return res.status(200).json({
                     isConnected: false,
-                    message: 'Connection requires re-authorization.',
-                    needsReAuth: true
+                    message: `Failed to connect to QuickBooks: ${qboClientError.message}`,
+                    needsReAuth: true // Default to true, as most client acquisition issues might need re-auth or config fix
                 });
             }
         }
 
-        return res.status(200).json({ isConnected: false });
+        // Default if no token record found initially
+        return res.status(200).json({ isConnected: false, message: "No QuickBooks connection found." });
 
     } catch (error) {
         console.error('Error getting QuickBooks connection status:', error);
@@ -191,17 +215,24 @@ exports.syncPayrollToQuickbooks = async (req, res) => {
         });
 
     } catch (error) {
-        console.error('Error syncing payroll to QuickBooks:', error);
+        console.error('Error syncing payroll to QuickBooks:', error.message); // Log the message for clarity
         // Check if the error is from QBO account lookup (e.g., account not found)
-        if (error.message && error.message.includes("not found in QuickBooks")) {
+        if (error.message && error.message.includes("not found in your QuickBooks Chart of Accounts")) {
              return res.status(400).json({
                 message: 'Failed to sync payroll to QuickBooks due to account configuration issue.',
+                error: error.message, // This will now contain the specific account name that was not found
+                details: "Please ensure all necessary accounts (as listed in QUICKBOOKS_INTEGRATION.md, e.g., 'Salaries and Wages Expense', 'Payroll Liabilities - PAYE', etc.) exist in your QuickBooks Chart of Accounts and are active."
+            });
+        } else if (error.message && error.message.includes("QuickBooks API error while searching for account")) {
+            return res.status(502).json({ // Bad Gateway might be appropriate for upstream API errors
+                message: 'Failed to sync payroll to QuickBooks due to an issue communicating with QuickBooks.',
                 error: error.message,
-                details: "Please ensure all necessary accounts (e.g., 'Salaries and Wages Expense', 'Payroll Liabilities - PAYE', etc.) exist in your QuickBooks Chart of Accounts."
+                details: "There was a problem searching for an account in QuickBooks. Please try again later. If the issue persists, check QuickBooks API status or your connection."
             });
         }
+        // Default error for other sync issues
         res.status(500).json({
-            message: 'Failed to sync payroll to QuickBooks.',
+            message: 'An unexpected error occurred while syncing payroll to QuickBooks.',
             error: error.message,
             details: error.stack // For debugging, remove or reduce in production
         });

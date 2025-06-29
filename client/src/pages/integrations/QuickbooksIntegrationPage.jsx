@@ -1,10 +1,10 @@
-import React, { useState, useEffect, useContext } from 'react';
-import { AuthContext } from '../../store/authContext'; // To get user info for roles or companyId
+import React, { useState, useEffect } from 'react'; // useContext removed if AuthContext direct use is gone
+import { useAuth } from '../../store/authContext'; // Import useAuth instead of AuthContext
 import { getQuickbooksStatus, connectQuickbooks, disconnectQuickbooks } from '../../services/api'; // Using the actual API service
 import styles from './QuickbooksIntegrationPage.module.css';
 
 const QuickbooksIntegrationPage = () => {
-    const { user } = useContext(AuthContext);
+    const { userInfo: user, loading: authLoading, isAuthenticated } = useAuth(); // Use useAuth() hook
     const [isLoading, setIsLoading] = useState(false);
     const [isActionLoading, setIsActionLoading] = useState(false); // For connect/disconnect buttons
     const [connectionStatus, setConnectionStatus] = useState({
